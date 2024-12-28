@@ -7,6 +7,8 @@ import HomePage from "./pages/HomePage";
 import PricePage from "./pages/PricePage";
 import PageNotFound from "./pages/PageNotFound";
 
+import AuthorLoginPage from "./pages/blog_pages/AuthorLoginPage";
+
 function App() {
   return (
     <>
@@ -15,6 +17,9 @@ function App() {
           <Route path="/" element={<HomePage />} />
           <Route path="/login" element={<LoginPage />} />
           <Route path="/signup" element={<SignupPage />} />
+          {/* Blog yazarları için */}
+          <Route path="/blog/login" element={<AuthorLoginPage />} />
+          <Route path="/blog/signup" element={<SignupPage />} />
 
           <Route path="/plans" element={<PricePage />} />
 

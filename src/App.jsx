@@ -8,6 +8,7 @@ import PricePage from "./pages/PricePage";
 import PageNotFound from "./pages/PageNotFound";
 
 import AuthorLoginPage from "./pages/blog_pages/AuthorLoginPage";
+import BlogDashboard from "./pages/blog_pages/BlogDashBoard";
 
 function App() {
   return (
@@ -25,6 +26,7 @@ function App() {
 
           {/* 404 Sayfası */}
           <Route path="*" element={<PageNotFound />} />
+          <Route path="/blog/dashboard" element={<BlogDashboard />} />
         </Routes>
       </Router>
     </>

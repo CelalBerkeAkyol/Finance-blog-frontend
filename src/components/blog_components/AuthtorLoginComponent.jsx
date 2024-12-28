@@ -1,6 +1,6 @@
 import React, { useState } from "react";
-import { Button, Input, Checkbox, Link, Divider } from "@nextui-org/react";
-import { Icon } from "@iconify/react";
+import { Button, Input, Checkbox, Link } from "@nextui-org/react";
+import axios from "../../api"; // Axios yapılandırmasını import ediyoruz
 
 export default function AuthorLoginComponent() {
   const [isVisible, setIsVisible] = useState(false);
@@ -21,34 +21,26 @@ export default function AuthorLoginComponent() {
     setErrorMessage("");
 
     try {
-      const response = await fetch("http://localhost:3000/blog/auth/login/", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          username: formData.username, // Backend'de `username` olarak tanımlanmış
-          password: formData.password,
-        }),
+      // Login isteği
+      const response = await axios.post("/auth/login", {
+        username: formData.username,
+        password: formData.password,
       });
 
-      const data = await response.json();
-
-      if (response.ok) {
-        // Başarılı giriş
-        localStorage.setItem("authToken", data.token); // Token saklanır
-        alert("Başarılı bir şekilde giriş yaptın");
-        // window.location.href = data.redirect_url; // Yönlendirme yapılır
-      } else {
-        // Hata mesajı
-        setErrorMessage(
-          data.error || "Giriş başarısız. Bilgilerinizi kontrol edin."
-        );
+      if (response.status === 200) {
+        alert("Başarılı bir şekilde giriş yaptınız");
       }
     } catch (error) {
-      setErrorMessage(
-        "Sunucuya bağlanılamadı. Lütfen daha sonra tekrar deneyin."
-      );
+      if (error.response) {
+        setErrorMessage(
+          error.response.data.error ||
+            "Giriş başarısız. Bilgilerinizi kontrol edin."
+        );
+      } else {
+        setErrorMessage(
+          "Sunucuya bağlanılamadı. Lütfen daha sonra tekrar deneyin."
+        );
+      }
     } finally {
       setIsLoading(false);
     }
@@ -60,32 +52,16 @@ export default function AuthorLoginComponent() {
         <p className="pb-2 text-xl font-medium">Log In</p>
         <form className="flex flex-col gap-3" onSubmit={handleSubmit}>
           <Input
-            label="user name "
+            label="Username"
             name="username"
             placeholder="Enter your username"
-            type="username"
+            type="text"
             variant="bordered"
             value={formData.username}
             onChange={handleChange}
             required
           />
-
           <Input
-            endContent={
-              <button type="button" onClick={toggleVisibility}>
-                {isVisible ? (
-                  <Icon
-                    className="pointer-events-none text-2xl text-default-400"
-                    icon="solar:eye-closed-linear"
-                  />
-                ) : (
-                  <Icon
-                    className="pointer-events-none text-2xl text-default-400"
-                    icon="solar:eye-bold"
-                  />
-                )}
-              </button>
-            }
             label="Password"
             name="password"
             placeholder="Enter your password"
@@ -95,24 +71,13 @@ export default function AuthorLoginComponent() {
             onChange={handleChange}
             required
           />
-
           {errorMessage && (
             <p className="text-red-500 text-sm">{errorMessage}</p>
           )}
-
-          <div className="flex items-center justify-between px-1 py-2">
-            <Checkbox name="remember" size="sm">
-              Remember me
-            </Checkbox>
-            <Link className="text-default-500" href="#" size="sm">
-              Forgot password?
-            </Link>
-          </div>
           <Button color="primary" type="submit" isDisabled={isLoading}>
             {isLoading ? "Loading..." : "Log In"}
           </Button>
         </form>
-        <div className="flex items-center gap-4 py-2"></div>
       </div>
     </div>
   );

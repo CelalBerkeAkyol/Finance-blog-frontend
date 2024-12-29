@@ -8,7 +8,6 @@ export default {
   ],
   theme: {
     extend: {
-      purple: "#111827",
       typography: (theme) => ({
         DEFAULT: {
           css: {

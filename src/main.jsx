@@ -7,7 +7,9 @@ import App from "./App.jsx";
 createRoot(document.getElementById("root")).render(
   <StrictMode>
     <NextUIProvider>
-      <App />
+      <main className="light text-foreground bg-background">
+        <App />
+      </main>
     </NextUIProvider>
   </StrictMode>
 );

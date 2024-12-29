@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { Button, Input, Checkbox, Link } from "@nextui-org/react";
-import axios from "../../api"; // Axios yapılandırmasını import ediyoruz
+import axios from "../../../api"; // Axios yapılandırmasını import ediyoruz
 
 export default function AuthorLoginComponent() {
   const [isVisible, setIsVisible] = useState(false);

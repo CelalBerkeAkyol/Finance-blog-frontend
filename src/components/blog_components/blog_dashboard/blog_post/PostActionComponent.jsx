@@ -1,9 +1,9 @@
 import React, { useState } from "react";
-import axios from "../../api";
-import EditPostForm from "../../components/blog_components/EditPostForm";
-import PostList from "../../components/blog_components/PostList";
+import axios from "../../../../api";
+import EditPostForm from "./EditPostForm";
+import PostList from "./PostList";
 
-export default function BlogDashboard() {
+export default function PostActionComponent() {
   const [editingPost, setEditingPost] = useState(null);
 
   const handleSave = async (postData) => {
@@ -31,8 +31,8 @@ export default function BlogDashboard() {
   };
 
   return (
-    <div className="container mx-auto p-4">
-      <h1 className="text-2xl font-bold mb-4">Dashboard</h1>
+    <div className="container mx-auto p-8">
+      <h1 className="text-2xl font-bold mb-4">Blog Edit Sayfası</h1>
       <EditPostForm onSubmit={handleSave} postToEdit={editingPost} />
       <div className="mt-6">
         <PostList

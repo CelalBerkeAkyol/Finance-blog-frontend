@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import axios from "../../api";
+import axios from "../../../../api";
 import { Button } from "@nextui-org/react";
 
 export default function PostList({ onEdit, onDelete }) {

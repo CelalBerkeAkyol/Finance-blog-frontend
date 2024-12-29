@@ -16,14 +16,14 @@ const BlogSidebarComponent = () => {
         <ul className="space-y-2 px-4">
           <li>
             <Link
-              to="/blog-admin/edit-posts"
+              to="/blog-admin/posts"
               className="flex items-center p-2 rounded-lg hover:bg-content3"
             >
               <Icon
                 icon="mdi:account-group-outline"
                 className="h-4 w-4 mr-2 "
               />
-              Post düzenle
+              Postlar
             </Link>
           </li>
         </ul>

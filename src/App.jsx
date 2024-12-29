@@ -38,7 +38,7 @@ function App() {
             }
           />
           <Route
-            path="/blog-admin/edit-posts"
+            path="/blog-admin/posts"
             element={
               <ProtectedRoute>
                 <BlogPostPage />

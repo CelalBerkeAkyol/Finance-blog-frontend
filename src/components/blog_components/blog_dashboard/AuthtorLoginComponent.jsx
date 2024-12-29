@@ -1,13 +1,14 @@
 import React, { useState } from "react";
 import { Button, Input, Checkbox, Link } from "@nextui-org/react";
 import axios from "../../../api"; // Axios yapılandırmasını import ediyoruz
+import { useNavigate } from "react-router-dom";
 
 export default function AuthorLoginComponent() {
   const [isVisible, setIsVisible] = useState(false);
   const [formData, setFormData] = useState({ username: "", password: "" });
   const [errorMessage, setErrorMessage] = useState("");
   const [isLoading, setIsLoading] = useState(false);
-
+  const navigate = useNavigate(); // Yönlendirme için useNavigate kullanıyoruz
   const toggleVisibility = () => setIsVisible(!isVisible);
 
   const handleChange = (e) => {
@@ -28,7 +29,7 @@ export default function AuthorLoginComponent() {
       });
 
       if (response.status === 200) {
-        alert("Başarılı bir şekilde giriş yaptınız");
+        navigate("/blog-admin/dashboard");
       }
     } catch (error) {
       if (error.response) {

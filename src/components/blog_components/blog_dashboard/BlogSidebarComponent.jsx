@@ -16,7 +16,7 @@ const BlogSidebarComponent = () => {
         <ul className="space-y-2 px-4">
           <li>
             <Link
-              to="/blog/edit-posts"
+              to="/blog-admin/edit-posts"
               className="flex items-center p-2 rounded-lg hover:bg-content3"
             >
               <Icon

@@ -1,16 +1,16 @@
-import BlogPostComponent from "../../components/blog_components/blog/BlogPostComponent";
+import BlogsComponent from "../../components/blog_components/blog/BlogsComponent";
 
 import BannerComponent from "../../components/header/BannerComponent";
 import CustomNavbar from "../../components/header/CustomNavbar";
 
-function BlogPostPage() {
+function BlogsPage() {
   return (
-    <div className="flex flex-col gap-4">
+    <div className="flex flex-col min-h-screen  gap-4">
       <BannerComponent />
       <CustomNavbar />
-      <BlogPostComponent />
+      <BlogsComponent />
     </div>
   );
 }
 
-export default BlogPostPage;
+export default BlogsPage;

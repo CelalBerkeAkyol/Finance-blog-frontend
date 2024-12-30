@@ -7,7 +7,7 @@ import CTASection from "../components/tanıtım_page/CTASection";
 import BlogComponent from "../components/tanıtım_page/BlogComponent";
 import NewsletterComponent from "../components/tanıtım_page/NewsletterComponent";
 import FeatureComponent from "../components/tanıtım_page/FeatureComponent";
-import Footer from "../components/footer/Footer";
+
 function HomePage() {
   return (
     <>
@@ -20,7 +20,6 @@ function HomePage() {
       <CTASection />
       <BlogComponent />
       <NewsletterComponent />
-      <Footer />
     </>
   );
 }

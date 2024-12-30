@@ -26,6 +26,18 @@ const BlogSidebarComponent = () => {
               Postlar
             </Link>
           </li>
+          <li>
+            <Link
+              to="/blog-admin/post/new"
+              className="flex items-center p-2 rounded-lg hover:bg-content3"
+            >
+              <Icon
+                icon="mdi:account-group-outline"
+                className="h-4 w-4 mr-2 "
+              />
+              New Post
+            </Link>
+          </li>
         </ul>
       </nav>
     </div>

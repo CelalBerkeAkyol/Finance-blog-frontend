@@ -9,6 +9,9 @@ import {
   DropdownItem,
 } from "@nextui-org/react";
 import { capitalize } from "../../../../utils/capitalize";
+import { useNavigate } from "react-router-dom";
+import { useDispatch } from "react-redux";
+import { deletePost } from "../../../../app/features/blogs/postsSlice";
 
 const statusColorMap = {
   yayında: "success",
@@ -17,21 +20,42 @@ const statusColorMap = {
   taslak: "secondary",
 };
 
-const TableCellContent = ({ blog, columnKey }) => {
-  const cellValue = blog[columnKey];
+const TableCellContent = ({ posts, columnKey }) => {
+  const cellValue = posts[columnKey];
+  const navigate = useNavigate();
+  const dispatch = useDispatch();
 
+  const handleView = () => {
+    navigate(`/blog-admin/posts/${posts._id}`);
+  };
+
+  const handleEdit = () => {
+    navigate(`/blog-admin/posts/edit/${posts._id}`);
+  };
+
+  const handleDelete = () => {
+    if (window.confirm("Bu postu silmek istediğinize emin misiniz?")) {
+      dispatch(deletePost(posts._id))
+        .then((result) => {
+          if (result.meta.requestStatus === "fulfilled") {
+            console.log("Post başarıyla silindi!");
+          } else {
+            console.error("Post silinirken hata oluştu:", result.payload);
+          }
+        })
+        .catch((error) => console.error("Silme işlemi hata verdi:", error));
+    }
+  };
   switch (columnKey) {
     case "title":
-      return (
-        <span>{cellValue}</span> // sadece blog title dön
-      );
+      return <span>{cellValue}</span>; // sadece blog title dön
     case "status":
       return (
         <Chip
-          color={statusColorMap[blog.status] || "default"}
+          color={statusColorMap[posts.status] || "default"}
           className="capitalize"
         >
-          {capitalize(blog.status)}
+          {capitalize(posts.status)}
         </Chip>
       );
     case "createdAt":
@@ -43,14 +67,30 @@ const TableCellContent = ({ blog, columnKey }) => {
           <Dropdown>
             <DropdownTrigger>
               <Button isIconOnly radius="full" size="sm" variant="light">
-                {/* İkonu kaldırmak istiyorsanız burayı basitleştirin */}
+                {/* Üç nokta sembolü */}
                 <span>⋮</span>
               </Button>
             </DropdownTrigger>
             <DropdownMenu>
-              <DropdownItem key={`view-${blog._id}`}>View</DropdownItem>
-              <DropdownItem key={`edit-${blog._id}`}>Edit</DropdownItem>
-              <DropdownItem key={`delete-${blog._id}`}>Delete</DropdownItem>
+              <DropdownItem
+                key={`view-${posts._id}`}
+                onClick={() => console.log("Görüntüle tıklandı!")}
+              >
+                Görüntüle
+              </DropdownItem>
+              <DropdownItem
+                key={`edit-${posts._id}`}
+                onClick={() => console.log("Düzenle tıklandı!")}
+              >
+                Düzenle
+              </DropdownItem>
+              <DropdownItem
+                key={`delete-${posts._id}`}
+                color="danger"
+                onClick={handleDelete}
+              >
+                Sil
+              </DropdownItem>
             </DropdownMenu>
           </Dropdown>
         </div>

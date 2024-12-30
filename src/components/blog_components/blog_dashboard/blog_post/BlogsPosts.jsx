@@ -17,9 +17,13 @@ import {
 } from "@nextui-org/react";
 
 import { useSelector, useDispatch } from "react-redux";
-import { fetchBlogs } from "../../../../app/features/blogs/blogSlice";
+import {
+  fetchPosts,
+  deletePost,
+} from "../../../../app/features/blogs/postsSlice";
 import TableCellContent from "./TableCellContent";
 import { capitalize } from "../../../../utils/capitalize";
+import { useNavigate } from "react-router-dom";
 
 const columns = [
   { name: "Başlık", uid: "title" },
@@ -40,8 +44,8 @@ const statusOptions = [
 
 const BlogsTable = () => {
   const dispatch = useDispatch();
-  const { blogs, status, error, pagination, count, total } = useSelector(
-    (state) => state.blogs
+  const { posts, status, error, pagination, count, total } = useSelector(
+    (state) => state.posts
   );
 
   // Local state
@@ -49,27 +53,27 @@ const BlogsTable = () => {
   const [statusFilter, setStatusFilter] = useState("all");
   const [sortDescriptor, setSortDescriptor] = useState({
     column: "createdAt",
-    direction: "ascending",
+    direction: "descending",
   });
   const [page, setPage] = useState(1);
   const limit = 20; // Tutarlı bir limit değeri belirleyin
 
   useEffect(() => {
-    dispatch(fetchBlogs({ page, limit }));
-  }, [dispatch, page, limit]);
+    dispatch(fetchPosts({ page, limit }));
+  }, [dispatch, page]);
 
   const filteredBlogs = useMemo(() => {
-    let filtered = [...blogs];
+    let filtered = [...posts];
     if (filterValue) {
-      filtered = filtered.filter((blog) =>
-        blog.title.toLowerCase().includes(filterValue.toLowerCase())
+      filtered = filtered.filter((posts) =>
+        posts.title.toLowerCase().includes(filterValue.toLowerCase())
       );
     }
     if (statusFilter !== "all") {
-      filtered = filtered.filter((blog) => blog.status === statusFilter);
+      filtered = filtered.filter((posts) => posts.status === statusFilter);
     }
     return filtered;
-  }, [blogs, filterValue, statusFilter]);
+  }, [posts, filterValue, statusFilter]);
 
   const sortedBlogs = useMemo(() => {
     const sorted = [...filteredBlogs].sort((a, b) => {
@@ -101,16 +105,16 @@ const BlogsTable = () => {
   if (status === "failed") return <div>Hata: {error}</div>;
 
   return (
-    <div className="p-4 w-full">
+    <div className="p-12 w-full ">
       {/* Üst İçerik */}
-      <div className="flex justify-between mb-4">
+      <div className="flex  mb-4 gap-6">
         <Input
           clearable
           placeholder="Başlık ile ara..."
           value={filterValue}
           onChange={handleFilterChange}
           size="sm"
-          css={{ width: "300px" }}
+          className="flex-initial w-[40%]"
         />
         <Dropdown>
           <DropdownTrigger>
@@ -138,48 +142,53 @@ const BlogsTable = () => {
             ))}
           </DropdownMenu>
         </Dropdown>
-        <div className="flex items-center gap-2">
-          <Button size="sm">Yeni Ekle</Button>
+        <div className="flex items-center gap-2 ">
+          <Button color="primary" variant="flat" size="sm">
+            Yeni Ekle
+          </Button>
         </div>
       </div>
 
       {/* Tablo */}
-      <Table
-        aria-label="Blogs Table"
-        sortDescriptor={sortDescriptor}
-        onSortChange={handleSortChange}
-        striped
-      >
-        <TableHeader columns={columns}>
-          {(column) => (
-            <TableColumn key={column.uid} allowsSorting>
-              {column.name}
-            </TableColumn>
-          )}
-        </TableHeader>
-        <TableBody>
-          {sortedBlogs.map((blog) => (
-            <TableRow key={blog._id}>
-              {columns.map((column) => (
-                <TableCell key={`${blog._id}-${column.uid}`}>
-                  <TableCellContent blog={blog} columnKey={column.uid} />
-                </TableCell>
-              ))}
-            </TableRow>
-          ))}
-        </TableBody>
-      </Table>
+      <div className="  ">
+        <Table
+          aria-label="Blogs Table"
+          sortDescriptor={sortDescriptor}
+          onSortChange={handleSortChange}
+          striped
+        >
+          <TableHeader columns={columns}>
+            {(column) => (
+              <TableColumn key={column.uid} allowsSorting>
+                {column.name}
+              </TableColumn>
+            )}
+          </TableHeader>
+          <TableBody>
+            {sortedBlogs.map((posts, index) => (
+              <TableRow key={posts._id || `row-${index}`}>
+                {columns.map((column) => (
+                  <TableCell
+                    key={`${posts._id || `row-${index}`}-${column.uid}`}
+                  >
+                    <TableCellContent posts={posts} columnKey={column.uid} />
+                  </TableCell>
+                ))}
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
 
-      {/* Alt İçerik */}
-      <div className="flex justify-between items-center mt-4">
-        <span className="text-sm text-gray-500">Toplam {total} blog</span>
-        <Pagination
-          total={Math.ceil(total / limit)}
-          initialPage={1}
-          page={page}
-          onChange={(p) => setPage(p)}
-          size="sm"
-        />
+        {/* Alt İçerik */}
+        <div className="flex justify-between align-center items-center mt-4">
+          <Pagination
+            total={Math.ceil((total || 0) / limit)}
+            initialPage={1}
+            page={page}
+            onChange={(p) => setPage(p)}
+            size="sm"
+          />
+        </div>
       </div>
     </div>
   );

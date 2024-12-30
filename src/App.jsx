@@ -11,6 +11,7 @@ import AuthorLoginPage from "./pages/blog_pages/AuthorLoginPage";
 import BlogDashboardPage from "./pages/blog_pages/BlogDashboardPage";
 import BlogPostPage from "./pages/blog_pages/BlogPostPage";
 import ProtectedRoute from "./components/ProtectedRoute";
+import NewPostPage from "./pages/blog_pages/NewPostPage";
 
 function App() {
   return (
@@ -42,6 +43,14 @@ function App() {
             element={
               <ProtectedRoute>
                 <BlogPostPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/blog-admin/post/new"
+            element={
+              <ProtectedRoute>
+                <NewPostPage />
               </ProtectedRoute>
             }
           />

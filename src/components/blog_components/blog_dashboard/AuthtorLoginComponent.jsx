@@ -1,14 +1,50 @@
-import React, { useState } from "react";
+// src/components/blog_components/blog_dashboard/AuthorLoginComponent.jsx
+import React, { useState, useEffect } from "react";
 import { Button, Input, Checkbox, Link } from "@nextui-org/react";
-import axios from "../../../api"; // Axios yapılandırmasını import ediyoruz
-import { useNavigate } from "react-router-dom";
+import { Icon } from "@iconify/react";
+import { useDispatch, useSelector } from "react-redux";
+import { loginUser, clearState } from "../../../app/features/user/userSlice";
+import { useNavigate } from "react-router-dom"; // Yönlendirme için
 
 export default function AuthorLoginComponent() {
+  const dispatch = useDispatch();
+  const navigate = useNavigate();
+
+  // Redux state'lerini alıyoruz
+  const { isLoading, isError, isSuccess, errorMessage, token } = useSelector(
+    (state) => state.user
+  );
+
   const [isVisible, setIsVisible] = useState(false);
   const [formData, setFormData] = useState({ username: "", password: "" });
-  const [errorMessage, setErrorMessage] = useState("");
-  const [isLoading, setIsLoading] = useState(false);
-  const navigate = useNavigate(); // Yönlendirme için useNavigate kullanıyoruz
+
+  // 1. useEffect: Başarılı giriş sonrası yönlendirme
+  useEffect(() => {
+    if (isSuccess) {
+      // Giriş başarılıysa yönlendirme yap
+      navigate("/blog-admin/dashboard");
+    }
+
+    if (isError) {
+      // Hata durumunda hata mesajını göstermek için
+      console.error(errorMessage);
+      // Örneğin, toast mesajı ekleyebilirsiniz
+      // toast.error(errorMessage);
+    }
+
+    // Bileşen unmount olduğunda state'i temizle
+    return () => {
+      dispatch(clearState());
+    };
+  }, [isSuccess, isError, navigate, dispatch, errorMessage]);
+
+  // 2. useEffect: Bileşen ilk yüklendiğinde token kontrolü
+  useEffect(() => {
+    if (token) {
+      navigate("/blog-admin/dashboard");
+    }
+  }, [token, navigate]);
+
   const toggleVisibility = () => setIsVisible(!isVisible);
 
   const handleChange = (e) => {
@@ -16,35 +52,9 @@ export default function AuthorLoginComponent() {
     setFormData({ ...formData, [name]: value });
   };
 
-  const handleSubmit = async (e) => {
+  const handleSubmit = (e) => {
     e.preventDefault();
-    setIsLoading(true);
-    setErrorMessage("");
-
-    try {
-      // Login isteği
-      const response = await axios.post("/auth/login", {
-        username: formData.username,
-        password: formData.password,
-      });
-
-      if (response.status === 200) {
-        navigate("/blog-admin/dashboard");
-      }
-    } catch (error) {
-      if (error.response) {
-        setErrorMessage(
-          error.response.data.error ||
-            "Giriş başarısız. Bilgilerinizi kontrol edin."
-        );
-      } else {
-        setErrorMessage(
-          "Sunucuya bağlanılamadı. Lütfen daha sonra tekrar deneyin."
-        );
-      }
-    } finally {
-      setIsLoading(false);
-    }
+    dispatch(loginUser(formData));
   };
 
   return (
@@ -63,6 +73,25 @@ export default function AuthorLoginComponent() {
             required
           />
           <Input
+            endContent={
+              <button
+                type="button"
+                onClick={toggleVisibility}
+                className="focus:outline-none"
+              >
+                {isVisible ? (
+                  <Icon
+                    className="pointer-events-none text-2xl text-default-400"
+                    icon="solar:eye-closed-linear"
+                  />
+                ) : (
+                  <Icon
+                    className="pointer-events-none text-2xl text-default-400"
+                    icon="solar:eye-bold"
+                  />
+                )}
+              </button>
+            }
             label="Password"
             name="password"
             placeholder="Enter your password"
@@ -72,9 +101,18 @@ export default function AuthorLoginComponent() {
             onChange={handleChange}
             required
           />
-          {errorMessage && (
-            <p className="text-red-500 text-sm">{errorMessage}</p>
-          )}
+
+          {/* Hata Mesajını Gösterme */}
+          {isError && <p className="text-red-500 text-sm">{errorMessage}</p>}
+
+          <div className="flex items-center justify-between px-1 py-2">
+            <Checkbox name="remember" size="sm">
+              Remember me
+            </Checkbox>
+            <Link className="text-default-500" href="#" size="sm">
+              Forgot password?
+            </Link>
+          </div>
           <Button color="primary" type="submit" isDisabled={isLoading}>
             {isLoading ? "Loading..." : "Log In"}
           </Button>

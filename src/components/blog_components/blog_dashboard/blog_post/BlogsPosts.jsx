@@ -1,5 +1,5 @@
 // src/features/blogs/BlogsTable.jsx
-import React, { useEffect, useMemo } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import {
   Table,
   TableHeader,
@@ -15,9 +15,11 @@ import {
   DropdownMenu,
   DropdownItem,
 } from "@nextui-org/react";
+
 import { useSelector, useDispatch } from "react-redux";
 import { fetchBlogs } from "../../../../app/features/blogs/blogSlice";
 import TableCellContent from "./TableCellContent";
+import { capitalize } from "../../../../utils/capitalize";
 
 const columns = [
   { name: "Başlık", uid: "title" },
@@ -36,10 +38,6 @@ const statusOptions = [
   { name: "taslak", uid: "taslak" },
 ];
 
-const capitalize = (s) => {
-  return s ? s.charAt(0).toUpperCase() + s.slice(1).toLowerCase() : "";
-};
-
 const BlogsTable = () => {
   const dispatch = useDispatch();
   const { blogs, status, error, pagination, count, total } = useSelector(
@@ -47,18 +45,18 @@ const BlogsTable = () => {
   );
 
   // Local state
-  const [filterValue, setFilterValue] = React.useState("");
-  const [statusFilter, setStatusFilter] = React.useState("all");
-  const [rowsPerPage] = React.useState(20); // Sabit 20 satır
-  const [sortDescriptor, setSortDescriptor] = React.useState({
+  const [filterValue, setFilterValue] = useState("");
+  const [statusFilter, setStatusFilter] = useState("all");
+  const [sortDescriptor, setSortDescriptor] = useState({
     column: "createdAt",
     direction: "ascending",
   });
-  const [page, setPage] = React.useState(1);
+  const [page, setPage] = useState(1);
+  const limit = 20; // Tutarlı bir limit değeri belirleyin
 
   useEffect(() => {
-    dispatch(fetchBlogs({ page, limit: rowsPerPage }));
-  }, [dispatch, page, rowsPerPage]);
+    dispatch(fetchBlogs({ page, limit }));
+  }, [dispatch, page, limit]);
 
   const filteredBlogs = useMemo(() => {
     let filtered = [...blogs];
@@ -68,11 +66,6 @@ const BlogsTable = () => {
       );
     }
     if (statusFilter !== "all") {
-      // Eğer çoklu seçim yapılıyorsa:
-      // if (Array.isArray(statusFilter) && statusFilter.length > 0) {
-      //   filtered = filtered.filter((blog) => statusFilter.includes(blog.status));
-      // }
-      // Tekli seçim için:
       filtered = filtered.filter((blog) => blog.status === statusFilter);
     }
     return filtered;
@@ -98,16 +91,10 @@ const BlogsTable = () => {
     setPage(1);
   };
 
-  // Durum filtresi için seçim değişikliği işlevi
   const handleStatusFilterChange = (selection) => {
-    // Tekli seçim için:
-    const selected = Array.from(selection)[0]; // Set'ten ilk elemanı al
+    const selected = Array.from(selection)[0];
     setStatusFilter(selected === "all" ? "all" : selected);
     setPage(1);
-
-    // Çoklu seçim için:
-    // setStatusFilter(Array.from(selection));
-    // setPage(1);
   };
 
   if (status === "loading") return <div>Yükleniyor...</div>;
@@ -135,7 +122,6 @@ const BlogsTable = () => {
           <DropdownMenu
             disallowEmptySelection
             aria-label="Durum Filtreleri"
-            // Tekli seçim için:
             selectionMode="single"
             selectedKeys={
               statusFilter !== "all"
@@ -188,7 +174,7 @@ const BlogsTable = () => {
       <div className="flex justify-between items-center mt-4">
         <span className="text-sm text-gray-500">Toplam {total} blog</span>
         <Pagination
-          total={Math.ceil(total / rowsPerPage)}
+          total={Math.ceil(total / limit)}
           initialPage={1}
           page={page}
           onChange={(p) => setPage(p)}

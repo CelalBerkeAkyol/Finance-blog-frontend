@@ -2,12 +2,18 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import axios from "../../../api";
 
-// API'den blog verilerini alacak asenkron thunk
+// Async thunk action for fetching blogs
 export const fetchBlogs = createAsyncThunk(
   "blogs/fetchBlogs",
-  async (page = 1, limit = 20) => {
-    const response = await axios.get(`/posts?page=${page}&limit=${limit}`);
-    return response.data;
+  async ({ page, limit }, thunkAPI) => {
+    try {
+      const response = await axios.get("/posts", {
+        params: { page, limit },
+      });
+      return response.data;
+    } catch (error) {
+      return thunkAPI.rejectWithValue(error.response.data);
+    }
   }
 );
 

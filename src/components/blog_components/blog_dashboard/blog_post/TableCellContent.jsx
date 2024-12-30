@@ -2,7 +2,6 @@
 import React from "react";
 import {
   Chip,
-  User,
   Button,
   Dropdown,
   DropdownTrigger,

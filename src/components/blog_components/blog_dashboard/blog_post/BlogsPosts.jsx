@@ -100,6 +100,10 @@ const BlogsTable = () => {
     setStatusFilter(selected === "all" ? "all" : selected);
     setPage(1);
   };
+  const navigate = useNavigate(); // Yönlendirme için useNavigate
+  const handleNavigate = () => {
+    navigate("/blog-admin/post/new"); // /post/new adresine yönlendir
+  };
 
   if (status === "loading") return <div>Yükleniyor...</div>;
   if (status === "failed") return <div>Hata: {error}</div>;
@@ -143,8 +147,13 @@ const BlogsTable = () => {
           </DropdownMenu>
         </Dropdown>
         <div className="flex items-center gap-2 ">
-          <Button color="primary" variant="flat" size="sm">
-            Yeni Ekle
+          <Button
+            color="primary"
+            variant="flat"
+            size="sm"
+            onClick={handleNavigate}
+          >
+            Yeni ekle
           </Button>
         </div>
       </div>

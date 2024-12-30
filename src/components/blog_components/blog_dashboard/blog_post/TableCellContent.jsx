@@ -26,7 +26,7 @@ const TableCellContent = ({ posts, columnKey }) => {
   const dispatch = useDispatch();
 
   const handleView = () => {
-    navigate(`/blog-admin/posts/${posts._id}`);
+    navigate(`/blog/post/${posts._id}`);
   };
 
   const handleEdit = () => {
@@ -72,10 +72,7 @@ const TableCellContent = ({ posts, columnKey }) => {
               </Button>
             </DropdownTrigger>
             <DropdownMenu>
-              <DropdownItem
-                key={`view-${posts._id}`}
-                onClick={() => console.log("Görüntüle tıklandı!")}
-              >
+              <DropdownItem key={`view-${posts._id}`} onClick={handleView}>
                 Görüntüle
               </DropdownItem>
               <DropdownItem

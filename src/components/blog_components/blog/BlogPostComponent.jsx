@@ -3,6 +3,7 @@ import ReactMarkdown from "react-markdown";
 import { useParams } from "react-router-dom"; // Dinamik parametre için
 import axios from "../../../api";
 import { Button } from "@nextui-org/react";
+import BlogPostSkeleton from "../BlogPostSkeleton";
 
 const incrementPostView = async (postId) => {
   try {
@@ -41,13 +42,13 @@ const BlogPostComponent = () => {
     fetchPost();
   }, [id]);
 
-  if (loading) return <div>Yükleniyor...</div>; // Yüklenme durumu
+  if (loading) return <BlogPostSkeleton />; // Yüklenme durumu
   if (error) return <div className="text-red-500">{error}</div>; // Hata durumu
 
   return (
-    <div className="flex items-center justify-center p-6">
+    <div className="flex items-center justify-center py-12">
       <div className="prose p-6 max-w-[60%] text-start text-pretty">
-        <h1 className="text-5xl font-bold mb-4">{post.title}</h1>
+        <h1 className="text-4xl font-bold mb-4">{post.title}</h1>
         <div id="blog-details" className="flex flex-row gap-6 pb-4 border-b">
           <Button color="primary" variant="ghost" radius="lg" size="sm">
             {post.category}

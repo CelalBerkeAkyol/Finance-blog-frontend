@@ -9,10 +9,11 @@ import PageNotFound from "./pages/PageNotFound";
 
 import AuthorLoginPage from "./pages/blog_pages/AuthorLoginPage";
 import BlogDashboardPage from "./pages/blog_pages/BlogDashboardPage";
-import BlogPostPage from "./pages/blog_pages/BlogPostPage";
+
 import ProtectedRoute from "./components/ProtectedRoute";
 import NewPostPage from "./pages/blog_pages/NewPostPage";
-import BlogPostComponent from "./components/blog_components/blog/BlogPostComponent";
+import BlogPostPage from "./pages/blog_pages/BlogPostPage";
+import BlogPostDashboardPage from "./pages/blog_pages/BlogPostDashboardPage";
 
 function App() {
   return (
@@ -43,7 +44,7 @@ function App() {
             path="/blog-admin/posts"
             element={
               <ProtectedRoute>
-                <BlogPostPage />
+                <BlogPostDashboardPage />
               </ProtectedRoute>
             }
           />
@@ -55,7 +56,7 @@ function App() {
               </ProtectedRoute>
             }
           />
-          <Route path="/blog/post/:id" element={<BlogPostComponent />} />
+          <Route path="/blog/post/:id" element={<BlogPostPage />} />
         </Routes>
       </Router>
     </>

@@ -12,6 +12,7 @@ import BlogDashboardPage from "./pages/blog_pages/BlogDashboardPage";
 import BlogPostPage from "./pages/blog_pages/BlogPostPage";
 import ProtectedRoute from "./components/ProtectedRoute";
 import NewPostPage from "./pages/blog_pages/NewPostPage";
+import BlogPostComponent from "./components/blog_components/blog/BlogPostComponent";
 
 function App() {
   return (
@@ -54,6 +55,7 @@ function App() {
               </ProtectedRoute>
             }
           />
+          <Route path="/blog/post/:id" element={<BlogPostComponent />} />
         </Routes>
       </Router>
     </>

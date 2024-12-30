@@ -19,22 +19,22 @@ export default {
               },
             },
             h1: {
-              fontSize: "2.5rem",
+              fontSize: "2rem",
               fontWeight: "bold",
               color: theme("colors.gray.900"),
             },
             h2: {
-              fontSize: "2rem",
-              fontWeight: "bold",
-              color: theme("colors.gray.800"),
-            },
-            h3: {
               fontSize: "1.75rem",
               fontWeight: "bold",
               color: theme("colors.gray.800"),
             },
-            h4: {
+            h3: {
               fontSize: "1.5rem",
+              fontWeight: "bold",
+              color: theme("colors.gray.800"),
+            },
+            h4: {
+              fontSize: "1.2rem",
               fontWeight: "bold",
               color: theme("colors.gray.800"),
             },

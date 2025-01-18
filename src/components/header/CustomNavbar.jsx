@@ -37,6 +37,10 @@ export default function CustomNavbar() {
         <NavbarItem>
           <Link to="/">Integrations</Link>
         </NavbarItem>
+
+        <NavbarItem>
+          <Link to="/blog/posts/">Blogs</Link>
+        </NavbarItem>
       </NavbarContent>
       <NavbarContent justify="end">
         <NavbarItem className="hidden lg:flex">

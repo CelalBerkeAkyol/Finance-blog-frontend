@@ -109,7 +109,7 @@ export default function BlogsComponent() {
               {/* Başlık ve İçerik */}
               <div className="group relative">
                 <h3 className="mt-2 text-lg/6 font-semibold text-gray-900 group-hover:text-gray-600">
-                  <Link to={`/blog-admin/post/${post._id}`}>
+                  <Link to={`/blog/post/${post._id}`}>
                     <span className="absolute inset-0" />
                     {post.title || "Başlık yok"}
                   </Link>

@@ -18,6 +18,20 @@ export const fetchPosts = createAsyncThunk(
     }
   }
 );
+export const fetchPostsByCategory = createAsyncThunk(
+  "posts/fetchPostsByCategory",
+  async (category, thunkAPI) => {
+    try {
+      const response = await axios.get(`/category/${category}`);
+      console.log("API yanıtı:", response.data);
+      return response.data.posts; // Backend'den dönen veri yapısına göre ayarlayın
+    } catch (error) {
+      return thunkAPI.rejectWithValue(
+        error.response?.data?.error || "Postları getirirken hata oluştu."
+      );
+    }
+  }
+);
 
 // Async thunk for adding a new post
 export const addNewPost = createAsyncThunk(
@@ -115,6 +129,21 @@ const postsSlice = createSlice({
         state.isError = true;
         state.errorMessage =
           action.payload || "Postları getirirken hata oluştu.";
+      })
+      // fetchPostByCategory
+      .addCase(fetchPostsByCategory.pending, (state) => {
+        state.isLoading = true;
+        state.isError = false;
+        state.errorMessage = "";
+      })
+      .addCase(fetchPostsByCategory.fulfilled, (state, action) => {
+        state.isLoading = false;
+        state.posts = action.payload; // Gelen kategori postlarını sakla
+      })
+      .addCase(fetchPostsByCategory.rejected, (state, action) => {
+        state.isLoading = false;
+        state.isError = true;
+        state.errorMessage = action.payload;
       })
       // Add New Post
       .addCase(addNewPost.pending, (state) => {

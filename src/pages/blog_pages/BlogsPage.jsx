@@ -1,3 +1,4 @@
+// tüm postların listelendiği sayfa
 import BlogsComponent from "../../components/blog_components/blog/BlogsComponent";
 
 import BannerComponent from "../../components/header/BannerComponent";

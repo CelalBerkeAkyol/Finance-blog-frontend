@@ -1,5 +1,5 @@
+// ID verilen bir blog postun gösterildiği sayfa
 import BlogPostComponent from "../../components/blog_components/blog/BlogPostComponent";
-
 import BannerComponent from "../../components/header/BannerComponent";
 import CustomNavbar from "../../components/header/CustomNavbar";
 

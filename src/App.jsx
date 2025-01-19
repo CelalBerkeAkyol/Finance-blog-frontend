@@ -14,10 +14,13 @@ import ProtectedRoute from "./components/ProtectedRoute";
 import NewPostPage from "./pages/blog_pages/NewPostPage";
 import BlogPostPage from "./pages/blog_pages/BlogPostPage";
 import BlogPostDashboardPage from "./pages/blog_pages/BlogPostDashboardPage";
-import BlogsComponent from "./components/blog_components/blog/BlogsComponent";
+
 import BlogsPage from "./pages/blog_pages/BlogsPage";
 import Footer from "./components/footer/Footer";
+import CategoryBasePosts from "./components/blog_components/CategoryBasePosts";
 
+import CategoryBasePostsPage from "./pages/blog_pages/CategoryBasePostsPage";
+import CategoriesPage from "./pages/blog_pages/CategoriesPage";
 function App() {
   return (
     <div className="min-h-screen flex flex-col">
@@ -62,6 +65,11 @@ function App() {
             />
             <Route path="/blog/posts/" element={<BlogsPage />} />
             <Route path="/blog/post/:id" element={<BlogPostPage />} />
+            <Route path="/blog/categories" element={<CategoriesPage />} />
+            <Route
+              path="/blog/category/:category"
+              element={<CategoryBasePostsPage />}
+            />
           </Routes>
         </main>
         <Footer />

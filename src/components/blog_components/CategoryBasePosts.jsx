@@ -4,6 +4,7 @@ import { useSelector, useDispatch } from "react-redux";
 import { useParams, Link } from "react-router-dom";
 import { fetchPostsByCategory } from "../../app/features/blogs/postsSlice";
 
+import BlogsSkeleton from "./blog/BlogsSkeleton";
 export default function CategoryBasePosts() {
   const dispatch = useDispatch();
   const { category } = useParams(); // URL’den kategori parametresi alınıyor
@@ -20,14 +21,12 @@ export default function CategoryBasePosts() {
   }, [dispatch, category]);
 
   if (isLoading) {
-    return <div>Yükleniyor...</div>;
+    return <BlogsSkeleton />;
   }
   if (isError) {
     return <div>Hata: {errorMessage}</div>;
   }
-  if (!posts || posts.length === 0) {
-    return <div>Bu kategoride gösterilecek blog yazısı bulunamadı.</div>;
-  }
+
   function slugToReadable(slug) {
     return slug
       .split("-") // Tireleri kes

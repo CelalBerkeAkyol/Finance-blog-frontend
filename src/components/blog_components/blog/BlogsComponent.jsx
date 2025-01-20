@@ -1,3 +1,5 @@
+// blogların tümünün listelendiği component
+
 import React, { useEffect } from "react";
 import { useSelector, useDispatch } from "react-redux";
 import { Link } from "react-router-dom";
@@ -47,7 +49,7 @@ export default function BlogsComponent() {
         <div className="mx-auto max-w-7xl px-6 lg:px-8">
           <div className="mx-auto max-w-2xl lg:mx-0">
             <h2 className="text-pretty text-4xl font-semibold tracking-tight text-gray-900 sm:text-5xl">
-              Blog Yazıları
+              Blog
             </h2>
             <p className="mt-2 text-lg/8 text-gray-600">
               Güncel içeriklerimizi keşfedin.
@@ -72,14 +74,19 @@ export default function BlogsComponent() {
   if (!posts || posts.length === 0) {
     return <div>Gösterilecek blog yazısı bulunamadı.</div>;
   }
-
+  function slugToReadable(slug) {
+    return slug
+      .split("-") // Tireleri kes
+      .map((word) => word.charAt(0).toUpperCase() + word.slice(1)) // Her kelimenin ilk harfini büyük yap
+      .join(" "); // Kelimeleri boşlukla birleştir
+  }
   return (
     <div className="bg-white py-12 sm:py-12 min-h-full">
       <div className="mx-auto max-w-7xl px-6 lg:px-8">
         <div className="mx-auto max-w-2xl lg:mx-0">
-          <h2 className="text-pretty text-4xl font-semibold tracking-tight text-gray-900 sm:text-5xl">
-            Blog Yazıları
-          </h2>
+          <h1 className="text-pretty text-3xl font-semibold tracking-tight text-gray-900 sm:text-5xl">
+            Blog
+          </h1>
           <p className="mt-2 text-lg/8 text-gray-600">
             Güncel içeriklerimizi keşfedin.
           </p>
@@ -101,9 +108,12 @@ export default function BlogsComponent() {
                       })
                     : "Tarih yok"}
                 </time>
-                <span className="relative z-10 rounded-full bg-gray-200 px-3 py-1.5 font-medium text-gray-600 hover:bg-gray-100">
-                  {post.category || "Kategori yok"}
-                </span>
+                <Link to={`/blog/category/${post.category}`}>
+                  {" "}
+                  <span className="relative z-10 rounded-full bg-gray-200 px-3 py-1.5 font-medium text-gray-600 hover:bg-gray-100">
+                    {slugToReadable(post.category) || "Kategori yok"}
+                  </span>{" "}
+                </Link>
               </div>
 
               {/* Başlık ve İçerik */}
@@ -127,7 +137,7 @@ export default function BlogsComponent() {
                   alt=""
                   src={
                     post.author?.profileImage ||
-                    "https://via.placeholder.com/50"
+                    "https://avatars.githubusercontent.com/u/30373425?v=4"
                   }
                   className="size-10 rounded-full bg-gray-200"
                 />

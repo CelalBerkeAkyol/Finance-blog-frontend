@@ -1,6 +1,7 @@
+// blog yazısının içeriği
 import React, { useEffect, useState } from "react";
 import ReactMarkdown from "react-markdown";
-import { useParams } from "react-router-dom"; // Dinamik parametre için
+import { useParams, useNavigate } from "react-router-dom"; // Dinamik parametre için
 import axios from "../../../api";
 import { Button } from "@nextui-org/react";
 import BlogPostSkeleton from "../BlogPostSkeleton";
@@ -41,7 +42,14 @@ const BlogPostComponent = () => {
 
     fetchPost();
   }, [id]);
-
+  const navigate = useNavigate();
+  // blog kategorilerinin okunabilir olması için bir fonksiyon
+  function slugToReadable(slug) {
+    return slug
+      .split("-") // Tireleri kes
+      .map((word) => word.charAt(0).toUpperCase() + word.slice(1)) // Her kelimenin ilk harfini büyük yap
+      .join(" "); // Kelimeleri boşlukla birleştir
+  }
   if (loading) return <BlogPostSkeleton />; // Yüklenme durumu
   if (error) return <div className="text-red-500">{error}</div>; // Hata durumu
 
@@ -50,9 +58,16 @@ const BlogPostComponent = () => {
       <div className="prose p-6 max-w-[60%] text-start text-pretty">
         <h1 className="text-4xl font-bold mb-4">{post.title}</h1>
         <div id="blog-details" className="flex flex-row gap-6 pb-4 border-b">
-          <Button color="primary" variant="ghost" radius="lg" size="sm">
-            {post.category}
+          <Button
+            color="primary"
+            variant="ghost"
+            radius="lg"
+            size="sm"
+            onClick={() => navigate(`/blog/category/${post.category}`)}
+          >
+            {slugToReadable(post.category)}
           </Button>
+
           <span>
             <strong>Görüntülenme:</strong> {post.views}
           </span>

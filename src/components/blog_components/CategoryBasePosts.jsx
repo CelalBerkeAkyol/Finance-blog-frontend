@@ -1,3 +1,4 @@
+// Kategorilere özel kategoris sayfası
 import React, { useEffect } from "react";
 import { useSelector, useDispatch } from "react-redux";
 import { useParams, Link } from "react-router-dom";
@@ -27,16 +28,22 @@ export default function CategoryBasePosts() {
   if (!posts || posts.length === 0) {
     return <div>Bu kategoride gösterilecek blog yazısı bulunamadı.</div>;
   }
-
+  function slugToReadable(slug) {
+    return slug
+      .split("-") // Tireleri kes
+      .map((word) => word.charAt(0).toUpperCase() + word.slice(1)) // Her kelimenin ilk harfini büyük yap
+      .join(" "); // Kelimeleri boşlukla birleştir
+  }
   return (
     <div className="bg-white py-12 sm:py-12 min-h-full">
       <div className="mx-auto max-w-7xl px-6 lg:px-8">
         <div className="mx-auto max-w-2xl lg:mx-0">
-          <h2 className="text-pretty text-4xl font-semibold tracking-tight text-gray-900 sm:text-5xl">
-            {category}
+          <h2 className="text-pretty text-2xl font-semibold  sm:text-4xl">
+            {slugToReadable(category)}
           </h2>
           <p className="mt-2 text-lg/8 text-gray-600">
-            {category} kategorisindeki güncel içeriklerimizi keşfedin.
+            {slugToReadable(category)} kategorisindeki güncel içeriklerimizi
+            keşfedin.
           </p>
         </div>
         <div className="mx-auto mt-10 grid max-w-2xl grid-cols-1 gap-y-12 border-t border-gray-200 pt-10 sm:mt-12 sm:pt-12 lg:mx-0 lg:max-w-none lg:grid-cols-3">
@@ -57,7 +64,7 @@ export default function CategoryBasePosts() {
                     : "Tarih yok"}
                 </time>
                 <span className="relative z-10 rounded-full bg-gray-200 px-3 py-1.5 font-medium text-gray-600 hover:bg-gray-100">
-                  {post.category || "Kategori yok"}
+                  {slugToReadable(post.category) || "Kategori yok"}
                 </span>
               </div>
 
@@ -82,7 +89,7 @@ export default function CategoryBasePosts() {
                   alt=""
                   src={
                     post.author?.profileImage ||
-                    "https://via.placeholder.com/50"
+                    "https://avatars.githubusercontent.com/u/30373425?v=4"
                   }
                   className="size-10 rounded-full bg-gray-200"
                 />

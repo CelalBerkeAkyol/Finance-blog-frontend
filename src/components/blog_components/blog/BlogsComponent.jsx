@@ -40,17 +40,17 @@ export default function BlogsComponent() {
       .join(" "); // Kelimeleri boşlukla birleştir
   }
   return (
-    <div className="bg-white py-12 sm:py-12 min-h-full">
-      <div className="mx-auto max-w-7xl px-6 lg:px-8">
-        <div className="mx-auto max-w-2xl lg:mx-0">
-          <h1 className="text-pretty text-3xl font-semibold tracking-tight text-gray-900 sm:text-5xl">
+    <div className="bg-white  py-2 mb-12 min-h-full">
+      <div className="mx-auto max-w-6xl px-6 lg:px-8 ">
+        <div className="mx-auto  lg:mx-0 text-start bg-gradient-to-r py-4">
+          <h1 className="text-pretty text-3xl font-semibold tracking-tight text-gray-900 sm:text-5xl ">
             Blog
           </h1>
           <p className="mt-2 text-lg/8 text-gray-600">
             Güncel içeriklerimizi keşfedin.
           </p>
         </div>
-        <div className="mx-auto mt-10 grid max-w-2xl grid-cols-1 gap-y-12 border-t border-gray-200 pt-10 sm:mt-12 sm:pt-12 lg:mx-0 lg:max-w-none lg:grid-cols-3">
+        <div className="mx-auto  grid max-w-2xl grid-cols-1 gap-y-12 border-t border-gray-200  pt-6 lg:mx-0 lg:max-w-none lg:grid-cols-3">
           {posts.map((post, index) => (
             <article
               key={post._id || `temp-key-${index}`}

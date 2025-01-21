@@ -1,10 +1,10 @@
-// Kategorilere özel kategoris sayfası
+// Kategorilere özel kategori sayfası
 import React, { useEffect } from "react";
 import { useSelector, useDispatch } from "react-redux";
 import { useParams, Link } from "react-router-dom";
 import { fetchPostsByCategory } from "../../app/features/blogs/postsSlice";
-
 import BlogsSkeleton from "./blog/BlogsSkeleton";
+
 export default function CategoryBasePosts() {
   const dispatch = useDispatch();
   const { category } = useParams(); // URL’den kategori parametresi alınıyor
@@ -33,11 +33,13 @@ export default function CategoryBasePosts() {
       .map((word) => word.charAt(0).toUpperCase() + word.slice(1)) // Her kelimenin ilk harfini büyük yap
       .join(" "); // Kelimeleri boşlukla birleştir
   }
+
   return (
-    <div className="bg-white py-12 sm:py-12 min-h-full">
-      <div className="mx-auto max-w-7xl px-6 lg:px-8">
-        <div className="mx-auto max-w-2xl lg:mx-0">
-          <h2 className="text-pretty text-2xl font-semibold  sm:text-4xl">
+    <div className="bg-white py-2 mb-12 min-h-full">
+      <div className="mx-auto max-w-6xl px-6 lg:px-8">
+        {/* Başlık ve alt bilgi kısmı BlogsComponent ile uyumlu şekilde */}
+        <div className="mx-auto lg:mx-0 text-start bg-gradient-to-r py-4">
+          <h2 className="text-pretty text-2xl font-semibold sm:text-4xl">
             {slugToReadable(category)}
           </h2>
           <p className="mt-2 text-lg/8 text-gray-600">
@@ -45,11 +47,13 @@ export default function CategoryBasePosts() {
             keşfedin.
           </p>
         </div>
-        <div className="mx-auto mt-10 grid max-w-2xl grid-cols-1 gap-y-12 border-t border-gray-200 pt-10 sm:mt-12 sm:pt-12 lg:mx-0 lg:max-w-none lg:grid-cols-3">
+
+        {/* Blog yazıları listesi */}
+        <div className="mx-auto mt-10 grid max-w-2xl grid-cols-1 gap-y-12 border-t border-gray-200 pt-6 lg:mx-0 lg:max-w-none lg:grid-cols-3">
           {posts.map((post, index) => (
             <article
               key={post._id || `temp-key-${index}`}
-              className="flex max-w-xl flex-col items-start bg-gray-50 mx-4 p-8 rounded-lg "
+              className="flex max-w-xl flex-col items-start bg-gray-50 mx-4 p-8 rounded-lg"
             >
               {/* Tarih ve Kategori */}
               <div className="flex items-center gap-x-4 text-xs">

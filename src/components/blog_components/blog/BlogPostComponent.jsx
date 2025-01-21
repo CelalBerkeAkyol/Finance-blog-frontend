@@ -55,9 +55,9 @@ const BlogPostComponent = () => {
 
   return (
     <div className="flex items-center justify-center py-12">
-      <div className="prose p-6 max-w-[60%] text-start text-pretty">
+      <div className="prose p-4 min-w-[60%]  text-start text-pretty">
         <h1 className="text-4xl font-bold mb-4">{post.title}</h1>
-        <div id="blog-details" className="flex flex-row gap-6 pb-4 border-b">
+        <div id="blog-details" className="flex flex-row gap-8 pb-4 border-b">
           <Button
             color="primary"
             variant="ghost"
@@ -80,7 +80,7 @@ const BlogPostComponent = () => {
           </span>
         </div>
 
-        <ReactMarkdown className="pt-8">{post.content}</ReactMarkdown>
+        <ReactMarkdown className="pt-2">{post.content}</ReactMarkdown>
       </div>
     </div>
   );

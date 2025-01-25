@@ -67,6 +67,8 @@ const userSlice = createSlice({
   name: "user",
   initialState: {
     userInfo: null, // { id, name, role } gibi kullanıcı bilgileri
+    isLoggedIn: false,
+    isAdmin: false,
     isLoading: false,
     isSuccess: false,
     isError: false,
@@ -84,19 +86,23 @@ const userSlice = createSlice({
     builder
       // Login User
       .addCase(loginUser.pending, (state) => {
+        console.log(" login user pending");
         state.isLoading = true;
       })
       .addCase(loginUser.fulfilled, (state, action) => {
+        console.log("LoginUser Fulfilled Payload:", action.payload); // Log ekledik
         state.isLoading = false;
         state.isSuccess = true;
-        state.userInfo = action.payload.user; // Backend'den gelen kullanıcı bilgisi
+        state.isLoggedIn = true;
+        state.isAdmin = action.payload.userRole === "admin"; // Rolü kontrol edin
       })
       .addCase(loginUser.rejected, (state, action) => {
+        console.log(" login user rejected");
         state.isLoading = false;
         state.isError = true;
         state.errorMessage = action.payload || "Giriş başarısız.";
       })
-      // Logout User
+
       .addCase(logoutUser.pending, (state) => {
         state.isLoading = true;
       })
@@ -104,6 +110,8 @@ const userSlice = createSlice({
         state.isLoading = false;
         state.isSuccess = true;
         state.userInfo = null;
+        state.isLoggedIn = false;
+        state.isAdmin = false;
       })
       .addCase(logoutUser.rejected, (state, action) => {
         state.isLoading = false;
@@ -117,7 +125,8 @@ const userSlice = createSlice({
       .addCase(fetchUser.fulfilled, (state, action) => {
         state.isLoading = false;
         state.isSuccess = true;
-        state.userInfo = action.payload.user; // Kullanıcı bilgisi
+        state.isLoggedIn = action.payload.valid;
+        state.isAdmin = action.payload.userRole === "admin";
       })
       .addCase(fetchUser.rejected, (state, action) => {
         state.isLoading = false;

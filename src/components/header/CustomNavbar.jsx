@@ -1,3 +1,4 @@
+import React from "react";
 import {
   Navbar,
   NavbarBrand,
@@ -6,6 +7,8 @@ import {
   Button,
 } from "@nextui-org/react";
 import { Link } from "react-router-dom";
+import { useSelector } from "react-redux"; // Redux'dan useSelector'ı import edin
+import AdminNavbar from "./AdminNavbar"; // Mevcut AdminNavbar bileşenini import edin
 
 export const AcmeLogo = () => {
   return (
@@ -21,6 +24,19 @@ export const AcmeLogo = () => {
 };
 
 export default function CustomNavbar() {
+  // Redux store'dan kullanıcı durumunu al
+  const isLoggedIn = useSelector((state) => state.user.isLoggedIn);
+  const isAdmin = useSelector((state) => state.user.isAdmin);
+
+  console.log(
+    "user is logged in " + isLoggedIn + " \n user is admin " + isAdmin
+  );
+
+  // Eğer kullanıcı admin ise AdminNavbar'ı göster
+  if (isLoggedIn && isAdmin) {
+    return <AdminNavbar />;
+  }
+
   return (
     <Navbar>
       <NavbarBrand>
@@ -37,20 +53,34 @@ export default function CustomNavbar() {
         <NavbarItem>
           <Link to="/">Integrations</Link>
         </NavbarItem>
-
         <NavbarItem>
           <Link to="/blog/posts/">Blogs</Link>
         </NavbarItem>
       </NavbarContent>
       <NavbarContent justify="end">
-        <NavbarItem className="hidden lg:flex">
-          <Link to="/login">Login</Link>
-        </NavbarItem>
-        <NavbarItem>
-          <Button as={Link} color="primary" to="/signup" variant="flat">
-            Sign Up
-          </Button>
-        </NavbarItem>
+        {/* Kullanıcı giriş yapmamışsa Login ve Sign Up göster */}
+        {!isLoggedIn ? (
+          <>
+            <NavbarItem className="hidden lg:flex">
+              <Link to="/login">Login</Link>
+            </NavbarItem>
+            <NavbarItem>
+              <Button as={Link} color="primary" to="/signup" variant="flat">
+                Sign Up
+              </Button>
+            </NavbarItem>
+          </>
+        ) : (
+          /* Kullanıcı giriş yapmışsa, Profil ve Çıkış Yap linklerini göster */
+          <>
+            <NavbarItem>
+              <Link to="/profile">Profil</Link>
+            </NavbarItem>
+            <NavbarItem>
+              <Link to="/logout">Çıkış Yap</Link>
+            </NavbarItem>
+          </>
+        )}
       </NavbarContent>
     </Navbar>
   );

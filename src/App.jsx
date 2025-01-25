@@ -17,7 +17,6 @@ import BlogPostDashboardPage from "./pages/blog_pages/BlogPostDashboardPage";
 
 import BlogsPage from "./pages/blog_pages/BlogsPage";
 import Footer from "./components/footer/Footer";
-import CategoryBasePosts from "./components/blog_components/CategoryBasePosts";
 
 import CategoryBasePostsPage from "./pages/blog_pages/CategoryBasePostsPage";
 import CategoriesPage from "./pages/blog_pages/CategoriesPage";

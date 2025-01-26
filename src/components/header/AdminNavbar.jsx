@@ -15,10 +15,10 @@ export default function AdminNavbar() {
           <Link to="/blog-admin/dashboard">Dashboard</Link>
         </NavbarItem>
         <NavbarItem>
-          <Link to="/blog/posts/">Blogs</Link>
+          <Link to="/blog-admin/posts">Posts</Link>
         </NavbarItem>
         <NavbarItem>
-          <Link to="/blog/posts/">Blogs</Link>
+          <Link to="/blog-admin/post/new">New Post</Link>
         </NavbarItem>
       </NavbarContent>
     </Navbar>

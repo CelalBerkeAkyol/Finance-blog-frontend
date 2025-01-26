@@ -30,7 +30,7 @@ const TableCellContent = ({ posts, columnKey }) => {
   };
 
   const handleEdit = () => {
-    navigate(`/blog-admin/posts/edit/${posts._id}`);
+    navigate(`/blog-admin/post/edit/${posts._id}`);
   };
 
   const handleDelete = () => {
@@ -75,10 +75,7 @@ const TableCellContent = ({ posts, columnKey }) => {
               <DropdownItem key={`view-${posts._id}`} onClick={handleView}>
                 Görüntüle
               </DropdownItem>
-              <DropdownItem
-                key={`edit-${posts._id}`}
-                onClick={() => console.log("Düzenle tıklandı!")}
-              >
+              <DropdownItem key={`edit-${posts._id}`} onClick={handleEdit}>
                 Düzenle
               </DropdownItem>
               <DropdownItem

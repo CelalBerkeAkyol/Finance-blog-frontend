@@ -28,7 +28,7 @@ const AddPost = () => {
   };
 
   return (
-    <div className="p-8 w-[80%] h-screen">
+    <div className="p-8 mb-4 w-[80%] h-screen">
       <h2 className="text-xl font-bold mb-4">Yeni Post Ekle</h2>
       <form onSubmit={handleSubmit} className="flex flex-col gap-4">
         <Input
@@ -50,13 +50,13 @@ const AddPost = () => {
           required
         />
         {/* Kategori ve Buton için sağa yaslanmış container */}
-        <div className="flex justify-end gap-4">
+        <div className="flex justify-end gap-6">
           <CategorySelector
             selectedCategory={formData.category}
             onChange={handleCategoryChange}
             className="w-auto"
           />
-          <Button type="submit" color="success" size="md" className="self-end">
+          <Button type="submit" size="md" className="self-end">
             Ekle
           </Button>
         </div>

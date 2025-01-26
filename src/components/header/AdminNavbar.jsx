@@ -9,11 +9,8 @@ import { Link } from "react-router-dom";
 
 export default function AdminNavbar() {
   return (
-    <Navbar>
-      <NavbarBrand>
-        <p className="font-bold text-inherit">FinAI</p>
-      </NavbarBrand>
-      <NavbarContent className="hidden sm:flex gap-4" justify="start">
+    <Navbar className="border-b-1">
+      <NavbarContent className="w-full gap-6" justify="center">
         <NavbarItem>
           <Link to="/blog-admin/dashboard">Dashboard</Link>
         </NavbarItem>

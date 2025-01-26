@@ -11,15 +11,9 @@ export default function AuthorLoginComponent() {
   const navigate = useNavigate();
 
   // Redux state'lerini alıyoruz
-  const {
-    isLoading,
-    isError,
-    isSuccess,
-    errorMessage,
-    token,
-    isLoggedIn,
-    isAdmin,
-  } = useSelector((state) => state.user);
+  const { isLoading, isError, isSuccess, errorMessage, token } = useSelector(
+    (state) => state.user
+  );
 
   const [isVisible, setIsVisible] = useState(false);
   const [formData, setFormData] = useState({ username: "", password: "" });
@@ -45,6 +39,7 @@ export default function AuthorLoginComponent() {
   }, [isSuccess, isError, navigate, dispatch, errorMessage]);
 
   // 2. useEffect: Bileşen ilk yüklendiğinde token kontrolü
+  // if token diye kontrol ediyoruz bence bu hatalı token olsa yetiyor yani  ???
   useEffect(() => {
     if (token) {
       navigate("/blog-admin/dashboard");

@@ -1,4 +1,3 @@
-import React from "react";
 import {
   Navbar,
   NavbarBrand,
@@ -7,8 +6,10 @@ import {
   Button,
 } from "@nextui-org/react";
 import { Link } from "react-router-dom";
-import { useSelector } from "react-redux"; // Redux'dan useSelector'ı import edin
-import AdminNavbar from "./AdminNavbar"; // Mevcut AdminNavbar bileşenini import edin
+import React, { useEffect } from "react";
+import { useSelector, useDispatch } from "react-redux";
+
+import { fetchUser } from "../../app/features/user/userSlice"; // fetchUser import edildi
 
 export const AcmeLogo = () => {
   return (
@@ -24,18 +25,16 @@ export const AcmeLogo = () => {
 };
 
 export default function CustomNavbar() {
+  const dispatch = useDispatch();
   // Redux store'dan kullanıcı durumunu al
   const isLoggedIn = useSelector((state) => state.user.isLoggedIn);
   const isAdmin = useSelector((state) => state.user.isAdmin);
 
-  console.log(
-    "user is logged in " + isLoggedIn + " \n user is admin " + isAdmin
-  );
-
-  // Eğer kullanıcı admin ise AdminNavbar'ı göster
-  if (isLoggedIn && isAdmin) {
-    return <AdminNavbar />;
-  }
+  // Navbar ilk yüklendiğinde `fetchUser` çağrısını tetikle
+  useEffect(() => {
+    console.log("Navbar yüklenirken fetchUser çağrılıyor...");
+    dispatch(fetchUser());
+  }, [dispatch]);
 
   return (
     <Navbar>

@@ -43,8 +43,8 @@ const AddPost = () => {
           clearable
           label="İçerik"
           name="content"
-          minRows={25}
-          maxRows={30}
+          minRows={20}
+          maxRows={25}
           onChange={handleChange}
           value={formData.content}
           required

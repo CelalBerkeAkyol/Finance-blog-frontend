@@ -2,14 +2,14 @@ import React, { useState } from "react";
 
 export default function CategorySelector({ selectedCategory, onChange }) {
   const categories = [
-    "Mikro Ekonomi",
-    "Makro Ekonomi",
-    "Kişisel Finans",
-    "Tasarruf",
-    "Temel Analiz",
-    "Teknik Analiz",
-    "Kategori yok",
-    "Araştırma",
+    "mikro-ekonomi",
+    "makro-ekonomi",
+    "kişisel-finans",
+    "tasarruf",
+    "temel-analiz",
+    "teknik-analiz",
+    "kategori-yok",
+    "araştırma",
   ];
 
   return (

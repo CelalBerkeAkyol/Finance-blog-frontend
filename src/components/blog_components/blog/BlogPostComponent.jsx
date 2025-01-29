@@ -19,7 +19,7 @@ const BlogPostComponent = () => {
   const [post, setPost] = useState(null);
   const [error, setError] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [author, setAuthor] = useState(null);
+
   useEffect(() => {
     if (!id) {
       setError("Geçersiz Post ID");
@@ -31,7 +31,7 @@ const BlogPostComponent = () => {
       try {
         const response = await axios.get(`/posts/one-post/${id}`);
         setPost(response.data.post);
-        setAuthor(response.data.author);
+
         await incrementPostView(id); // Görüntülenme sayısını artır
       } catch (err) {
         console.error("API çağrısı sırasında hata oluştu:", err);
@@ -86,7 +86,9 @@ const BlogPostComponent = () => {
           </p>
 
           {/* Yazar */}
-          <p className="text-sm flex items-center gap-1">✍️ Yazar: {author}</p>
+          <p className="text-sm flex items-center gap-1">
+            ✍️ Yazar: {post.author.userName}
+          </p>
           {/* Görüntülenme Sayısı */}
           <p className="text-sm flex items-center gap-1">
             👀 {post.views} Görüntülenme

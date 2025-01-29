@@ -21,6 +21,7 @@ import Footer from "./components/footer/Footer";
 import CategoryBasePostsPage from "./pages/blog_pages/CategoryBasePostsPage";
 import CategoriesPage from "./pages/blog_pages/CategoriesPage";
 import EditPostPage from "./pages/blog_pages/EditPostPage";
+import CheatSheet from "./components/blog_components/blog_dashboard/edit_posts/CheatSheet";
 function App() {
   return (
     <div className="min-h-screen flex flex-col">
@@ -68,6 +69,14 @@ function App() {
               element={
                 <ProtectedRoute>
                   <EditPostPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/blog-admin/cheat-sheet"
+              element={
+                <ProtectedRoute>
+                  <CheatSheet />
                 </ProtectedRoute>
               }
             />

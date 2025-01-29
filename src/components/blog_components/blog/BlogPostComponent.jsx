@@ -5,7 +5,7 @@ import { useParams, useNavigate } from "react-router-dom"; // Dinamik parametre 
 import axios from "../../../api";
 import { Button } from "@nextui-org/react";
 import BlogPostSkeleton from "../BlogPostSkeleton";
-
+import ServerErrorComponent from "../../../components/uyarılar/ServerErrorComponent";
 const incrementPostView = async (postId) => {
   try {
     await axios.put(`/posts/${postId}/view`);
@@ -19,7 +19,7 @@ const BlogPostComponent = () => {
   const [post, setPost] = useState(null);
   const [error, setError] = useState(null);
   const [loading, setLoading] = useState(true);
-
+  const [author, setAuthor] = useState(null);
   useEffect(() => {
     if (!id) {
       setError("Geçersiz Post ID");
@@ -31,6 +31,7 @@ const BlogPostComponent = () => {
       try {
         const response = await axios.get(`/posts/one-post/${id}`);
         setPost(response.data.post);
+        setAuthor(response.data.author);
         await incrementPostView(id); // Görüntülenme sayısını artır
       } catch (err) {
         console.error("API çağrısı sırasında hata oluştu:", err);
@@ -51,13 +52,19 @@ const BlogPostComponent = () => {
       .join(" "); // Kelimeleri boşlukla birleştir
   }
   if (loading) return <BlogPostSkeleton />; // Yüklenme durumu
-  if (error) return <div className="text-red-500">{error}</div>; // Hata durumu
+  if (error) return <ServerErrorComponent message={error} />; // Hata durumu
 
   return (
     <div className="flex items-center justify-center py-12">
-      <div className="prose p-4 min-w-[60%]  text-start text-pretty">
+      <div className="prose p-4 min-w-[60%] text-start text-pretty">
         <h1 className="text-4xl font-bold mb-4">{post.title}</h1>
-        <div id="blog-details" className="flex flex-row gap-8 pb-4 border-b">
+
+        {/* Blog Post Üst Bilgileri */}
+        <div
+          id="blog-details"
+          className="flex flex-wrap items-center gap-8 text-gray-600 pb-4 border-b"
+        >
+          {/* Kategori Butonu */}
           <Button
             color="primary"
             variant="ghost"
@@ -68,19 +75,26 @@ const BlogPostComponent = () => {
             {slugToReadable(post.category)}
           </Button>
 
-          <span>
-            <strong>Görüntülenme:</strong> {post.views}
-          </span>
-          <span>
+          {/* Tarih */}
+          <p className="text-sm flex items-center gap-1">
+            🗓️{" "}
             {new Date(post.createdAt).toLocaleDateString("tr-TR", {
               year: "numeric",
               month: "long",
               day: "numeric",
             })}
-          </span>
+          </p>
+
+          {/* Yazar */}
+          <p className="text-sm flex items-center gap-1">✍️ Yazar: {author}</p>
+          {/* Görüntülenme Sayısı */}
+          <p className="text-sm flex items-center gap-1">
+            👀 {post.views} Görüntülenme
+          </p>
         </div>
 
-        <ReactMarkdown className="pt-2">{post.content}</ReactMarkdown>
+        {/* Blog İçeriği */}
+        <ReactMarkdown className="pt-6">{post.content}</ReactMarkdown>
       </div>
     </div>
   );

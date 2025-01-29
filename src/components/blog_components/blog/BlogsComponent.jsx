@@ -5,6 +5,7 @@ import { useSelector, useDispatch } from "react-redux";
 import { Link } from "react-router-dom";
 import { fetchPosts } from "../../../app/features/blogs/postsSlice";
 import BlogsSkeleton from "./BlogsSkeleton";
+import ServerErrorComponent from "../../uyarılar/ServerErrorComponent";
 export default function BlogsComponent() {
   const dispatch = useDispatch();
 
@@ -26,7 +27,7 @@ export default function BlogsComponent() {
 
   // Hata durumu
   if (isError) {
-    return <div>Hata: {errorMessage}</div>;
+    return <ServerErrorComponent message={errorMessage} />;
   }
 
   // Hiç post bulunamama durumu

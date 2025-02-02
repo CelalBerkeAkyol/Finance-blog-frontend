@@ -7,20 +7,22 @@ export const loginUser = createAsyncThunk(
   "user/loginUser",
   async ({ username, password }, thunkAPI) => {
     try {
-      console.log("Login isteği gönderiliyor...", { username, password });
-
+      console.info("loginUser: Giriş isteği gönderiliyor...", {
+        username,
+        password,
+      });
       const response = await axios.post(
         "/auth/login",
         { username, password },
         { withCredentials: true }
       );
-
-      console.log("Login başarılı! Backend'den gelen veri:", response.data);
-
+      console.info(
+        "loginUser: Giriş başarılı! Backend'den gelen veri:",
+        response.data
+      );
       return response.data;
     } catch (error) {
-      console.error("Login başarısız!", error.response?.data || error.message);
-
+      console.error("loginUser hata:", error.response?.data || error.message);
       return thunkAPI.rejectWithValue(
         error.response?.data?.error || "Giriş başarısız."
       );
@@ -33,44 +35,41 @@ export const logoutUser = createAsyncThunk(
   "user/logoutUser",
   async (_, thunkAPI) => {
     try {
-      console.log("Çıkış işlemi başlatılıyor...");
-
+      console.info("logoutUser: Çıkış işlemi başlatılıyor...");
+      // Port 5000'e istek yapılıyorsa, axios yapılandırmanızda baseURL varsa otomatik kullanılır.
       await axios.post("/auth/logout", {}, { withCredentials: true });
-
-      console.log("Çıkış başarılı!");
+      console.info("logoutUser: Çıkış başarılı!");
       return true;
     } catch (error) {
-      console.error("Çıkış başarısız!", error.response?.data || error.message);
+      console.error("logoutUser hata:", error.response?.data || error.message);
       return thunkAPI.rejectWithValue("Çıkış yapılamadı.");
     }
   }
 );
 
-// Kullanıcı bilgisini getirme thunk'ı
+// Kullanıcı bilgisi getirme thunk'ı
 export const fetchUser = createAsyncThunk(
   "user/fetchUser",
   async (_, thunkAPI) => {
     try {
-      console.log("Kullanıcı bilgisi getiriliyor...");
-
-      const response = await axios.post("/auth/verify-token", {
-        withCredentials: true,
-      });
-
+      console.info("fetchUser: Kullanıcı bilgisi getiriliyor...");
+      const response = await axios.post(
+        "/auth/verify-token",
+        {},
+        { withCredentials: true }
+      );
       const { valid, user } = response.data;
-
       if (!valid) {
-        console.warn("Token geçersiz!");
+        console.warn("fetchUser: Token geçersiz!");
         throw new Error("Token geçersiz.");
       }
-
-      return { valid, user }; // Redux'a valid ve user gönder
+      console.info("fetchUser: Kullanıcı bilgisi başarıyla alındı.", user);
+      return { valid, user };
     } catch (error) {
       console.error(
-        "fetchUser başarısız!",
+        "fetchUser hata:",
         error.response?.data?.error || error.message
       );
-
       return thunkAPI.rejectWithValue(
         error.response?.data?.error || "Kullanıcı bilgileri alınamadı."
       );
@@ -81,7 +80,7 @@ export const fetchUser = createAsyncThunk(
 const userSlice = createSlice({
   name: "user",
   initialState: {
-    userInfo: null, // Kullanıcı bilgileri
+    userInfo: null,
     isLoggedIn: false,
     isAdmin: false,
     isLoading: false,
@@ -91,7 +90,7 @@ const userSlice = createSlice({
   },
   reducers: {
     clearState: (state) => {
-      console.log("State temizleniyor...");
+      console.info("userSlice: State temizleniyor...");
       state.isLoading = false;
       state.isSuccess = false;
       state.isError = false;
@@ -100,43 +99,40 @@ const userSlice = createSlice({
   },
   extraReducers: (builder) => {
     builder
-      // Kullanıcı giriş yapıyor
+      // loginUser
       .addCase(loginUser.pending, (state) => {
-        console.log("Login işlemi devam ediyor...");
+        console.info("loginUser: Giriş işlemi devam ediyor...");
         state.isLoading = true;
       })
       .addCase(loginUser.fulfilled, (state, action) => {
-        console.log("Login başarılı! Güncellenen Redux state:", action.payload);
-
+        console.info(
+          "loginUser: Giriş başarılı. Güncellenen state:",
+          action.payload
+        );
         state.isLoading = false;
         state.isSuccess = true;
         state.isLoggedIn = true;
-
+        state.userInfo = action.payload.user;
         if (action.payload?.userRole) {
           state.isAdmin = action.payload.userRole === "admin";
         } else {
-          console.warn(
-            "userRole bilgisi eksik! Backend doğru veri döndürüyor mu?"
-          );
+          console.warn("loginUser: userRole bilgisi eksik!");
           state.isAdmin = false;
         }
-
-        console.log("Son isAdmin state:", state.isAdmin);
       })
       .addCase(loginUser.rejected, (state, action) => {
-        console.log("Login başarısız!", action.payload);
+        console.error("loginUser: Giriş başarısız!", action.payload);
         state.isLoading = false;
         state.isError = true;
         state.errorMessage = action.payload || "Giriş başarısız.";
       })
-
-      // Kullanıcı çıkış yapıyor
+      // logoutUser
       .addCase(logoutUser.pending, (state) => {
-        console.log("Çıkış işlemi devam ediyor...");
+        console.info("logoutUser: Çıkış işlemi devam ediyor...");
         state.isLoading = true;
       })
       .addCase(logoutUser.fulfilled, (state) => {
-        console.log("Çıkış başarılı, Redux state sıfırlanıyor...");
+        console.info("logoutUser: Çıkış başarılı, state sıfırlanıyor.");
         state.isLoading = false;
         state.isSuccess = true;
         state.userInfo = null;
@@ -144,40 +140,39 @@ const userSlice = createSlice({
         state.isAdmin = false;
       })
       .addCase(logoutUser.rejected, (state, action) => {
-        console.log("Çıkış başarısız!", action.payload);
+        console.error("logoutUser: Çıkış başarısız!", action.payload);
         state.isLoading = false;
         state.isError = true;
         state.errorMessage = action.payload || "Çıkış yapılamadı.";
       })
-
-      // Kullanıcı bilgisi getiriliyor
+      // fetchUser
       .addCase(fetchUser.pending, (state) => {
-        console.log("fetchUser isteği devam ediyor...");
+        console.info(
+          "fetchUser: Kullanıcı bilgisi getirme işlemi devam ediyor..."
+        );
         state.isLoading = true;
       })
       .addCase(fetchUser.fulfilled, (state, action) => {
-        console.log(
-          "fetchUser başarılı! Güncellenen Redux state:",
+        console.info(
+          "fetchUser: Kullanıcı bilgisi başarıyla alındı.",
           action.payload
         );
-
         state.isLoading = false;
         state.isSuccess = true;
         state.isLoggedIn = action.payload.valid;
-
+        state.userInfo = action.payload.user;
         if (action.payload.user?.role) {
           state.isAdmin = action.payload.user.role === "admin";
         } else {
-          console.warn(
-            "fetchUser: role bilgisi eksik! Backend doğru veri döndürüyor mu?"
-          );
+          console.warn("fetchUser: role bilgisi eksik!");
           state.isAdmin = false;
         }
-
-        console.log("Son fetchUser isAdmin state:", state.isAdmin);
       })
       .addCase(fetchUser.rejected, (state, action) => {
-        console.log("fetchUser başarısız!", action.payload);
+        console.error(
+          "fetchUser: Kullanıcı bilgisi getirme başarısız!",
+          action.payload
+        );
         state.isLoading = false;
         state.isError = true;
         state.errorMessage = action.payload || "Kullanıcı bilgileri alınamadı.";

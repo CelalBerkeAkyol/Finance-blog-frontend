@@ -8,8 +8,8 @@ import {
 import { Link } from "react-router-dom";
 import React, { useEffect } from "react";
 import { useSelector, useDispatch } from "react-redux";
-import { fetchUser } from "../../app/features/user/userSlice"; // fetchUser import edildi
-import handleLogout from "../auth/LogoutComponent";
+import { fetchUser, logoutUser } from "../../app/features/user/userSlice"; // logoutUser ekleniyor
+
 export const AcmeLogo = () => {
   return (
     <svg fill="none" height="36" viewBox="0 0 32 32" width="36">
@@ -25,15 +25,29 @@ export const AcmeLogo = () => {
 
 export default function CustomNavbar() {
   const dispatch = useDispatch();
-  // Redux store'dan kullanıcı durumunu al
   const isLoggedIn = useSelector((state) => state.user.isLoggedIn);
   const isAdmin = useSelector((state) => state.user.isAdmin);
 
-  // Navbar ilk yüklendiğinde `fetchUser` çağrısını tetikle
+  // Navbar ilk yüklendiğinde fetchUser çağrılıyor.
   useEffect(() => {
     console.log("Navbar yüklenirken fetchUser çağrılıyor...");
     dispatch(fetchUser());
   }, [dispatch]);
+
+  // Logout işlemini gerçekleştiren fonksiyon
+  const handleLogoutClick = () => {
+    console.log("Logout işlemi başlatılıyor...");
+    dispatch(logoutUser())
+      .unwrap()
+      .then(() => {
+        console.log("Logout başarılı, yönlendiriliyor...");
+        // Yönlendirmeyi gerçekleştirmek için window.location.href veya başka bir yönlendirme yöntemi kullanabilirsiniz.
+        window.location.href = "/blog-admin/login";
+      })
+      .catch((error) => {
+        console.error("Logout sırasında hata oluştu:", error);
+      });
+  };
 
   return (
     <Navbar>
@@ -75,9 +89,7 @@ export default function CustomNavbar() {
               <Link to="/profile">Profil</Link>
             </NavbarItem>
             <NavbarItem>
-              <NavbarItem>
-                <Button onClick={handleLogout}>Çıkış Yap</Button>
-              </NavbarItem>
+              <Button onClick={handleLogoutClick}>Çıkış Yap</Button>
             </NavbarItem>
           </>
         )}

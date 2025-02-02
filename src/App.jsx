@@ -22,6 +22,9 @@ import CategoryBasePostsPage from "./pages/blog_pages/CategoryBasePostsPage";
 import CategoriesPage from "./pages/blog_pages/CategoriesPage";
 import EditPostPage from "./pages/blog_pages/EditPostPage";
 import CheatSheet from "./components/blog_components/blog_dashboard/edit_posts/CheatSheet";
+import AboutUsPage from "./pages/AboutUsPage";
+import DisclaimerPage from "./pages/DisclaimerPage";
+import PrivacyPolicyPage from "./pages/PrivacyPolicyPage";
 function App() {
   return (
     <div className="min-h-screen flex flex-col">
@@ -33,13 +36,10 @@ function App() {
             <Route path="/signup" element={<SignupPage />} />
             {/* Blog yazarları için */}
             <Route path="/blog-admin/login" element={<AuthorLoginPage />} />
-
             <Route path="/plans" element={<PricePage />} />
-
-            {/* 404 Sayfası */}
-            <Route path="*" element={<PageNotFound />} />
-            {/* Blog author sayfaları */}
-
+            <Route path="/about-us" element={<AboutUsPage />} />
+            <Route path="/disclaimer" element={<DisclaimerPage />} />
+            <Route path="/privacy-policy" element={<PrivacyPolicyPage />} />
             <Route
               path="/blog-admin/dashboard"
               element={
@@ -87,6 +87,10 @@ function App() {
               path="/blog/category/:category"
               element={<CategoryBasePostsPage />}
             />
+
+            {/* 404 Sayfası */}
+            <Route path="*" element={<PageNotFound />} />
+            {/* Blog author sayfaları */}
           </Routes>
         </main>
         <Footer />

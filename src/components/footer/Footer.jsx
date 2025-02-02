@@ -7,18 +7,19 @@ export default function Footer() {
           <h3 className="text-white font-semibold text-lg mb-2">Company</h3>
           <ul>
             <li>
-              <a href="#" className="hover:underline">
-                About Us
-              </a>
-            </li>
-            <li>
-              <a href="#" className="hover:underline">
-                Careers
-              </a>
-            </li>
-            <li>
-              <a href="#" className="hover:underline">
+              <a
+                href="http://localhost:5173/blog/posts/"
+                className="hover:underline"
+              >
                 Blog
+              </a>
+            </li>
+            <li>
+              <a
+                href="http://localhost:5173/blog/category/makro-ekonomi"
+                className="hover:underline"
+              >
+                Makro Ekonomi
               </a>
             </li>
           </ul>
@@ -26,20 +27,29 @@ export default function Footer() {
 
         {/* Column 2 */}
         <div>
-          <h3 className="text-white font-semibold text-lg mb-2">Support</h3>
+          <h3 className="text-white font-semibold text-lg mb-2">Hakkımızda</h3>
           <ul>
             <li>
-              <a href="#" className="hover:underline">
-                Help Center
+              <a
+                href="http://localhost:5173/about-us"
+                className="hover:underline"
+              >
+                About us
               </a>
             </li>
             <li>
-              <a href="#" className="hover:underline">
+              <a
+                href="http://localhost:5173/privacy-policy"
+                className="hover:underline"
+              >
                 Privacy Policy
               </a>
             </li>
             <li>
-              <a href="#" className="hover:underline">
+              <a
+                href="http://localhost:5173/disclaimer"
+                className="hover:underline"
+              >
                 Terms of Service
               </a>
             </li>

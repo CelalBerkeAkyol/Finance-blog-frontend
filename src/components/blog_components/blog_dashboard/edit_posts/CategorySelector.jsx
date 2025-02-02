@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React from "react";
 
 export default function CategorySelector({ selectedCategory, onChange }) {
   const categories = [
@@ -12,6 +12,11 @@ export default function CategorySelector({ selectedCategory, onChange }) {
     "araştırma",
   ];
 
+  const handleChange = (e) => {
+    console.info("CategorySelector: Seçilen kategori:", e.target.value);
+    onChange(e.target.value);
+  };
+
   return (
     <div>
       <label
@@ -24,7 +29,7 @@ export default function CategorySelector({ selectedCategory, onChange }) {
         id="category"
         name="category"
         value={selectedCategory}
-        onChange={(e) => onChange(e.target.value)}
+        onChange={handleChange}
         className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm"
         required
       >

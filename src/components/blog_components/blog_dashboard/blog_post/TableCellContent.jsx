@@ -1,4 +1,3 @@
-// src/components/blog_components/blog_dashboard/blog_post/TableCellContent.jsx
 import React from "react";
 import {
   Chip,
@@ -26,29 +25,42 @@ const TableCellContent = ({ posts, columnKey }) => {
   const dispatch = useDispatch();
 
   const handleView = () => {
+    console.info(`TableCellContent: Post ${posts._id} görüntüleniyor.`);
     navigate(`/blog/post/${posts._id}`);
   };
 
   const handleEdit = () => {
+    console.info(
+      `TableCellContent: Post ${posts._id} düzenleme sayfasına yönlendiriliyor.`
+    );
     navigate(`/blog-admin/post/edit/${posts._id}`);
   };
 
   const handleDelete = () => {
     if (window.confirm("Bu postu silmek istediğinize emin misiniz?")) {
+      console.info(
+        `TableCellContent: Post ${posts._id} silme işlemi başlatılıyor.`
+      );
       dispatch(deletePost(posts._id))
         .then((result) => {
           if (result.meta.requestStatus === "fulfilled") {
-            console.log("Post başarıyla silindi!");
+            console.info("TableCellContent: Post başarıyla silindi!");
           } else {
-            console.error("Post silinirken hata oluştu:", result.payload);
+            console.error(
+              "TableCellContent: Post silinirken hata oluştu:",
+              result.payload
+            );
           }
         })
-        .catch((error) => console.error("Silme işlemi hata verdi:", error));
+        .catch((error) =>
+          console.error("TableCellContent: Silme işlemi hata verdi:", error)
+        );
     }
   };
+
   switch (columnKey) {
     case "title":
-      return <span>{cellValue}</span>; // sadece blog title dön
+      return <span>{cellValue}</span>;
     case "status":
       return (
         <Chip
@@ -67,7 +79,6 @@ const TableCellContent = ({ posts, columnKey }) => {
           <Dropdown>
             <DropdownTrigger>
               <Button isIconOnly radius="full" size="sm" variant="light">
-                {/* Üç nokta sembolü */}
                 <span>⋮</span>
               </Button>
             </DropdownTrigger>

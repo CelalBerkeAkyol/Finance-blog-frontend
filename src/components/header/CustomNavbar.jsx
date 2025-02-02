@@ -8,9 +8,8 @@ import {
 import { Link } from "react-router-dom";
 import React, { useEffect } from "react";
 import { useSelector, useDispatch } from "react-redux";
-
 import { fetchUser } from "../../app/features/user/userSlice"; // fetchUser import edildi
-
+import handleLogout from "../auth/LogoutComponent";
 export const AcmeLogo = () => {
   return (
     <svg fill="none" height="36" viewBox="0 0 32 32" width="36">
@@ -76,7 +75,9 @@ export default function CustomNavbar() {
               <Link to="/profile">Profil</Link>
             </NavbarItem>
             <NavbarItem>
-              <Link to="/logout">Çıkış Yap</Link>
+              <NavbarItem>
+                <Button onClick={handleLogout}>Çıkış Yap</Button>
+              </NavbarItem>
             </NavbarItem>
           </>
         )}

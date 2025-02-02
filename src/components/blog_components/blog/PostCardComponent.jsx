@@ -9,9 +9,12 @@ function slugToReadable(slug) {
 }
 
 const PostCardComponent = ({ post }) => {
+  const handleView = () => {
+    console.info(`PostCardComponent: Post ${post._id} görüntüleniyor.`);
+  };
+
   return (
     <article className="flex max-w-xl flex-col items-start bg-gray-50 mx-4 p-8 rounded-lg">
-      {/* Tarih ve Kategori */}
       <div className="flex items-center gap-x-4 text-xs">
         <time dateTime={post.createdAt || ""} className="text-gray-500">
           {post.createdAt
@@ -28,11 +31,9 @@ const PostCardComponent = ({ post }) => {
           </span>
         </Link>
       </div>
-
-      {/* Başlık ve İçerik */}
       <div className="group relative">
         <h3 className="mt-2 text-lg font-semibold text-gray-900 group-hover:text-gray-600">
-          <Link to={`/blog/post/${post._id}`}>
+          <Link to={`/blog/post/${post._id}`} onClick={handleView}>
             <span className="absolute inset-0" />
             {post.title || "Başlık yok"}
           </Link>
@@ -43,8 +44,6 @@ const PostCardComponent = ({ post }) => {
             : post.content || "İçerik yok"}
         </p>
       </div>
-
-      {/* Yazar Bilgileri */}
       <div className="relative mt-4 flex items-center gap-x-4">
         <img
           alt=""
@@ -56,7 +55,7 @@ const PostCardComponent = ({ post }) => {
         />
         <div className="text-sm">
           <p className="font-semibold text-gray-900">
-            {post.author?.name || "Anonim Yazar"}
+            {post.author?.userName || "Anonim Yazar"}
           </p>
           <p className="text-gray-600">{post.author?.role || "Yazar"}</p>
         </div>

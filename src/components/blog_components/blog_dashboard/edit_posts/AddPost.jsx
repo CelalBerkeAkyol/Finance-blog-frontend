@@ -19,11 +19,24 @@ const AddPost = () => {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    dispatch(addNewPost(formData));
-    setFormData({ title: "", content: "", category: "" });
+    console.info("AddPost: Yeni post ekleme işlemi başlatılıyor.", formData);
+    dispatch(addNewPost(formData))
+      .then((result) => {
+        if (result.meta.requestStatus === "fulfilled") {
+          console.info("AddPost: Post başarıyla eklendi.");
+          setFormData({ title: "", content: "", category: "" });
+        } else {
+          console.error(
+            "AddPost: Post eklenirken hata oluştu:",
+            result.payload
+          );
+        }
+      })
+      .catch((error) => console.error("AddPost: Hata oluştu:", error));
   };
 
   const handleCategoryChange = (selectedCategory) => {
+    console.info("AddPost: Kategori değiştirildi:", selectedCategory);
     setFormData((prevData) => ({ ...prevData, category: selectedCategory }));
   };
 
@@ -49,7 +62,6 @@ const AddPost = () => {
           value={formData.content}
           required
         />
-        {/* Kategori ve Buton için sağa yaslanmış container */}
         <div className="flex justify-end gap-6">
           <CategorySelector
             selectedCategory={formData.category}

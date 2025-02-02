@@ -1,52 +1,44 @@
-// src/components/blog_components/blog_dashboard/AuthorLoginComponent.jsx
 import React, { useState, useEffect } from "react";
 import { Button, Input, Checkbox, Link } from "@nextui-org/react";
 import { Icon } from "@iconify/react";
 import { useDispatch, useSelector } from "react-redux";
 import { loginUser, clearState } from "../../../app/features/user/userSlice";
-import { useNavigate } from "react-router-dom"; // Yönlendirme için
+import { useNavigate } from "react-router-dom";
 
 export default function AuthorLoginComponent() {
   const dispatch = useDispatch();
   const navigate = useNavigate();
-
-  // Redux state'lerini alıyoruz
   const { isLoading, isError, isSuccess, errorMessage, token } = useSelector(
     (state) => state.user
   );
-
   const [isVisible, setIsVisible] = useState(false);
   const [formData, setFormData] = useState({ username: "", password: "" });
 
-  // 1. useEffect: Başarılı giriş sonrası yönlendirme
   useEffect(() => {
     if (isSuccess) {
-      // Giriş başarılıysa yönlendirme yap
+      console.info("AuthorLoginComponent: Giriş başarılı, yönlendiriliyor.");
       navigate("/blog-admin/dashboard");
     }
-
     if (isError) {
-      // Hata durumunda hata mesajını göstermek için
-      console.error(errorMessage);
-      // Örneğin, toast mesajı ekleyebilirsiniz
-      // toast.error(errorMessage);
+      console.error("AuthorLoginComponent: Giriş hatası:", errorMessage);
+      // Örneğin, toast mesajı eklenebilir.
     }
-
-    // Bileşen unmount olduğunda state'i temizle
     return () => {
       dispatch(clearState());
     };
   }, [isSuccess, isError, navigate, dispatch, errorMessage]);
 
-  // 2. useEffect: Bileşen ilk yüklendiğinde token kontrolü
-  // if token diye kontrol ediyoruz bence bu hatalı token olsa yetiyor yani  ???
   useEffect(() => {
     if (token) {
+      console.info("AuthorLoginComponent: Token mevcut, yönlendiriliyor.");
       navigate("/blog-admin/dashboard");
     }
   }, [token, navigate]);
 
-  const toggleVisibility = () => setIsVisible(!isVisible);
+  const toggleVisibility = () => {
+    console.info("AuthorLoginComponent: Şifre görünürlüğü değiştiriliyor.");
+    setIsVisible(!isVisible);
+  };
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -55,6 +47,7 @@ export default function AuthorLoginComponent() {
 
   const handleSubmit = (e) => {
     e.preventDefault();
+    console.info("AuthorLoginComponent: Giriş formu gönderiliyor.", formData);
     dispatch(loginUser(formData));
   };
 
@@ -102,10 +95,7 @@ export default function AuthorLoginComponent() {
             onChange={handleChange}
             required
           />
-
-          {/* Hata Mesajını Gösterme */}
           {isError && <p className="text-red-500 text-sm">{errorMessage}</p>}
-
           <div className="flex items-center justify-between px-1 py-2">
             <Checkbox name="remember" size="sm">
               Remember me

@@ -15,8 +15,14 @@ export default function SignupComponent() {
   const [successMessage, setSuccessMessage] = useState("");
   const [isLoading, setIsLoading] = useState(false);
 
-  const toggleVisibility = () => setIsVisible(!isVisible);
-  const toggleConfirmVisibility = () => setIsConfirmVisible(!isConfirmVisible);
+  const toggleVisibility = () => {
+    console.info("SignupComponent: Şifre görünürlüğü değiştiriliyor.");
+    setIsVisible(!isVisible);
+  };
+  const toggleConfirmVisibility = () => {
+    console.info("SignupComponent: Confirm şifre görünürlüğü değiştiriliyor.");
+    setIsConfirmVisible(!isConfirmVisible);
+  };
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -25,11 +31,12 @@ export default function SignupComponent() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    console.info("SignupComponent: Kayıt formu gönderiliyor...", formData);
     setErrorMessage("");
     setSuccessMessage("");
 
-    // Şifre eşleşmesini kontrol edin
     if (formData.password !== formData.confirmPassword) {
+      console.warn("SignupComponent: Şifreler eşleşmiyor.");
       setErrorMessage("Passwords do not match.");
       return;
     }
@@ -38,9 +45,7 @@ export default function SignupComponent() {
     try {
       const response = await fetch("http://127.0.0.1:8000/api/register/", {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           username: formData.username,
           email: formData.email,
@@ -51,6 +56,7 @@ export default function SignupComponent() {
       const data = await response.json();
 
       if (response.ok) {
+        console.info("SignupComponent: Kayıt başarılı.", data);
         setSuccessMessage("Account created successfully! You can now log in.");
         setFormData({
           username: "",
@@ -59,9 +65,11 @@ export default function SignupComponent() {
           confirmPassword: "",
         });
       } else {
+        console.warn("SignupComponent: Kayıt hatası.", data.error);
         setErrorMessage(data.error || "An error occurred during registration.");
       }
     } catch (error) {
+      console.error("SignupComponent: Sunucuya bağlanılamadı.", error);
       setErrorMessage("Failed to connect to the server. Please try again.");
     } finally {
       setIsLoading(false);
@@ -71,7 +79,7 @@ export default function SignupComponent() {
   return (
     <div className="flex h-full w-full items-center justify-center my-14">
       <div className="flex w-full max-w-sm flex-col gap-4 rounded-large">
-        <div className="flex flex-col items-center pb-6 ">
+        <div className="flex flex-col items-center pb-6">
           <p className="text-xl font-medium">Welcome</p>
           <p className="text-small text-default-500">
             Create an account to get started

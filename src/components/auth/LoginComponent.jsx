@@ -8,7 +8,10 @@ export default function LoginComponent() {
   const [errorMessage, setErrorMessage] = useState("");
   const [isLoading, setIsLoading] = useState(false);
 
-  const toggleVisibility = () => setIsVisible(!isVisible);
+  const toggleVisibility = () => {
+    console.info("LoginComponent: Şifre görünürlüğü değiştiriliyor.");
+    setIsVisible(!isVisible);
+  };
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -17,6 +20,7 @@ export default function LoginComponent() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    console.info("LoginComponent: Giriş formu gönderiliyor...", formData);
     setIsLoading(true);
     setErrorMessage("");
 
@@ -26,8 +30,9 @@ export default function LoginComponent() {
         headers: {
           "Content-Type": "application/json",
         },
+        credentials: "include",
         body: JSON.stringify({
-          email: formData.email, // Backend'de `username` olarak tanımlanmış
+          email: formData.email, // Backend'de 'username' olarak tanımlanmış olabilir
           password: formData.password,
         }),
       });
@@ -35,16 +40,19 @@ export default function LoginComponent() {
       const data = await response.json();
 
       if (response.ok) {
-        // Başarılı giriş
-        localStorage.setItem("authToken", data.token); // Token saklanır
-        window.location.href = data.redirect_url; // Yönlendirme yapılır
+        console.info(
+          "LoginComponent: Giriş başarılı. Yönlendiriliyor...",
+          data.redirect_url
+        );
+        window.location.href = data.redirect_url;
       } else {
-        // Hata mesajı
+        console.warn("LoginComponent: Giriş başarısız.", data.error);
         setErrorMessage(
           data.error || "Giriş başarısız. Bilgilerinizi kontrol edin."
         );
       }
     } catch (error) {
+      console.error("LoginComponent: Sunucuya bağlanılamadı.", error);
       setErrorMessage(
         "Sunucuya bağlanılamadı. Lütfen daha sonra tekrar deneyin."
       );
@@ -68,7 +76,6 @@ export default function LoginComponent() {
             onChange={handleChange}
             required
           />
-
           <Input
             endContent={
               <button type="button" onClick={toggleVisibility}>
@@ -94,11 +101,9 @@ export default function LoginComponent() {
             onChange={handleChange}
             required
           />
-
           {errorMessage && (
             <p className="text-red-500 text-sm">{errorMessage}</p>
           )}
-
           <div className="flex items-center justify-between px-1 py-2">
             <Checkbox name="remember" size="sm">
               Remember me
@@ -116,7 +121,6 @@ export default function LoginComponent() {
           <p className="shrink-0 text-tiny text-default-500">OR</p>
           <Divider className="flex-1" />
         </div>
-
         <div className="flex flex-col gap-2">
           <Button
             startContent={<Icon icon="flat-color-icons:google" width={24} />}
@@ -133,7 +137,6 @@ export default function LoginComponent() {
             Continue with Github
           </Button>
         </div>
-
         <p className="text-center text-small">
           Need to create an account?&nbsp;
           <Link href="http://localhost:5173/signup" size="sm">

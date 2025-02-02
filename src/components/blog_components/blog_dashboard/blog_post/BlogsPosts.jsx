@@ -1,4 +1,3 @@
-// src/features/blogs/BlogsTable.jsx
 import React, { useEffect, useMemo, useState } from "react";
 import {
   Table,
@@ -15,12 +14,8 @@ import {
   DropdownMenu,
   DropdownItem,
 } from "@nextui-org/react";
-
 import { useSelector, useDispatch } from "react-redux";
-import {
-  fetchPosts,
-  deletePost,
-} from "../../../../app/features/blogs/postsSlice";
+import { fetchPosts } from "../../../../app/features/blogs/postsSlice";
 import TableCellContent from "./TableCellContent";
 import { capitalize } from "../../../../utils/capitalize";
 import { useNavigate } from "react-router-dom";
@@ -44,11 +39,7 @@ const statusOptions = [
 
 const BlogsTable = () => {
   const dispatch = useDispatch();
-  const { posts, status, error, pagination, count, total } = useSelector(
-    (state) => state.posts
-  );
-
-  // Local state
+  const { posts, status, error, total } = useSelector((state) => state.posts);
   const [filterValue, setFilterValue] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
   const [sortDescriptor, setSortDescriptor] = useState({
@@ -56,37 +47,39 @@ const BlogsTable = () => {
     direction: "descending",
   });
   const [page, setPage] = useState(1);
-  const limit = 20; // Tutarlı bir limit değeri belirleyin
+  const limit = 20;
+  const navigate = useNavigate();
 
   useEffect(() => {
+    console.info("BlogsTable: Postlar getiriliyor (sayfa:", page, ")");
     dispatch(fetchPosts({ page, limit }));
   }, [dispatch, page]);
 
   const filteredBlogs = useMemo(() => {
     let filtered = [...posts];
     if (filterValue) {
-      filtered = filtered.filter((posts) =>
-        posts.title.toLowerCase().includes(filterValue.toLowerCase())
+      filtered = filtered.filter((post) =>
+        post.title.toLowerCase().includes(filterValue.toLowerCase())
       );
     }
     if (statusFilter !== "all") {
-      filtered = filtered.filter((posts) => posts.status === statusFilter);
+      filtered = filtered.filter((post) => post.status === statusFilter);
     }
     return filtered;
   }, [posts, filterValue, statusFilter]);
 
   const sortedBlogs = useMemo(() => {
-    const sorted = [...filteredBlogs].sort((a, b) => {
+    return [...filteredBlogs].sort((a, b) => {
       const aVal = a[sortDescriptor.column];
       const bVal = b[sortDescriptor.column];
       if (aVal < bVal) return sortDescriptor.direction === "ascending" ? -1 : 1;
       if (aVal > bVal) return sortDescriptor.direction === "ascending" ? 1 : -1;
       return 0;
     });
-    return sorted;
   }, [filteredBlogs, sortDescriptor]);
 
   const handleSortChange = (descriptor) => {
+    console.info("BlogsTable: Sıralama değişti.", descriptor);
     setSortDescriptor(descriptor);
   };
 
@@ -100,18 +93,18 @@ const BlogsTable = () => {
     setStatusFilter(selected === "all" ? "all" : selected);
     setPage(1);
   };
-  const navigate = useNavigate(); // Yönlendirme için useNavigate
+
   const handleNavigate = () => {
-    navigate("/blog-admin/post/new"); // /post/new adresine yönlendir
+    console.info("BlogsTable: Yeni post ekleme sayfasına yönlendiriliyor.");
+    navigate("/blog-admin/post/new");
   };
 
   if (status === "loading") return <div>Yükleniyor...</div>;
   if (status === "failed") return <div>Hata: {error}</div>;
 
   return (
-    <div className="p-12 w-full ">
-      {/* Üst İçerik */}
-      <div className="flex  mb-4 gap-6">
+    <div className="p-12 w-full">
+      <div className="flex mb-4 gap-6">
         <Input
           clearable
           placeholder="Başlık ile ara..."
@@ -146,7 +139,7 @@ const BlogsTable = () => {
             ))}
           </DropdownMenu>
         </Dropdown>
-        <div className="flex items-center gap-2 ">
+        <div className="flex items-center gap-2">
           <Button
             color="primary"
             variant="flat"
@@ -157,9 +150,7 @@ const BlogsTable = () => {
           </Button>
         </div>
       </div>
-
-      {/* Tablo */}
-      <div className="  ">
+      <div>
         <Table
           aria-label="Blogs Table"
           sortDescriptor={sortDescriptor}
@@ -174,21 +165,19 @@ const BlogsTable = () => {
             )}
           </TableHeader>
           <TableBody>
-            {sortedBlogs.map((posts, index) => (
-              <TableRow key={posts._id || `row-${index}`}>
+            {sortedBlogs.map((post, index) => (
+              <TableRow key={post._id || `row-${index}`}>
                 {columns.map((column) => (
                   <TableCell
-                    key={`${posts._id || `row-${index}`}-${column.uid}`}
+                    key={`${post._id || `row-${index}`}-${column.uid}`}
                   >
-                    <TableCellContent posts={posts} columnKey={column.uid} />
+                    <TableCellContent posts={post} columnKey={column.uid} />
                   </TableCell>
                 ))}
               </TableRow>
             ))}
           </TableBody>
         </Table>
-
-        {/* Alt İçerik */}
         <div className="flex justify-between align-center items-center mt-4">
           <Pagination
             total={Math.ceil((total || 0) / limit)}

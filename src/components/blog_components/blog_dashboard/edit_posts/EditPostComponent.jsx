@@ -1,9 +1,11 @@
+// src/app/features/blog_components/blog_dashboard/edit_posts/EditPostComponent.jsx
 import React, { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { Input, Textarea, Button, Card } from "@nextui-org/react";
 import api from "../../../../api";
 import CategorySelector from "./CategorySelector";
 import StatusSelector from "./StatusSelector";
+import ImageGalleryModal from "../../image/ImageGalleryModal";
 
 const EditPostComponent = () => {
   const { id } = useParams();
@@ -16,6 +18,7 @@ const EditPostComponent = () => {
   });
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [isGalleryOpen, setIsGalleryOpen] = useState(false);
 
   useEffect(() => {
     console.info(`EditPostComponent: ${id} ID'li post getiriliyor.`);
@@ -111,12 +114,20 @@ const EditPostComponent = () => {
                 onChange={handleStatusChange}
               />
             </div>
-            <Button color="primary" fullWidth onClick={handleUpdate}>
-              Güncelle
-            </Button>
+            <div className="flex gap-4 mt-4">
+              {/* Görseller butonu */}
+              <Button onClick={() => setIsGalleryOpen(true)}>Görseller</Button>
+              <Button color="primary" fullWidth onClick={handleUpdate}>
+                Güncelle
+              </Button>
+            </div>
           </>
         )}
       </Card>
+      <ImageGalleryModal
+        isOpen={isGalleryOpen}
+        onClose={() => setIsGalleryOpen(false)}
+      />
     </div>
   );
 };

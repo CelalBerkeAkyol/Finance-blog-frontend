@@ -1,8 +1,10 @@
+// src/app/features/blog/AddPost.jsx
 import React, { useState } from "react";
 import { useDispatch } from "react-redux";
 import { addNewPost } from "../../../../app/features/blogs/postsSlice";
 import { Input, Textarea, Button } from "@nextui-org/react";
 import CategorySelector from "./CategorySelector";
+import ImageGalleryModal from "../../image/ImageGalleryModal";
 
 const AddPost = () => {
   const dispatch = useDispatch();
@@ -11,6 +13,7 @@ const AddPost = () => {
     content: "",
     category: "",
   });
+  const [isGalleryOpen, setIsGalleryOpen] = useState(false);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -56,23 +59,33 @@ const AddPost = () => {
           clearable
           label="İçerik"
           name="content"
-          minRows={20}
-          maxRows={25}
+          rows={20}
           onChange={handleChange}
           value={formData.content}
           required
         />
-        <div className="flex justify-end gap-6">
+        <div className="flex justify-between items-center">
           <CategorySelector
             selectedCategory={formData.category}
             onChange={handleCategoryChange}
             className="w-auto"
           />
-          <Button type="submit" size="md" className="self-end">
-            Ekle
-          </Button>
+          <div className="flex gap-4">
+            {/* Görseller butonu */}
+            <Button type="button" onClick={() => setIsGalleryOpen(true)}>
+              Görseller
+            </Button>
+            <Button type="submit" size="md" className="self-end">
+              Ekle
+            </Button>
+          </div>
         </div>
       </form>
+      {/* Modal'ı ekrana getiriyoruz */}
+      <ImageGalleryModal
+        isOpen={isGalleryOpen}
+        onClose={() => setIsGalleryOpen(false)}
+      />
     </div>
   );
 };

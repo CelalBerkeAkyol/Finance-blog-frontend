@@ -25,6 +25,7 @@ import CheatSheet from "./components/blog_components/blog_dashboard/edit_posts/C
 import AboutUsPage from "./pages/AboutUsPage";
 import DisclaimerPage from "./pages/DisclaimerPage";
 import PrivacyPolicyPage from "./pages/PrivacyPolicyPage";
+import ImagePage from "./pages/blog_pages/ImagePage";
 function App() {
   return (
     <div className="min-h-screen flex flex-col">
@@ -69,6 +70,14 @@ function App() {
               element={
                 <ProtectedRoute>
                   <EditPostPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/blog-admin/images"
+              element={
+                <ProtectedRoute>
+                  <ImagePage />
                 </ProtectedRoute>
               }
             />

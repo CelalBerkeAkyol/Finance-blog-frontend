@@ -3,75 +3,108 @@ import { Spacer } from "@nextui-org/react";
 
 const PrivacyPolicyPage = () => {
   return (
-    <div style={{ maxWidth: "800px", margin: "auto", padding: "20px" }}>
-      {/* Başlık */}
-      <h1 style={{ textAlign: "center" }}>Gizlilik Politikası</h1>
+    <div className="max-w-4xl mx-auto p-6">
+      <h1 className="text-center text-4xl font-bold mb-4">
+        Gizlilik Politikası
+      </h1>
 
-      {/* Giriş Bölümü */}
       <p>
-        Bu gizlilik politikası, [Şirket Adınız] tarafından sağlanan hizmetleri
-        kullanırken kişisel bilgilerinizin nasıl toplandığını, kullanıldığını ve
-        korunduğunu açıklar.
+        [Blog Adınız] (“Biz”, “Bize” veya “Bizim”), kullanıcılarımızın
+        gizliliğine büyük önem verir. Bu gizlilik politikası, web sitemizi
+        ziyaret eden veya hizmetlerimizi kullanan kişisel verilerin nasıl
+        toplandığını, işlendiğini ve korunduğunu açıklamaktadır.
       </p>
-
       <Spacer y={1} />
 
-      {/* Toplanan Bilgiler */}
-      <h2>1. Hangi Bilgileri Topluyoruz?</h2>
-      <p>Hizmetlerimizi kullanırken aşağıdaki türde bilgiler toplanabilir:</p>
-      <ul>
-        <li>Ad, soyad ve e-posta adresi gibi kişisel bilgiler</li>
-        <li>Çerezler ve kullanım verileri</li>
-        <li>Analitik ve trafik bilgileri</li>
-      </ul>
-
-      <Spacer y={1} />
-
-      {/* Kullanım Amaçları */}
-      <h2>2. Bilgilerin Kullanımı</h2>
-      <p>Toplanan bilgiler şu amaçlarla kullanılabilir:</p>
-      <ul>
-        <li>Hizmetleri geliştirmek ve optimize etmek</li>
-        <li>Kullanıcı deneyimini iyileştirmek</li>
-        <li>Güvenliği sağlamak ve dolandırıcılığı önlemek</li>
-      </ul>
-
-      <Spacer y={1} />
-
-      {/* Çerezler */}
-      <h2>3. Çerezler (Cookies)</h2>
+      <h2 className="text-2xl font-bold mt-6 mb-2">1. Toplanan Veriler</h2>
       <p>
-        Web sitemiz, kullanıcı deneyimini geliştirmek için çerezleri
-        kullanmaktadır. Çerezleri tarayıcınızdan devre dışı bırakabilirsiniz.
+        Hizmetlerimizi kullanırken;
+        <strong>kişisel bilgiler</strong> (ad, soyad, e-posta adresi, telefon
+        numarası gibi) ve
+        <strong>otomatik olarak toplanan veriler</strong> (IP adresi, tarayıcı
+        bilgileri, çerezler, kullanım verileri) toplanmaktadır.
       </p>
-
       <Spacer y={1} />
 
-      {/* Üçüncü Taraf Hizmetleri */}
-      <h2>4. Üçüncü Taraf Hizmetleri</h2>
+      <h2 className="text-2xl font-bold mt-6 mb-2">
+        2. Verilerin Kullanım Amaçları
+      </h2>
       <p>
-        Web sitemizde Google Analytics ve diğer üçüncü taraf hizmetleri
-        kullanabiliriz. Bu hizmetler hakkında daha fazla bilgi almak için ilgili
-        sağlayıcıların gizlilik politikalarını inceleyin.
+        Toplanan veriler; hizmetlerimizi geliştirmek, kullanıcı deneyimini
+        iyileştirmek, güvenlik önlemleri almak, pazarlama ve iletişim
+        faaliyetleri yürütmek amacıyla kullanılmaktadır. Ayrıca, analitik ve
+        raporlama çalışmaları için üçüncü taraf analiz araçları (ör. Google
+        Analytics) ile entegre edilebilmektedir.
       </p>
-
       <Spacer y={1} />
 
-      {/* Gizlilik Politikası Güncellemeleri */}
-      <h2>5. Değişiklikler</h2>
+      <h2 className="text-2xl font-bold mt-6 mb-2">
+        3. Çerezler ve İzleme Teknolojileri
+      </h2>
       <p>
-        Gizlilik politikamız zaman zaman güncellenebilir. Değişiklikler bu sayfa
-        üzerinden duyurulacaktır.
+        Web sitemiz, kullanıcı deneyimini artırmak ve analiz amacıyla çerezler
+        kullanmaktadır. Çerezler sayesinde tarayıcı türü, sayfa görüntüleme
+        sayısı, ziyaret süresi gibi veriler toplanmaktadır. Tarayıcı
+        ayarlarınızdan çerezleri devre dışı bırakma seçeneğiniz bulunmaktadır;
+        ancak bu durumda bazı hizmetlerimizde kısıtlamalar yaşanabilir.
       </p>
+      <Spacer y={1} />
 
-      <Spacer y={2} />
-
-      {/* İletişim */}
-      <h2>📩 İletişim</h2>
+      <h2 className="text-2xl font-bold mt-6 mb-2">
+        4. Üçüncü Taraf Hizmet Sağlayıcılar
+      </h2>
       <p>
-        Herhangi bir sorunuz varsa bizimle{" "}
-        <a href="mailto:ornek@example.com">ornek@example.com</a> adresinden
-        iletişime geçebilirsiniz.
+        Sitemizde yer alan bazı içerikler ve işlevler, üçüncü taraf hizmet
+        sağlayıcılar (ör. reklam, analiz, sosyal medya eklentileri) tarafından
+        sunulmaktadır. Bu hizmet sağlayıcıların gizlilik politikaları, kendi
+        sitelerinde yer almaktadır. Biz, üçüncü tarafların veri işleme
+        yöntemlerinden sorumlu tutulamayız.
+      </p>
+      <Spacer y={1} />
+
+      <h2 className="text-2xl font-bold mt-6 mb-2">
+        5. Veri Saklama ve Güvenlik
+      </h2>
+      <p>
+        Toplanan veriler, yasal zorunluluklar ve hizmetlerimizin sürekliliği
+        amacıyla belirli bir süre saklanmaktadır. Verilerinizin güvenliği için
+        endüstri standartlarında şifreleme, erişim kontrolü ve güvenlik duvarı
+        gibi teknik önlemler uygulanmaktadır.
+      </p>
+      <Spacer y={1} />
+
+      <h2 className="text-2xl font-bold mt-6 mb-2">6. Kullanıcı Hakları</h2>
+      <p>
+        Kullanıcılar, kendileri hakkında toplanan verilere erişim, düzeltme,
+        silme veya işleme itiraz etme haklarına sahiptir. Bu haklarınızı
+        kullanmak için bize{" "}
+        <a href="mailto:ornek@example.com" className="text-blue-500">
+          ornek@example.com
+        </a>
+        adresinden ulaşabilirsiniz. Ayrıca, GDPR ve KVKK kapsamındaki haklarınız
+        çerçevesinde ek bilgilendirme talep edebilirsiniz.
+      </p>
+      <Spacer y={1} />
+
+      <h2 className="text-2xl font-bold mt-6 mb-2">
+        7. Politikada Yapılacak Değişiklikler
+      </h2>
+      <p>
+        Bu gizlilik politikası, yasal düzenlemeler veya hizmetlerimizde
+        yapılacak değişiklikler doğrultusunda güncellenebilir. Herhangi bir
+        değişiklik yapıldığında, güncellenmiş politika web sitemizde
+        yayınlanacaktır.
+      </p>
+      <Spacer y={1} />
+
+      <h2 className="text-2xl font-bold mt-6 mb-2">8. İletişim</h2>
+      <p>
+        Gizlilik politikamızla ilgili sorularınız veya talepleriniz için lütfen
+        <a href="mailto:ornek@example.com" className="text-blue-500">
+          {" "}
+          ornek@example.com
+        </a>{" "}
+        adresi üzerinden bizimle iletişime geçiniz.
       </p>
     </div>
   );

@@ -1,7 +1,9 @@
 import React from "react";
 import { Link } from "react-router-dom";
 
+// kategori isimlerini okunabilir hale getirmek için kullanılıyor
 function slugToReadable(slug) {
+  if (!slug) return "Kategori Yok"; // veya boş string: ""
   return slug
     .split("-")
     .map((word) => word.charAt(0).toUpperCase() + word.slice(1))

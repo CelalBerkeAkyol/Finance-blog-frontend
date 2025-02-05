@@ -43,6 +43,11 @@ const ImageGalleryModal = ({ isOpen, onClose }) => {
     }
   };
 
+  // "Yeniden Yükle" butonuna tıklandığında sayfa 1'den verileri tekrar getiriyoruz.
+  const handleReload = () => {
+    dispatch(fetchImages(1));
+  };
+
   if (!isOpen) return null;
 
   return (
@@ -97,6 +102,15 @@ const ImageGalleryModal = ({ isOpen, onClose }) => {
               className="px-3 py-1 border rounded"
             >
               Sonraki
+            </button>
+          </div>
+          {/* Yeniden Yükle butonu */}
+          <div className="flex justify-end mt-4">
+            <button
+              onClick={handleReload}
+              className="px-4 py-2 bg-blue-500 text-white rounded"
+            >
+              Yeniden Yükle
             </button>
           </div>
 

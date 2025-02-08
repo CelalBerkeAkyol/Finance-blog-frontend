@@ -3,8 +3,8 @@ import React, { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { Input, Textarea, Button, Card } from "@nextui-org/react";
 import api from "../../../../api";
-import CategorySelector from "./CategorySelector";
-import StatusSelector from "./StatusSelector";
+import CategorySelector from "../helpers/CategorySelector";
+import StatusSelector from "../helpers/StatusSelector";
 import ImageGalleryModal from "../../image/ImageGalleryModal";
 
 const EditPostComponent = () => {

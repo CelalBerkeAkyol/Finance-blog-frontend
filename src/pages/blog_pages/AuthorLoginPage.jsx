@@ -1,4 +1,4 @@
-import AuthorLoginComponent from "../../components/blog_components/blog_dashboard/AuthtorLoginComponent";
+import AuthorLoginComponent from "../../components/auth/AuthtorLoginComponent";
 
 function AuthorLoginPage() {
   return (

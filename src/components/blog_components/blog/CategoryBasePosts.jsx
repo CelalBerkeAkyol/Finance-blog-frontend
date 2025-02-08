@@ -2,10 +2,10 @@
 import React, { useEffect } from "react";
 import { useSelector, useDispatch } from "react-redux";
 import { useParams } from "react-router-dom";
-import { fetchPostsByCategory } from "../../app/features/blogs/postsSlice";
-import BlogsSkeleton from "./blog/BlogsSkeleton";
-import PostCardComponent from "./blog/PostCardComponent";
-import ServerErrorComponent from "../../components/uyarılar/ServerErrorComponent";
+import { fetchPostsByCategory } from "../../../app/features/blogs/postsSlice";
+import BlogsSkeleton from "./BlogsSkeleton";
+import PostCardComponent from "./PostCardComponent";
+import ServerErrorComponent from "../../uyarılar/ServerErrorComponent";
 export default function CategoryBasePosts() {
   const dispatch = useDispatch();
   const { category } = useParams(); // URL’den kategori parametresi alınıyor

@@ -2,7 +2,7 @@ import BannerComponent from "../components/header/BannerComponent";
 import CustomNavbar from "../components/header/CustomNavbar";
 import HeroTail from "../components/tanıtım_page/Hero/HeroTail";
 import SSFeatureComponent from "../components/tanıtım_page/SSFeatureComponent";
-import LogoComponent from "../components/tanıtım_page/LogoComponent";
+
 import CTASection from "../components/tanıtım_page/CTASection";
 
 import NewsletterComponent from "../components/tanıtım_page/NewsletterComponent";
@@ -16,7 +16,7 @@ function HomePage() {
       <HeroTail />
       <SSFeatureComponent />
       <FeatureComponent />
-      <LogoComponent />
+
       <CTASection />
 
       <NewsletterComponent />

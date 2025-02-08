@@ -1,6 +1,6 @@
 import React from "react";
 import { useSelector } from "react-redux";
-import AddPost from "../../components/blog_components/blog_dashboard/edit_posts/AddPost";
+import AddPost from "../../components/blog_components/blog_dashboard/blog_post/AddPost";
 import BlogSidebarComponent from "../../components/blog_components/blog_dashboard/BlogSidebarComponent";
 
 const NewPostPage = () => {

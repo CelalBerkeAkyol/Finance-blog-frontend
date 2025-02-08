@@ -3,7 +3,7 @@ import React, { useState } from "react";
 import { useDispatch } from "react-redux";
 import { addNewPost } from "../../../../app/features/blogs/postsSlice";
 import { Input, Textarea, Button } from "@nextui-org/react";
-import CategorySelector from "./CategorySelector";
+import CategorySelector from "../helpers/CategorySelector";
 import ImageGalleryModal from "../../image/ImageGalleryModal";
 
 const AddPost = () => {

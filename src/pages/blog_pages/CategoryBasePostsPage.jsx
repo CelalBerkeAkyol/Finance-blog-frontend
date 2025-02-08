@@ -1,5 +1,5 @@
 // kategoriye özel postların listelendiği sayfa
-import CategoryBasePosts from "../../components/blog_components/CategoryBasePosts";
+import CategoryBasePosts from "../../components/blog_components/blog/CategoryBasePosts";
 import CustomNavbar from "../../components/header/CustomNavbar";
 import BannerComponent from "../../components/header/BannerComponent";
 function CategoryBasePostsPage() {

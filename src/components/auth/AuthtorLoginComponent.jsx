@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import { Button, Input, Checkbox, Link } from "@nextui-org/react";
 import { Icon } from "@iconify/react";
 import { useDispatch, useSelector } from "react-redux";
-import { loginUser, clearState } from "../../../app/features/user/userSlice";
+import { loginUser, clearState } from "../../app/features/user/userSlice";
 import { useNavigate } from "react-router-dom";
 
 export default function AuthorLoginComponent() {

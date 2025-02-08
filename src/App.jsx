@@ -2,8 +2,8 @@ import "./App.css";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 
 import HomePage from "./pages/HomePage";
-import PricePage from "./pages/PricePage";
-import PageNotFound from "./pages/PageNotFound";
+import PricePage from "./pages/other_pages/PricePage";
+import PageNotFound from "./pages/other_pages/PageNotFound";
 
 import AuthorLoginPage from "./pages/blog_pages/AuthorLoginPage";
 import BlogDashboardPage from "./pages/blog_pages/BlogDashboardPage";
@@ -19,10 +19,10 @@ import Footer from "./components/footer/Footer";
 import CategoryBasePostsPage from "./pages/blog_pages/CategoryBasePostsPage";
 import CategoriesPage from "./pages/blog_pages/CategoriesPage";
 import EditPostPage from "./pages/blog_pages/EditPostPage";
-import CheatSheet from "./components/blog_components/blog_dashboard/edit_posts/CheatSheet";
-import AboutUsPage from "./pages/AboutUsPage";
-import DisclaimerPage from "./pages/DisclaimerPage";
-import PrivacyPolicyPage from "./pages/PrivacyPolicyPage";
+import CheatSheet from "./components/blog_components/blog_dashboard/helpers/CheatSheet";
+import AboutUsPage from "./pages/other_pages/AboutUsPage";
+import DisclaimerPage from "./pages/other_pages/DisclaimerPage";
+import PrivacyPolicyPage from "./pages/other_pages/PrivacyPolicyPage";
 import ImagePage from "./pages/blog_pages/ImagePage";
 function App() {
   return (

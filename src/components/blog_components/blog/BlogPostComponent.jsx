@@ -3,7 +3,7 @@ import ReactMarkdown from "react-markdown";
 import { useParams, useNavigate } from "react-router-dom";
 import axios from "../../../api";
 import { Button } from "@nextui-org/react";
-import BlogPostSkeleton from "../BlogPostSkeleton";
+import BlogPostSkeleton from "./BlogPostSkeleton";
 import ServerErrorComponent from "../../../components/uyarılar/ServerErrorComponent";
 
 const incrementPostView = async (postId) => {

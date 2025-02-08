@@ -6,7 +6,7 @@ import CustomNavbar from "../../components/header/CustomNavbar";
 
 function BlogsPage() {
   return (
-    <div className="flex flex-col min-h-screen  gap-4">
+    <div className="flex flex-col min-h-screen">
       <BannerComponent />
       <CustomNavbar />
       <BlogsComponent />

@@ -28,7 +28,7 @@ export default function BannerComponent() {
         <div className="flex w-full items-center justify-center gap-x-3 border-b-1 border-divider bg-background/[0.15] px-6 py-2 backdrop-blur-xl sm:px-3.5">
           <p className="text-small text-foreground">
             <Link className="text-inherit" to="/chatbot">
-              Yeni Chat Botumuzla konuşması şimdi ücretsiz hemen dene.&nbsp;
+              Bize destek olabilirsiniz.&nbsp;
             </Link>
           </p>
           <Button
@@ -51,7 +51,7 @@ export default function BannerComponent() {
             }}
             variant="bordered"
           >
-            Free Chat
+            Destek Ol
           </Button>
         </div>
       )}

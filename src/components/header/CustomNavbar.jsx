@@ -41,7 +41,6 @@ export default function CustomNavbar() {
       .unwrap()
       .then(() => {
         console.log("Logout başarılı, yönlendiriliyor...");
-        // Yönlendirmeyi gerçekleştirmek için window.location.href veya başka bir yönlendirme yöntemi kullanabilirsiniz.
         window.location.href = "/blog-admin/login";
       })
       .catch((error) => {
@@ -50,23 +49,22 @@ export default function CustomNavbar() {
   };
 
   return (
-    <Navbar>
+    <Navbar className="bg-[#F9F8F8]">
+      {" "}
+      {/* Arka plan rengi burada güncellendi */}
       <NavbarBrand>
         <AcmeLogo />
         <p className="font-bold text-inherit">ACME</p>
       </NavbarBrand>
       <NavbarContent className="hidden sm:flex gap-4" justify="center">
         <NavbarItem>
-          <Link to="/">Features</Link>
-        </NavbarItem>
-        <NavbarItem>
-          <Link to="/">Customers</Link>
-        </NavbarItem>
-        <NavbarItem>
-          <Link to="/">Integrations</Link>
-        </NavbarItem>
-        <NavbarItem>
           <Link to="/blog/posts/">Blogs</Link>
+        </NavbarItem>
+        <NavbarItem>
+          <Link to="/about-us">Hakkımızda</Link>
+        </NavbarItem>
+        <NavbarItem>
+          <Link to="/disclaimer">Feragatname</Link>
         </NavbarItem>
       </NavbarContent>
       <NavbarContent justify="end">

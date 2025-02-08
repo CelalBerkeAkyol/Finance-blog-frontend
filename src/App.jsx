@@ -1,8 +1,6 @@
 import "./App.css";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 
-import LoginPage from "./pages/LoginPage";
-import SignupPage from "./pages/SignupPage";
 import HomePage from "./pages/HomePage";
 import PricePage from "./pages/PricePage";
 import PageNotFound from "./pages/PageNotFound";
@@ -33,8 +31,7 @@ function App() {
         <main className="flex-1">
           <Routes>
             <Route path="/" element={<HomePage />} />
-            <Route path="/login" element={<LoginPage />} />
-            <Route path="/signup" element={<SignupPage />} />
+
             {/* Blog yazarları için */}
             <Route path="/blog-admin/login" element={<AuthorLoginPage />} />
             <Route path="/plans" element={<PricePage />} />

@@ -73,9 +73,6 @@ export default function CustomNavbar() {
         {/* Kullanıcı giriş yapmamışsa Login ve Sign Up göster */}
         {!isLoggedIn ? (
           <>
-            <NavbarItem className="hidden lg:flex">
-              <Link to="/login">Login</Link>
-            </NavbarItem>
             <NavbarItem>
               <Button as={Link} color="primary" to="/signup" variant="flat">
                 Sign Up

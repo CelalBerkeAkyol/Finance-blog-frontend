@@ -25,7 +25,7 @@ export default function BannerComponent() {
       {isAdmin ? (
         <AdminNavbar />
       ) : (
-        <div className="flex w-full items-center justify-center gap-x-3 border-b-1 border-divider bg-background/[0.15] px-6 py-2 backdrop-blur-xl sm:px-3.5">
+        <div className="flex w-full items-center justify-center gap-x-3 border-b-1 border-stone-200 border-divider bg-background/[0.15] px-6 py-2 backdrop-blur-xl sm:px-3.5">
           <p className="text-small text-foreground">
             <Link className="text-inherit" to="/chatbot">
               Bize destek olabilirsiniz.&nbsp;

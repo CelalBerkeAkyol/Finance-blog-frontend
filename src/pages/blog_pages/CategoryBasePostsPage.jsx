@@ -4,7 +4,7 @@ import CustomNavbar from "../../components/header/CustomNavbar";
 import BannerComponent from "../../components/header/BannerComponent";
 function CategoryBasePostsPage() {
   return (
-    <div className="flex flex-col min-h-screen  gap-4">
+    <div className="flex flex-col min-h-screen ">
       <BannerComponent />
       <CustomNavbar />
       <CategoryBasePosts />

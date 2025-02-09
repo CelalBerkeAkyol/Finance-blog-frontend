@@ -5,7 +5,7 @@ import CustomNavbar from "../../components/header/CustomNavbar";
 
 function BlogPostPage() {
   return (
-    <div className="flex flex-col gap-4">
+    <div className="flex flex-col">
       <BannerComponent />
       <CustomNavbar />
       <BlogPostComponent />

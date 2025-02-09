@@ -49,7 +49,7 @@ export default function CustomNavbar() {
   };
 
   return (
-    <Navbar className="bg-[#F9F8F8]">
+    <Navbar className="bg-zinc-50">
       {" "}
       {/* Arka plan rengi burada güncellendi */}
       <NavbarBrand>
@@ -61,10 +61,13 @@ export default function CustomNavbar() {
           <Link to="/blog/posts/">Blogs</Link>
         </NavbarItem>
         <NavbarItem>
-          <Link to="/about-us">Hakkımızda</Link>
+          <Link to="/blog/posts/">Blogs</Link>
         </NavbarItem>
         <NavbarItem>
-          <Link to="/disclaimer">Feragatname</Link>
+          <Link to="/blog/posts/">Blogs</Link>
+        </NavbarItem>
+        <NavbarItem>
+          <Link to="/blog/posts/">Blogs</Link>
         </NavbarItem>
       </NavbarContent>
       <NavbarContent justify="end">
@@ -73,7 +76,7 @@ export default function CustomNavbar() {
           <>
             <NavbarItem>
               <Button as={Link} color="primary" to="/signup" variant="flat">
-                Sign Up
+                Mail Bültenimize Katıl
               </Button>
             </NavbarItem>
           </>

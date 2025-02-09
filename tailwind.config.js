@@ -48,6 +48,14 @@ export default {
               padding: "0.2rem 0.4rem",
               fontSize: "0.875rem",
             },
+            // Responsive tablo stili ekleniyor:
+            table: {
+              width: "100%",
+              maxWidth: "100%",
+              display: "block",
+              overflowX: "auto",
+              borderCollapse: "collapse",
+            },
           },
         },
       }),

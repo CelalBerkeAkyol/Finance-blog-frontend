@@ -5,7 +5,8 @@ import axios from "../../../api";
 import { Button } from "@nextui-org/react";
 import BlogPostSkeleton from "./BlogPostSkeleton";
 import ServerErrorComponent from "../../../components/uyarılar/ServerErrorComponent";
-
+import remarkGfm from "remark-gfm";
+import rehypeRaw from "rehype-raw";
 const incrementPostView = async (postId) => {
   try {
     console.info(
@@ -96,7 +97,15 @@ const BlogPostComponent = () => {
             👀 {post.views} Görüntülenme
           </p>
         </div>
-        <ReactMarkdown className="pt-6">{post.content}</ReactMarkdown>
+        <div className="overflow-x-auto">
+          <ReactMarkdown
+            remarkPlugins={[remarkGfm]}
+            rehypePlugins={[rehypeRaw]}
+            className="pt-6"
+          >
+            {post.content}
+          </ReactMarkdown>
+        </div>
       </div>
     </div>
   );

@@ -1,4 +1,7 @@
+// tailwind.config.js
+
 const { nextui } = require("@nextui-org/react");
+
 /** @type {import('tailwindcss').Config} */
 export default {
   content: [
@@ -12,31 +15,38 @@ export default {
         DEFAULT: {
           css: {
             color: theme("colors.gray.700"),
+            // Tüm linkler
             a: {
-              color: theme("colors.blue.500"),
+              color: theme("colors.gray.700"),
               "&:hover": {
-                color: theme("colors.blue.700"),
+                color: theme("colors.gray.900"),
               },
             },
+            // Başlıklar
             h1: {
-              fontSize: "2rem",
+              fontSize: "2.5rem",
               fontWeight: "bold",
               color: theme("colors.gray.900"),
+              // Scroll offset örneği
+              scrollMarginTop: "5rem",
             },
             h2: {
               fontSize: "1.75rem",
               fontWeight: "bold",
               color: theme("colors.gray.800"),
+              scrollMarginTop: "5rem",
             },
             h3: {
               fontSize: "1.5rem",
               fontWeight: "bold",
               color: theme("colors.gray.800"),
+              scrollMarginTop: "5rem",
             },
             h4: {
               fontSize: "1.2rem",
               fontWeight: "bold",
               color: theme("colors.gray.800"),
+              scrollMarginTop: "5rem",
             },
             ul: {
               marginLeft: "1.5rem",
@@ -48,7 +58,7 @@ export default {
               padding: "0.2rem 0.4rem",
               fontSize: "0.875rem",
             },
-            // Responsive tablo stili ekleniyor:
+            // Responsive tablo stili
             table: {
               width: "100%",
               maxWidth: "100%",

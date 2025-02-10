@@ -25,6 +25,7 @@
     "react-router-dom": "^7.0.2",
     "recharts": "^2.15.0",
     "rehype-raw": "^6.1.0",
+    "rehype-slug": "^6.0.0",
     "remark-gfm": "^4.0.0"
   },
   "devDependencies": {

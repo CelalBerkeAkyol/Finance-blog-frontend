@@ -15,50 +15,65 @@ export default {
         DEFAULT: {
           css: {
             color: theme("colors.gray.700"),
-            // Tüm linkler
             a: {
-              color: theme("colors.gray.700"),
+              color: theme("colors.blue.600"),
               "&:hover": {
-                color: theme("colors.gray.900"),
+                color: theme("colors.blue.800"),
               },
             },
-            // Başlıklar
             h1: {
               fontSize: "2.5rem",
               fontWeight: "bold",
               color: theme("colors.gray.900"),
-              // Scroll offset örneği
-              scrollMarginTop: "5rem",
+              marginBottom: "0.75rem", // Boşluğu azalttık
+              scrollMarginTop: "4rem",
             },
             h2: {
-              fontSize: "1.75rem",
+              fontSize: "2 rem",
               fontWeight: "bold",
               color: theme("colors.gray.800"),
-              scrollMarginTop: "5rem",
+              marginBottom: "0.5rem", // Boşluğu azalttık
+              scrollMarginTop: "4rem",
             },
             h3: {
               fontSize: "1.5rem",
               fontWeight: "bold",
               color: theme("colors.gray.800"),
-              scrollMarginTop: "5rem",
+              marginBottom: "0.5rem",
+              scrollMarginTop: "4rem",
             },
-            h4: {
-              fontSize: "1.2rem",
-              fontWeight: "bold",
-              color: theme("colors.gray.800"),
-              scrollMarginTop: "5rem",
+            p: {
+              fontSize: "1rem",
+              marginTop: "0.25rem",
+              marginBottom: "0.25rem", // Paragraf boşluklarını küçülttük
             },
             ul: {
-              marginLeft: "1.5rem",
+              marginLeft: "1rem",
               listStyleType: "disc",
+              paddingLeft: "1rem",
+              marginBottom: "0.5rem", // Liste boşluklarını küçülttük
+            },
+            ol: {
+              marginLeft: "1rem",
+              listStyleType: "decimal",
+              paddingLeft: "1rem",
+              marginBottom: "0.5rem",
+            },
+            li: {
+              fontSize: "1rem",
+              marginBottom: "0.25rem", // Liste öğeleri arasındaki boşluğu azalttık
             },
             code: {
               backgroundColor: theme("colors.gray.100"),
               borderRadius: "0.25rem",
               padding: "0.2rem 0.4rem",
-              fontSize: "0.875rem",
+              fontSize: "0.5rem",
             },
-            // Responsive tablo stili
+            blockquote: {
+              borderLeftColor: theme("colors.gray.300"),
+              paddingLeft: "1rem",
+              fontStyle: "italic",
+            },
             table: {
               width: "100%",
               maxWidth: "100%",

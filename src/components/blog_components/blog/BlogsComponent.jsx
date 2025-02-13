@@ -34,11 +34,9 @@ export default function BlogsComponent() {
   return (
     <div className="bg-white py-2 mb-12 min-h-full">
       <div className="mx-auto max-w-6xl px-6 lg:px-8">
-        <div className="mx-auto lg:mx-0 text-start bg-gradient-to-r py-4">
-          <h1 className="text-pretty text-2xl font-semibold sm:text-4xl">
-            Blog
-          </h1>
-          <p className="mt-2 text-lg text-gray-600">
+        <div className="mx-auto my-8 lg:mx-0 text-start bg-gradient-to-r from-gray-800 to-gray-700 text-white py-6 px-6 rounded-lg shadow-lg">
+          <h1 className="text-pretty text-3xl font-bold sm:text-4xl">Blog</h1>
+          <p className="mt-2 text-lg text-gray-300">
             Güncel içeriklerimizi keşfedin.
           </p>
         </div>

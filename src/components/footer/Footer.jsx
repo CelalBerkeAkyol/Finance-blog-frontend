@@ -73,7 +73,7 @@ export default function Footer() {
       </div>
 
       {/* Footer Bottom */}
-      <div className="mt-5 border-t border-gray-700  text-center py-4 text-sm">
+      <div className="mt-5 border-t border-gray-600  text-center py-4 text-sm">
         <p>© 2024 MyCompany. All rights reserved.</p>
       </div>
     </footer>

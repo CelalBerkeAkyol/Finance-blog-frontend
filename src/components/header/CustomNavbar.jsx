@@ -49,7 +49,7 @@ export default function CustomNavbar() {
   };
 
   return (
-    <Navbar className="bg-zinc-50">
+    <Navbar className="bg-gray-50">
       {" "}
       {/* Arka plan rengi burada güncellendi */}
       <NavbarBrand>
@@ -58,16 +58,16 @@ export default function CustomNavbar() {
       </NavbarBrand>
       <NavbarContent className="hidden sm:flex gap-4" justify="center">
         <NavbarItem>
-          <Link to="/blog/posts/">Blogs</Link>
+          <Link to="/blog/posts/">Anasayfa</Link>
         </NavbarItem>
         <NavbarItem>
-          <Link to="/blog/posts/">Blogs</Link>
+          <Link to="/blog/posts/">Makro Ekonomi</Link>
         </NavbarItem>
         <NavbarItem>
-          <Link to="/blog/posts/">Blogs</Link>
+          <Link to="/blog/posts/">Mikro Ekonomi</Link>
         </NavbarItem>
         <NavbarItem>
-          <Link to="/blog/posts/">Blogs</Link>
+          <Link to="/blog/posts/">Finans</Link>
         </NavbarItem>
       </NavbarContent>
       <NavbarContent justify="end">
@@ -75,7 +75,7 @@ export default function CustomNavbar() {
         {!isLoggedIn ? (
           <>
             <NavbarItem>
-              <Button as={Link} color="primary" to="/signup" variant="flat">
+              <Button as={Link} color="default" to="/signup" variant="flat">
                 Mail Bültenimize Katıl
               </Button>
             </NavbarItem>

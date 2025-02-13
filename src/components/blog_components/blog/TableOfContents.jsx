@@ -34,9 +34,11 @@ const TableOfContents = ({ content }) => {
   }
 
   return (
-    <nav className="toc  p-6   sticky text-sm">
-      <h2 className="text-xl text-center font-bold mb-2">Table Of Contents</h2>
-      <ul className="list-disc">
+    <nav className="toc  pr-4  sticky text-sm">
+      <h2 className="text-xl text-center text-gray-800 font-bold mb-2">
+        Table Of Contents
+      </h2>
+      <ul className="list-none">
         {headings.map((heading, index) => (
           <li
             key={index}

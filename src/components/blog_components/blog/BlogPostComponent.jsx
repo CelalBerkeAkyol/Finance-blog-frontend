@@ -59,7 +59,7 @@ const BlogPostComponent = ({ post }) => {
       </div>
 
       {/* Blog İçeriği */}
-      <div className="overflow-x-auto pt-6 text-base sm:text-lg leading-relaxed">
+      <div className="overflow-x-auto pt-6 text-base  leading-relaxed">
         <ReactMarkdown
           remarkPlugins={[remarkGfm]}
           rehypePlugins={[rehypeRaw, rehypeSlug]}

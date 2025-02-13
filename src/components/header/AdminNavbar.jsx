@@ -1,16 +1,10 @@
-import {
-  Navbar,
-  NavbarBrand,
-  NavbarContent,
-  NavbarItem,
-  Button,
-} from "@nextui-org/react";
+import { Navbar, NavbarContent, NavbarItem } from "@nextui-org/react";
 import { Link } from "react-router-dom";
 
 export default function AdminNavbar() {
   return (
-    <Navbar className="border-b-1">
-      <NavbarContent className="w-full gap-6" justify="center">
+    <Navbar className="border-b-1 bg-gray-800 text-white">
+      <NavbarContent className="w-full " justify="center">
         <NavbarItem>
           <Link to="/blog-admin/dashboard">Dashboard</Link>
         </NavbarItem>

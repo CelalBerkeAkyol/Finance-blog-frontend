@@ -34,7 +34,7 @@ const TableOfContents = ({ content }) => {
   }
 
   return (
-    <nav className="toc  pr-4  sticky text-sm">
+    <nav className="toc  p-4  sticky text-sm">
       <h2 className="text-xl text-center text-gray-800 font-bold mb-2">
         Table Of Contents
       </h2>

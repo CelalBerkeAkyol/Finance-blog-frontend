@@ -7,6 +7,9 @@ import BannerComponent from "../../components/header/BannerComponent";
 import CustomNavbar from "../../components/header/CustomNavbar";
 import BlogPostSkeleton from "../../components/blog_components/blog/BlogPostSkeleton";
 import TableSkeleton from "../../components/blog_components/blog/TableSkeleton";
+
+import { useDispatch } from "react-redux";
+import { incrementPostView } from "../../app/features/blogs/postsSlice";
 function BlogPostPage() {
   const { id } = useParams();
   const [post, setPost] = useState(null);
@@ -32,6 +35,15 @@ function BlogPostPage() {
         setLoading(false);
       });
   }, [id]);
+
+  const dispatch = useDispatch();
+
+  useEffect(() => {
+    if (post && post._id) {
+      // Post yüklendikten sonra 1 kere views'i artır
+      dispatch(incrementPostView(post._id));
+    }
+  }, [post, dispatch]);
 
   // Eğer bir hata varsa, isterseniz content kısmında gösterebilirsiniz.
   // Ama header/footer yine görünür kalsın.

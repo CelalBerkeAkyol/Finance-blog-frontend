@@ -40,7 +40,7 @@ export default {
               marginBottom: "1.25rem",
               marginTop: "1.75rem",
               lineHeight: "1.4",
-              scrollMarginTop: "4rem",
+              scrollMarginTop: "5rem",
             },
             h3: {
               fontSize: "1.75rem",
@@ -49,7 +49,7 @@ export default {
               marginBottom: "1rem",
               marginTop: "1.5rem",
               lineHeight: "1.5",
-              scrollMarginTop: "3.5rem",
+              scrollMarginTop: "5rem",
             },
             h4: {
               fontSize: "1.5rem",
@@ -58,7 +58,7 @@ export default {
               marginBottom: "0.85rem",
               marginTop: "1.25rem",
               lineHeight: "1.6",
-              scrollMarginTop: "3rem",
+              scrollMarginTop: "5rem",
             },
             h5: {
               fontSize: "1.25rem",
@@ -67,7 +67,7 @@ export default {
               marginBottom: "0.75rem",
               marginTop: "1rem",
               lineHeight: "1.6",
-              scrollMarginTop: "2.5rem",
+              scrollMarginTop: "5rem",
             },
             h6: {
               fontSize: "1.125rem",
@@ -76,7 +76,7 @@ export default {
               marginBottom: "0.5rem",
               marginTop: "1rem",
               lineHeight: "1.6",
-              scrollMarginTop: "2rem",
+              scrollMarginTop: "5rem",
             },
             p: {
               fontSize: "0.8 rem",

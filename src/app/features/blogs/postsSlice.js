@@ -104,6 +104,35 @@ export const deletePost = createAsyncThunk(
     }
   }
 );
+// Post görüntülenme sayısını artırma
+export const incrementPostView = createAsyncThunk(
+  "posts/incrementPostView",
+  async (postId, { rejectWithValue }) => {
+    try {
+      console.info(
+        "incrementPostView: Görüntülenme sayısı artırılıyor, ID:",
+        postId
+      );
+      // API'de görüntülenme arttırma endpoint'iniz:
+      // Örneğin: PUT /posts/inc/:id
+      const response = await axios.put(`/posts/${postId}/view`);
+      // response.data içinde güncellenmiş post verisini döndürüyor varsayıyoruz
+      console.info(
+        "incrementPostView: Başarılı, güncellenmiş post:",
+        response.data.data
+      );
+      return response.data.data; // güncellenmiş post objesi
+    } catch (error) {
+      console.error(
+        "incrementPostView hata:",
+        error.response?.data || error.message
+      );
+      return rejectWithValue(
+        error.response?.data?.error || "View artırırken hata oluştu."
+      );
+    }
+  }
+);
 
 // Redux slice
 const postsSlice = createSlice({
@@ -221,6 +250,31 @@ const postsSlice = createSlice({
         state.isLoading = false;
         state.isError = true;
         state.errorMessage = action.payload || "Post silerken hata oluştu.";
+      })
+      // incrementPostView (views artırma)
+      .addCase(incrementPostView.pending, (state) => {
+        state.isLoading = true;
+        state.isError = false;
+        state.errorMessage = "";
+      })
+      .addCase(incrementPostView.fulfilled, (state, action) => {
+        state.isLoading = false;
+        state.isSuccess = true;
+        // action.payload => Güncellenmiş post nesnesi
+        const updatedPost = action.payload;
+
+        // Mevcut posts array'inde bulup güncelleriz
+        const index = state.posts.findIndex((p) => p._id === updatedPost._id);
+        if (index !== -1) {
+          // Yeni view sayısını store'a kaydediyoruz
+          state.posts[index] = updatedPost;
+        }
+      })
+      .addCase(incrementPostView.rejected, (state, action) => {
+        state.isLoading = false;
+        state.isError = true;
+        state.errorMessage =
+          action.payload || "Görüntülenme sayısı artırılırken hata oluştu.";
       });
   },
 });

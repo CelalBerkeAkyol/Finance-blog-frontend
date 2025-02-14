@@ -24,6 +24,7 @@ import AboutUsPage from "./pages/other_pages/AboutUsPage";
 import DisclaimerPage from "./pages/other_pages/DisclaimerPage";
 import PrivacyPolicyPage from "./pages/other_pages/PrivacyPolicyPage";
 import ImagePage from "./pages/blog_pages/ImagePage";
+import GalleryPage from "./pages/blog_pages/GalleryPage";
 function App() {
   return (
     <div className="min-h-screen flex flex-col">
@@ -39,7 +40,7 @@ function App() {
             <Route path="/disclaimer" element={<DisclaimerPage />} />
             <Route path="/privacy-policy" element={<PrivacyPolicyPage />} />
             <Route
-              path="/blog-admin/dashboard"
+              path="/dashboard/home"
               element={
                 <ProtectedRoute>
                   <BlogDashboardPage />
@@ -47,7 +48,7 @@ function App() {
               }
             />
             <Route
-              path="/blog-admin/posts"
+              path="/dashboard/posts"
               element={
                 <ProtectedRoute>
                   <BlogPostDashboardPage />
@@ -55,7 +56,7 @@ function App() {
               }
             />
             <Route
-              path="/blog-admin/post/new"
+              path="/dashboard/post/new"
               element={
                 <ProtectedRoute>
                   <NewPostPage />
@@ -63,7 +64,7 @@ function App() {
               }
             />
             <Route
-              path="/blog-admin/post/edit/:id"
+              path="/dashboard/post/edit/:id"
               element={
                 <ProtectedRoute>
                   <EditPostPage />
@@ -71,7 +72,7 @@ function App() {
               }
             />
             <Route
-              path="/blog-admin/images"
+              path="/dashboard/images"
               element={
                 <ProtectedRoute>
                   <ImagePage />
@@ -79,10 +80,18 @@ function App() {
               }
             />
             <Route
-              path="/blog-admin/cheat-sheet"
+              path="/dashboard/cheat-sheet"
               element={
                 <ProtectedRoute>
                   <CheatSheet />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/dashboard/gallery"
+              element={
+                <ProtectedRoute>
+                  <GalleryPage />
                 </ProtectedRoute>
               }
             />

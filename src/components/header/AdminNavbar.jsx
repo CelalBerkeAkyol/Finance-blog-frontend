@@ -15,13 +15,13 @@ export default function AdminNavbar() {
     <Navbar className="border-b-1 bg-gray-800 text-white">
       <NavbarContent className="w-full " justify="center">
         <NavbarItem>
-          <Link to="/blog-admin/dashboard">Dashboard</Link>
+          <Link to="/dashboard/home">Dashboard</Link>
         </NavbarItem>
         <NavbarItem>
-          <Link to="/blog-admin/posts">Posts</Link>
+          <Link to="/dashboard/posts">Posts</Link>
         </NavbarItem>
         <NavbarItem>
-          <Link to="/blog-admin/post/new">New Post</Link>
+          <Link to="/dashboard/post/new">New Post</Link>
         </NavbarItem>
       </NavbarContent>
 

@@ -1,4 +1,3 @@
-// src/app/features/blog_components/blog_dashboard/edit_posts/EditPostComponent.jsx
 import React, { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { Input, Textarea, Button, Card } from "@nextui-org/react";
@@ -99,12 +98,14 @@ const EditPostComponent = () => {
               label="İçerik"
               fullWidth
               minRows={20}
-              maxRows={30}
+              maxRows={25}
               value={postData.content || ""}
               onChange={handleChange}
               className="mb-6"
             />
-            <div className="flex justify-around px-4">
+
+            {/* En altta, kategori, durum ve butonları aynı satıra alıyoruz */}
+            <div className="flex items-center justify-evenly ">
               <CategorySelector
                 selectedCategory={postData.category}
                 onChange={handleCategoryChange}
@@ -113,11 +114,8 @@ const EditPostComponent = () => {
                 value={postData.status}
                 onChange={handleStatusChange}
               />
-            </div>
-            <div className="flex gap-4 mt-4">
-              {/* Görseller butonu */}
               <Button onClick={() => setIsGalleryOpen(true)}>Görseller</Button>
-              <Button color="primary" fullWidth onClick={handleUpdate}>
+              <Button color="primary" onClick={handleUpdate}>
                 Güncelle
               </Button>
             </div>

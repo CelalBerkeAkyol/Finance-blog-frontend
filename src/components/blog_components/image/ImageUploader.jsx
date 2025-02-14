@@ -1,3 +1,4 @@
+// image yüklemeye yarar Görseller çoklu seçilebilir. Açıklama girilebilir
 import React, { useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 // Çoklu dosya yükleme için hazırladığınız yeni action

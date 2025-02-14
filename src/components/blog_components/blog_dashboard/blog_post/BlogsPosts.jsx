@@ -96,7 +96,7 @@ const BlogsTable = () => {
 
   const handleNavigate = () => {
     console.info("BlogsTable: Yeni post ekleme sayfasına yönlendiriliyor.");
-    navigate("/blog-admin/post/new");
+    navigate("/dashboard/post/new");
   };
 
   if (status === "loading") return <div>Yükleniyor...</div>;

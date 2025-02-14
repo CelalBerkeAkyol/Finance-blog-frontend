@@ -68,7 +68,7 @@ const EditPostComponent = () => {
         headers: { "Content-Type": "application/json" },
       });
       console.info("EditPostComponent: Post güncellendi, yönlendiriliyor.");
-      navigate("/blog-admin/posts");
+      navigate("/dashboard/posts");
     } catch (error) {
       console.error("EditPostComponent: Güncelleme hatası:", error);
       setError("Güncelleme sırasında bir hata oluştu.");

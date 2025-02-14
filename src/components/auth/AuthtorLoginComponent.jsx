@@ -17,7 +17,7 @@ export default function AuthorLoginComponent() {
   useEffect(() => {
     if (isSuccess) {
       console.info("AuthorLoginComponent: Giriş başarılı, yönlendiriliyor.");
-      navigate("/blog-admin/dashboard");
+      navigate("/dashboard/home");
     }
     if (isError) {
       console.error("AuthorLoginComponent: Giriş hatası:", errorMessage);
@@ -31,7 +31,7 @@ export default function AuthorLoginComponent() {
   useEffect(() => {
     if (token) {
       console.info("AuthorLoginComponent: Token mevcut, yönlendiriliyor.");
-      navigate("/blog-admin/dashboard");
+      navigate("/dashboard/home");
     }
   }, [token, navigate]);
 

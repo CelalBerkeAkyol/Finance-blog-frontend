@@ -4,16 +4,11 @@ export default function Footer() {
       <div className="container mx-auto grid grid-cols-1 sm:grid-cols-3  px-6 pt-8">
         {/* Column 1 */}
         <div>
-          <h3 className="text-white font-semibold text-lg mb-2">Company</h3>
+          <h3 className="text-white font-semibold text-lg mb-2">
+            {" "}
+            Popular Categories
+          </h3>
           <ul>
-            <li>
-              <a
-                href="http://localhost:5173/blog/posts/"
-                className="hover:underline"
-              >
-                Blog
-              </a>
-            </li>
             <li>
               <a
                 href="http://localhost:5173/blog/category/makro-ekonomi"
@@ -22,12 +17,29 @@ export default function Footer() {
                 Makro Ekonomi
               </a>
             </li>
+            <li>
+              <a
+                href="http://localhost:5173/blog/category/mikro-ekonomi"
+                className="hover:underline"
+              >
+                Mikro Ekonomi
+              </a>
+            </li>
+
+            <li>
+              <a
+                href="http://localhost:5173/blog/category/araştırma"
+                className="hover:underline"
+              >
+                Araştırma
+              </a>
+            </li>
           </ul>
         </div>
 
         {/* Column 2 */}
         <div>
-          <h3 className="text-white font-semibold text-lg mb-2">Hakkımızda</h3>
+          <h3 className="text-white font-semibold text-lg mb-2">Company</h3>
           <ul>
             <li>
               <a
@@ -74,7 +86,7 @@ export default function Footer() {
 
       {/* Footer Bottom */}
       <div className="mt-5 border-t border-gray-600  text-center py-4 text-sm">
-        <p>© 2024 MyCompany. All rights reserved.</p>
+        <p>© 2024 Fin AI. All rights reserved.</p>
       </div>
     </footer>
   );

@@ -14,7 +14,14 @@ export default {
       typography: (theme) => ({
         DEFAULT: {
           css: {
-            color: theme("colors.gray.700"),
+            colors: {
+              primary: "#4F46E5",
+              secondary: "#9333EA",
+              success: "#10B981",
+              warning: "#F59E0B",
+              danger: "#EF4444",
+              default: "#6B7280",
+            },
             a: {
               color: theme("colors.blue.600"),
               fontWeight: "600",

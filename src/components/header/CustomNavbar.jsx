@@ -54,7 +54,7 @@ export default function CustomNavbar() {
       {/* Arka plan rengi burada güncellendi */}
       <NavbarBrand>
         <AcmeLogo />
-        <p className="font-bold text-inherit">ACME</p>
+        <p className="font-bold text-inherit text-lg">Fin AI</p>
       </NavbarBrand>
       <NavbarContent className="hidden sm:flex gap-4" justify="center">
         <NavbarItem>

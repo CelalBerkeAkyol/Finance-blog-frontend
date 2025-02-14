@@ -8,28 +8,28 @@ import { Button } from "@nextui-org/react";
 import { Icon } from "@iconify/react";
 import ImageUploaderModal from "../../components/blog_components/image/ImageUploaderModal";
 import BlogSidebarComponent from "../../components/blog_components/blog_dashboard/BlogSidebarComponent";
+
 function GalleryPage() {
   const dispatch = useDispatch();
   const { images, loading, error, page, totalPages } = useSelector(
     (state) => state.imageGallery
   );
 
-  // Seçili görsel ID
   const [selectedImageId, setSelectedImageId] = useState(null);
-  // Kopyalama bildirimi
   const [copyNotification, setCopyNotification] = useState(false);
-  // Modal açık/kapalı state’i
   const [isUploaderOpen, setIsUploaderOpen] = useState(false);
 
+  // İlk yükelemede 20 görseli çek
   useEffect(() => {
-    // 12 görseli çekmek için
-    dispatch(fetchImages({ page: 1, limit: 12 }));
+    dispatch(fetchImages({ page: 1, limit: 20 }));
   }, [dispatch]);
 
+  // Bir görseli seçme
   const handleSelectImage = (id) => {
     setSelectedImageId(id === selectedImageId ? null : id);
   };
 
+  // Kopyalama
   const handleCopy = () => {
     if (!selectedImageId) {
       alert("Lütfen bir görsel seçin.");
@@ -48,6 +48,7 @@ function GalleryPage() {
       .catch((err) => console.error("Kopyalama hatası:", err));
   };
 
+  // Silme
   const handleDelete = () => {
     if (!selectedImageId) {
       alert("Lütfen silmek için bir görsel seçin.");
@@ -58,41 +59,47 @@ function GalleryPage() {
     dispatch(deleteImage(selectedImageId))
       .unwrap()
       .then(() => {
-        dispatch(fetchImages({ page, limit: 12 }));
+        // Silme sonrası mevcut sayfadaki görselleri yenile
+        dispatch(fetchImages({ page, limit: 20 }));
         setSelectedImageId(null);
       })
       .catch((err) => console.error("Silme hatası:", err));
   };
 
+  // Sayfalama
   const handlePrevPage = () => {
     if (page > 1) {
-      dispatch(fetchImages({ page: page - 1, limit: 12 }));
+      dispatch(fetchImages({ page: page - 1, limit: 20 }));
       setSelectedImageId(null);
     }
   };
 
   const handleNextPage = () => {
     if (page < totalPages) {
-      dispatch(fetchImages({ page: page + 1, limit: 12 }));
+      dispatch(fetchImages({ page: page + 1, limit: 20 }));
       setSelectedImageId(null);
     }
   };
 
   const handleReload = () => {
-    dispatch(fetchImages({ page: 1, limit: 12 }));
+    dispatch(fetchImages({ page: 1, limit: 20 }));
     setSelectedImageId(null);
   };
 
-  // "Görsel Ekle" butonuna tıklayınca modalı aç
+  // "Görsel Ekle" butonu: modal aç
   const handleAddImage = () => {
     setIsUploaderOpen(true);
   };
 
   return (
-    <div className="flex flex-1">
+    <div className="flex min-h-screen">
+      {/* Sidebar solda sabit */}
+
       <BlogSidebarComponent />
-      <div className="min-h-screen p-6">
-        {/* Butonlar */}
+
+      {/* İçerik */}
+      <div className="flex-1 p-4 md:p-6">
+        {/* Üst Butonlar */}
         <div className="mb-4 flex flex-wrap gap-2 justify-end">
           <Button
             variant="flat"
@@ -111,31 +118,32 @@ function GalleryPage() {
             Sil
           </Button>
 
-          {/* Görsel Ekle Butonu */}
           <Button variant="flat" color="primary" onPress={handleAddImage}>
             Görsel Ekle
           </Button>
         </div>
 
+        {/* İçerik */}
         {loading && <p>Yükleniyor...</p>}
         {error && <p className="text-red-500">{error}</p>}
 
-        {/* 4 sütun x 3 satır = 12 görsel */}
-        <div className="grid grid-cols-4 gap-4">
+        {/* Responsive Grid: Küçük ekran = 2 sütun, orta = 3, büyük = 4, daha büyük = 5 */}
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
           {images.map((img) => {
             const isSelected = selectedImageId === img._id;
             return (
               <div
                 key={img._id}
                 onClick={() => handleSelectImage(img._id)}
-                className={`border p-2 cursor-pointer ${
+                className={`cursor-pointer border p-1 ${
                   isSelected ? "border-blue-500" : "border-gray-200"
                 }`}
               >
                 <img
                   src={img.url}
                   alt={img.altText || "Görsel"}
-                  className="w-full h-60 object-cover"
+                  className="w-full h-36 object-cover"
+                  /* h-36 daha küçük görüntü */
                 />
               </div>
             );

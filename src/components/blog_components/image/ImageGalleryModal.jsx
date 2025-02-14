@@ -16,28 +16,20 @@ const ImageGalleryModal = ({ isOpen, onClose }) => {
     (state) => state.imageGallery
   );
 
-  // Bir resmi tıklayınca ID’sini burada tutacağız:
   const [selectedImageId, setSelectedImageId] = useState(null);
-
-  // Kopyalama bildirimi gösterip kapatmak için
   const [copyNotification, setCopyNotification] = useState(false);
-
-  // Modal içinde "Görsel Ekle" diyince uploaderModal açılsın
   const [isUploaderOpen, setIsUploaderOpen] = useState(false);
 
   useEffect(() => {
     if (isOpen) {
-      // Modal açıldığında ilk sayfayı çek
-      dispatch(fetchImages({ page: 1, limit: 9 }));
+      dispatch(fetchImages({ page: 1, limit: 15 }));
     }
   }, [isOpen, dispatch]);
 
-  // Görseli tıklayınca seçiyoruz (artık otomatik kopyalama yok)
   const handleSelectImage = (id) => {
     setSelectedImageId(id === selectedImageId ? null : id);
   };
 
-  // Seçili görselin linkini kopyala
   const handleCopy = () => {
     if (!selectedImageId) {
       alert("Lütfen önce bir görsel seçin.");
@@ -51,14 +43,11 @@ const ImageGalleryModal = ({ isOpen, onClose }) => {
       .writeText(markdownLink)
       .then(() => {
         setCopyNotification(true);
-        setTimeout(() => {
-          setCopyNotification(false);
-        }, 2000);
+        setTimeout(() => setCopyNotification(false), 2000);
       })
       .catch((err) => console.error("Kopyalama hatası:", err));
   };
 
-  // Seçili görseli sil
   const handleDelete = () => {
     if (!selectedImageId) {
       alert("Lütfen silmek için bir görsel seçin.");
@@ -70,32 +59,28 @@ const ImageGalleryModal = ({ isOpen, onClose }) => {
     dispatch(deleteImage(selectedImageId))
       .unwrap()
       .then(() => {
-        // Silme tamamlandıktan sonra tekrar listeyi çek
-        dispatch(fetchImages({ page, limit: 9 }));
-        // Seçimi kaldır
+        dispatch(fetchImages({ page, limit: 15 }));
         setSelectedImageId(null);
       })
       .catch((err) => console.error("Silme hatası:", err));
   };
 
-  // Sayfaları değiştirmek için
   const handleNextPage = () => {
     if (page < totalPages) {
-      dispatch(fetchImages({ page: page + 1, limit: 9 }));
+      dispatch(fetchImages({ page: page + 1, limit: 15 }));
       setSelectedImageId(null);
     }
   };
 
   const handlePrevPage = () => {
     if (page > 1) {
-      dispatch(fetchImages({ page: page - 1, limit: 9 }));
+      dispatch(fetchImages({ page: page - 1, limit: 15 }));
       setSelectedImageId(null);
     }
   };
 
-  // Listeyi yenile (ilk sayfaya dön)
   const handleReload = () => {
-    dispatch(fetchImages({ page: 1, limit: 9 }));
+    dispatch(fetchImages({ page: 1, limit: 15 }));
     setSelectedImageId(null);
   };
 
@@ -103,14 +88,14 @@ const ImageGalleryModal = ({ isOpen, onClose }) => {
 
   return (
     <>
+      {/* Arka plan karartma */}
       <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
-        {/* Modal Kutusu */}
-        <div className="bg-white p-6 rounded max-w-6xl w-full">
-          {/* Üst Kısım */}
+        {/* Modal kutusu: yüksekliği %90 ve dikey scroll*/}
+        <div className="bg-white rounded max-w-6xl w-full max-h-[100vh] overflow-y-auto flex flex-col p-6">
+          {/* Üst Başlık ve Butonlar */}
           <div className="flex justify-between items-center mb-4">
             <h2 className="text-2xl font-bold">Görseller</h2>
             <div className="flex items-center space-x-2">
-              {/* Yeniden Yükle */}
               <Button
                 variant="flat"
                 color="default"
@@ -121,7 +106,6 @@ const ImageGalleryModal = ({ isOpen, onClose }) => {
                 Yeniden Yükle
               </Button>
 
-              {/* Görsel Ekle */}
               <Button
                 variant="flat"
                 color="primary"
@@ -131,7 +115,6 @@ const ImageGalleryModal = ({ isOpen, onClose }) => {
                 Görsel Ekle
               </Button>
 
-              {/* Kapat */}
               <Button
                 variant="flat"
                 color="danger"
@@ -148,7 +131,7 @@ const ImageGalleryModal = ({ isOpen, onClose }) => {
           {error && <p className="text-red-500">{error}</p>}
 
           {/* Görsel Galeri */}
-          <div className="grid grid-cols-3 gap-4">
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 xl:grid-cols-5 gap-4">
             {images.map((image) => {
               const isSelected = image._id === selectedImageId;
               return (
@@ -156,20 +139,23 @@ const ImageGalleryModal = ({ isOpen, onClose }) => {
                   key={image._id}
                   className={`border p-2 cursor-pointer ${
                     isSelected ? "border-blue-500" : "border-gray-200"
-                  } hover:shadow-md`}
+                  } hover:shadow-md flex flex-col items-center`}
                   onClick={() => handleSelectImage(image._id)}
                 >
                   <img
                     src={image.url}
-                    alt={image.altText}
-                    className="w-full h-40 object-cover"
+                    alt={image.altText || "Görsel"}
+                    className="w-full h-24 object-cover"
                   />
+                  <p className="mt-2 text-sm text-gray-700 text-center font-medium">
+                    {image.filename || image.name || "İsimsiz Görsel"}
+                  </p>
                 </div>
               );
             })}
           </div>
 
-          {/* Altta Butonlar (Kopyala, Sil, Sayfa Kontrolleri) */}
+          {/* Alt kısım: Butonlar ve Sayfalama */}
           <div className="mt-6 flex flex-col items-center space-y-4">
             {/* Kopyala / Sil Butonları */}
             <div className="flex gap-2">
@@ -191,7 +177,7 @@ const ImageGalleryModal = ({ isOpen, onClose }) => {
               </Button>
             </div>
 
-            {/* Sayfalama */}
+            {/* Sayfa kontrolü */}
             <div className="flex justify-between items-center w-full max-w-sm">
               <Button
                 variant="flat"
@@ -202,11 +188,9 @@ const ImageGalleryModal = ({ isOpen, onClose }) => {
               >
                 Önceki
               </Button>
-
               <span>
                 {page} / {totalPages}
               </span>
-
               <Button
                 variant="flat"
                 color="default"
@@ -219,7 +203,7 @@ const ImageGalleryModal = ({ isOpen, onClose }) => {
             </div>
           </div>
 
-          {/* Kopyalama Bildirimi */}
+          {/* Kopyalama bildirimi */}
           {copyNotification && (
             <div className="fixed bottom-4 right-4 bg-green-500 text-white px-4 py-2 rounded shadow-lg transition-opacity duration-300">
               Görsel linki markdown formatında kopyalandı!
@@ -228,7 +212,7 @@ const ImageGalleryModal = ({ isOpen, onClose }) => {
         </div>
       </div>
 
-      {/* Görsel Yükleme Modalı */}
+      {/* Görsel yükleme modalı */}
       {isUploaderOpen && (
         <ImageUploaderModal onClose={() => setIsUploaderOpen(false)} />
       )}

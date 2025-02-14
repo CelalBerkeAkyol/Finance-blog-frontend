@@ -7,7 +7,6 @@ const stripMarkdown = (text) => {
 
 const extractHeadings = (content) => {
   // 1) Üçlü backtick'ler arasındaki tüm metni siler
-  //    [\s\S] ifadesi newline da dahil olmak üzere tüm karakterleri kapsar.
   const withoutCodeBlocks = content.replace(/```[\s\S]*?```/g, "");
 
   // 2) Kalan içerikte başlıkları arar
@@ -34,7 +33,7 @@ const TableOfContents = ({ content }) => {
   }
 
   return (
-    <nav className="toc  p-4  sticky text-sm">
+    <nav className="toc p-4 sticky text-sm">
       <h2 className="text-xl text-center text-gray-800 font-bold mb-2">
         Table Of Contents
       </h2>
@@ -47,7 +46,11 @@ const TableOfContents = ({ content }) => {
           >
             <a
               href={`#${heading.slug}`}
-              className="text-gray-700 hover:underline cursor-pointer"
+              className={
+                heading.level == 1
+                  ? "text-gray-700 hover:underline cursor-pointer font-bold"
+                  : "text-gray-700 hover:underline cursor-pointer"
+              }
             >
               {heading.text}
             </a>

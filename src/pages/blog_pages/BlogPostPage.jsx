@@ -53,13 +53,12 @@ function BlogPostPage() {
       {/* Üst kısım her zaman görünüyor */}
       <BannerComponent />
       <CustomNavbar />
-
+      // BlogPostPage.jsx (ilgili kısım)
       <div className="flex flex-col md:flex-row gap-8 py-8 container">
         {/* Sol kolon (içindekiler) */}
         <div className="md:w-[25%] w-full border-r min-w-[20%]">
-          <div className="sticky top-20 overflow-y-auto">
-            {/* İçindekiler, post varsa ve yükleme bitmişse göster */}
-
+          {/* Burada TOC'yi sabitleyip kendi içinde scroll ekliyoruz */}
+          <div className="sticky top-20 max-h-[calc(100vh-8rem)] overflow-y-auto py-4">
             {loading ? (
               <TableSkeleton />
             ) : (
@@ -71,13 +70,10 @@ function BlogPostPage() {
         {/* Sağ kolon (asıl blog içeriği) */}
         <div className="md:w-[70%] w-full margin-auto px-4">
           {loading ? (
-            // Yükleme durumunda sadece blog içeriği yerine skeleton
             <BlogPostSkeleton />
           ) : error ? (
-            // Hata mesajı
             <div className="text-red-600">{error}</div>
           ) : (
-            // Yükleme bitti ve hata yoksa gerçek içerik
             <BlogPostComponent post={post} />
           )}
         </div>

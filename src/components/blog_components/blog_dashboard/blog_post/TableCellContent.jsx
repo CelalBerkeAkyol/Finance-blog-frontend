@@ -33,7 +33,7 @@ const TableCellContent = ({ posts, columnKey }) => {
     console.info(
       `TableCellContent: Post ${posts._id} düzenleme sayfasına yönlendiriliyor.`
     );
-    navigate(`/blog-admin/post/edit/${posts._id}`);
+    navigate(`/dashboard/post/edit/${posts._id}`);
   };
 
   const handleDelete = () => {

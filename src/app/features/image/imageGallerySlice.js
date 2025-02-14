@@ -7,7 +7,7 @@ export const fetchImages = createAsyncThunk(
   "imageGallery/fetchImages",
   async (page = 1, thunkAPI) => {
     try {
-      const response = await api.get(`/images?page=${page}&limit=20`);
+      const response = await api.get(`/images?page=${page}&limit=9`);
       return response.data;
     } catch (error) {
       return thunkAPI.rejectWithValue(

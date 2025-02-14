@@ -1,22 +1,21 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import api from "../../../api";
 
-// Görsel yükleme işlemi için async thunk
-export const uploadImage = createAsyncThunk(
-  "image/uploadImage",
+// Çoklu görsel yükleme
+export const uploadImages = createAsyncThunk(
+  "image/uploadImages",
   async (formData, thunkAPI) => {
     try {
-      const response = await api.post("/images", formData, {
+      // /images/multiple => back-end’de çoklu yükleme rotası
+      const response = await api.post("/images/multiple", formData, {
         headers: {
           "Content-Type": "multipart/form-data",
         },
       });
-      return response.data;
+      return response.data; // { message, images: [...] }
     } catch (error) {
       return thunkAPI.rejectWithValue(
-        error.response && error.response.data.error
-          ? error.response.data.error
-          : error.message
+        error.response?.data?.error ?? error.message
       );
     }
   }
@@ -28,22 +27,22 @@ const imageSlice = createSlice({
     loading: false,
     error: null,
     success: false,
-    image: null,
+    images: [], // Birden fazla görsel döneceği için array tutmak mantıklı
   },
   reducers: {},
   extraReducers: (builder) => {
     builder
-      .addCase(uploadImage.pending, (state) => {
+      .addCase(uploadImages.pending, (state) => {
         state.loading = true;
         state.error = null;
         state.success = false;
       })
-      .addCase(uploadImage.fulfilled, (state, action) => {
+      .addCase(uploadImages.fulfilled, (state, action) => {
         state.loading = false;
         state.success = true;
-        state.image = action.payload.image;
+        state.images = action.payload.images; // Array
       })
-      .addCase(uploadImage.rejected, (state, action) => {
+      .addCase(uploadImages.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload || action.error.message;
       });

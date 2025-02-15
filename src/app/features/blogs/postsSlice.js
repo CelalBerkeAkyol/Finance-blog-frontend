@@ -5,7 +5,7 @@ import axios from "../../../api"; // Axios yapılandırmanızı kullanın
 // Tüm postları sayfalı getirme
 export const fetchPosts = createAsyncThunk(
   "posts/fetchPosts",
-  async ({ page = 1, limit = 10 }, thunkAPI) => {
+  async ({ page = 1, limit = 20 }, thunkAPI) => {
     try {
       console.info(
         `fetchPosts: Postlar getiriliyor (sayfa: ${page}, limit: ${limit})`

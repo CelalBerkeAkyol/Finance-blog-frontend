@@ -53,7 +53,7 @@ function BlogPostPage() {
       {/* Üst kısım her zaman görünüyor */}
       <BannerComponent />
       <CustomNavbar />
-      // BlogPostPage.jsx (ilgili kısım)
+
       <div className="flex flex-col md:flex-row gap-8 py-8 container">
         {/* Sol kolon (içindekiler) */}
         <div className="md:w-[25%] w-full border-r min-w-[20%]">

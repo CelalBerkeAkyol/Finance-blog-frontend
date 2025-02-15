@@ -1,7 +1,7 @@
 import BlogSidebarComponent from "../../components/blog_components/blog_dashboard/BlogSidebarComponent";
 import InfoComponent from "../../components/blog_components/blog_dashboard/info/InfoComponent";
 import ServerStatus from "../../components/blog_components/blog_dashboard/info/ServerStatus";
-function BlogDashboardPage() {
+function DashboardHomePage() {
   return (
     <div className="flex min-h-screen flex-1">
       <BlogSidebarComponent />
@@ -17,4 +17,4 @@ function BlogDashboardPage() {
     </div>
   );
 }
-export default BlogDashboardPage;
+export default DashboardHomePage;

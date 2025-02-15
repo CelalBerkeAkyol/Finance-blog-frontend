@@ -5,26 +5,28 @@ import HomePage from "./pages/HomePage";
 import PricePage from "./pages/other_pages/PricePage";
 import PageNotFound from "./pages/other_pages/PageNotFound";
 
-import AuthorLoginPage from "./pages/blog_pages/AuthorLoginPage";
-import BlogDashboardPage from "./pages/blog_pages/BlogDashboardPage";
-
 import ProtectedRoute from "./components/ProtectedRoute";
-import NewPostPage from "./pages/blog_pages/NewPostPage";
 import BlogPostPage from "./pages/blog_pages/BlogPostPage";
-import BlogPostDashboardPage from "./pages/blog_pages/BlogPostDashboardPage";
-
 import BlogsPage from "./pages/blog_pages/BlogsPage";
 import Footer from "./components/footer/Footer";
-
 import CategoryBasePostsPage from "./pages/blog_pages/CategoryBasePostsPage";
 import CategoriesPage from "./pages/blog_pages/CategoriesPage";
-import EditPostPage from "./pages/blog_pages/EditPostPage";
+
 import CheatSheet from "./components/blog_components/blog_dashboard/helpers/CheatSheet";
 import AboutUsPage from "./pages/other_pages/AboutUsPage";
 import DisclaimerPage from "./pages/other_pages/DisclaimerPage";
 import PrivacyPolicyPage from "./pages/other_pages/PrivacyPolicyPage";
-import ImagePage from "./pages/blog_pages/ImagePage";
-import GalleryPage from "./pages/blog_pages/GalleryPage";
+import AuthorLoginPage from "./pages/dashboard_pages/AuthorLoginPage";
+{
+  /* dashboard pages */
+}
+import ImagePage from "./pages/dashboard_pages/ImagePage";
+import GalleryPage from "./pages/dashboard_pages/GalleryPage";
+import EditPostPage from "./pages/dashboard_pages/EditPostPage";
+import DashboardHomePage from "./pages/dashboard_pages/DashboardHomePage";
+import NewPostPage from "./pages/dashboard_pages/NewPostPage";
+import AllBlogPostsPage from "./pages/dashboard_pages/AllBlogPostsPage";
+
 function App() {
   return (
     <div className="min-h-screen flex flex-col">
@@ -43,7 +45,7 @@ function App() {
               path="/dashboard/home"
               element={
                 <ProtectedRoute>
-                  <BlogDashboardPage />
+                  <DashboardHomePage />
                 </ProtectedRoute>
               }
             />
@@ -51,7 +53,7 @@ function App() {
               path="/dashboard/posts"
               element={
                 <ProtectedRoute>
-                  <BlogPostDashboardPage />
+                  <AllBlogPostsPage />
                 </ProtectedRoute>
               }
             />

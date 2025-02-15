@@ -2,7 +2,10 @@
 
 Bu proje, **Data Science** ve **Makine Öğrenmesi** alanlarında öğrendiğimiz bilgileri paylaşmak için oluşturulmuş minimal bir **blog platformudur**. Markdown formatını desteklediği için **Python Notebook'ları kolayca entegre edebilir**, içerisine **görseller ekleyebilir**, farklı **kategorilere ayırabilir** ve **Table of Content** (İçindekiler) ile kullanıcı deneyimini artırabiliriz.
 
-> **Not:** Bu proje **ikiye ayrılmaktadır**: **Frontend** ve **Backend** bileşenleri ayrı olarak geliştirilmiştir.
+> **Not:** Bu proje **iki bileşenden** oluşmaktadır:
+>
+> - **Frontend**:(Bu repo).
+> - **Backend** **[Backend Repo](https://github.com/CelalBerkeAkyol/Finance-blog-backend)**
 
 ## Frontend Özellikler
 
@@ -85,5 +88,20 @@ git checkout -b feature/yeniozellik
 git commit -m "Yeni özellik eklendi"
 git push origin feature/yeniozellik
 ```
+
+## **📩 İletişim**
+
+**E-posta:** [celal.berke32@gmail.com](mailto:celal.berke32@gmail.com)\
+**Github:** [Github ](https://github.com/CelalBerkeAkyol)\
+**Linkedin:** [Linkedin ](https://www.linkedin.com/in/celal-berke-akyol-389a3a216/)
+
+---
+
+### **🔗 Ekstra Bağlantılar**
+
+- 📌 **[Backend Repo](https://github.com/CelalBerkeAkyol/Finance-blog-backend)**
+- 📌 **[API Swagger Docs](#)**
+
+---
 
 Her türlü geri bildirim ve öneri için bizimle iletişime geçebilirsiniz! 🚀

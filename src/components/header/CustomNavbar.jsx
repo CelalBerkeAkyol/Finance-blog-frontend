@@ -1,3 +1,4 @@
+// src/components/header/CustomNavbar.jsx
 import {
   Navbar,
   NavbarBrand,
@@ -8,7 +9,7 @@ import {
 import { Link } from "react-router-dom";
 import React, { useEffect, useState } from "react";
 import { useSelector, useDispatch } from "react-redux";
-import { fetchUser, logoutUser } from "../../app/features/user/userSlice";
+import { fetchUser } from "../../app/features/user/userSlice";
 import SearchModal from "../yardımcılar/SearchModal";
 import { Icon } from "@iconify/react";
 
@@ -28,7 +29,6 @@ export const AcmeLogo = () => {
 export default function CustomNavbar() {
   const dispatch = useDispatch();
   const isLoggedIn = useSelector((state) => state.user.isLoggedIn);
-  const isAdmin = useSelector((state) => state.user.isAdmin);
 
   // Arama modalının açılıp kapanma durumunu yönetiyoruz
   const [isSearchOpen, setIsSearchOpen] = useState(false);
@@ -38,20 +38,6 @@ export default function CustomNavbar() {
     console.log("Navbar yüklenirken fetchUser çağrılıyor...");
     dispatch(fetchUser());
   }, [dispatch]);
-
-  // Logout işlemini gerçekleştiren fonksiyon
-  const handleLogoutClick = () => {
-    console.log("Logout işlemi başlatılıyor...");
-    dispatch(logoutUser())
-      .unwrap()
-      .then(() => {
-        console.log("Logout başarılı, yönlendiriliyor...");
-        window.location.href = "/blog-admin/login";
-      })
-      .catch((error) => {
-        console.error("Logout sırasında hata oluştu:", error);
-      });
-  };
 
   return (
     <>
@@ -76,8 +62,9 @@ export default function CustomNavbar() {
             <Link to="/blog/posts/">Finans</Link>
           </NavbarItem>
         </NavbarContent>
-        {/* Arama ikonu */}
-        <NavbarItem justify="end" className="mx-4 w-24">
+
+        {/* Arama butonu */}
+        <NavbarItem justify="end" className="mx-2 w-24">
           <Button
             variant="ghost"
             color="default"
@@ -90,25 +77,21 @@ export default function CustomNavbar() {
             Ara
           </Button>
         </NavbarItem>
-        {/* Sağ kısım */}
-        <NavbarContent className="mx-2">
-          {/* Kullanıcı giriş yapmamışsa Mail Bülteni butonu */}
-          {!isLoggedIn ? (
+
+        {/* Sağ kısım: Yalnızca giriş yapmamışsa “Mail Bültenine Katıl” */}
+        <NavbarContent>
+          {!isLoggedIn && (
             <NavbarItem>
-              <Button as={Link} color="default" to="/signup" variant="flat">
+              <Button
+                as={Link}
+                color="default"
+                to="/signup"
+                variant="ghost"
+                radius="lg"
+              >
                 Mail Bültenimize Katıl
               </Button>
             </NavbarItem>
-          ) : (
-            // Giriş yapmışsa Profil ve Çıkış
-            <>
-              <NavbarItem>
-                <Link to="/profile">Profil</Link>
-              </NavbarItem>
-              <NavbarItem>
-                <Button onClick={handleLogoutClick}>Çıkış Yap</Button>
-              </NavbarItem>
-            </>
           )}
         </NavbarContent>
       </Navbar>

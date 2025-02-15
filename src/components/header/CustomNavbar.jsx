@@ -8,8 +8,7 @@ import {
 } from "@nextui-org/react";
 import { Link } from "react-router-dom";
 import React, { useEffect, useState } from "react";
-import { useSelector, useDispatch } from "react-redux";
-import { fetchUser } from "../../app/features/user/userSlice";
+
 import SearchModal from "../yardımcılar/SearchModal";
 import { Icon } from "@iconify/react";
 
@@ -27,17 +26,8 @@ export const AcmeLogo = () => {
 };
 
 export default function CustomNavbar() {
-  const dispatch = useDispatch();
-  const isLoggedIn = useSelector((state) => state.user.isLoggedIn);
-
   // Arama modalının açılıp kapanma durumunu yönetiyoruz
   const [isSearchOpen, setIsSearchOpen] = useState(false);
-
-  // Navbar ilk yüklendiğinde fetchUser çağrılıyor
-  useEffect(() => {
-    console.log("Navbar yüklenirken fetchUser çağrılıyor...");
-    dispatch(fetchUser());
-  }, [dispatch]);
 
   return (
     <>
@@ -80,19 +70,17 @@ export default function CustomNavbar() {
 
         {/* Sağ kısım: Yalnızca giriş yapmamışsa “Mail Bültenine Katıl” */}
         <NavbarContent>
-          {!isLoggedIn && (
-            <NavbarItem>
-              <Button
-                as={Link}
-                color="default"
-                to="/signup"
-                variant="ghost"
-                radius="lg"
-              >
-                Mail Bültenimize Katıl
-              </Button>
-            </NavbarItem>
-          )}
+          <NavbarItem>
+            <Button
+              as={Link}
+              color="default"
+              to="/signup"
+              variant="ghost"
+              radius="lg"
+            >
+              Mail Bültenimize Katıl
+            </Button>
+          </NavbarItem>
         </NavbarContent>
       </Navbar>
 

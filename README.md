@@ -90,7 +90,7 @@ git push origin feature/new-feature
 
 ## **📩 Contact**
 
-**Email:** [celal.berke32@gmail.com](mailto:buscberke@gmail.com)  
+**Email:** [buscberke@gmail.com](mailto:buscberke@gmail.com)  
 **Github:** [Github](https://github.com/CelalBerkeAkyol)  
 **LinkedIn:** [LinkedIn](https://www.linkedin.com/in/celal-berke-akyol-389a3a216/)  
 

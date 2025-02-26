@@ -1,11 +1,13 @@
-import React from "react";
+import React, { useState } from "react";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import rehypeRaw from "rehype-raw";
 import rehypeSlug from "rehype-slug";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@nextui-org/react";
-
+import { Icon } from "@iconify/react";
+import ShareButtons from "../../buttons/ShareButtons";
+import VoteButtons from "../../buttons/VoteButton";
 // Kategori isimlerini okunabilir hale getiriyor
 function slugToReadable(slug) {
   return slug
@@ -16,6 +18,13 @@ function slugToReadable(slug) {
 
 const BlogPostComponent = ({ post }) => {
   const navigate = useNavigate();
+  const [votes, setVotes] = useState(0); // Upvote / Downvote için state
+  const currentURL = window.location.href; // Sayfanın mevcut URL'si
+
+  // Sayfanın en yukarısına çıkma fonksiyonu
+  const scrollToTop = () => {
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  };
 
   return (
     <div className="prose p-4 text-start w-full max-w-4xl mx-auto">
@@ -25,22 +34,21 @@ const BlogPostComponent = ({ post }) => {
       {/* Blog detayları */}
       <div
         id="blog-details"
-        className="flex flex-col sm:flex-row sm:flex-wrap items-start sm:items-center gap-4 text-gray-600 pb-4 border-b"
+        className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 text-gray-600 pb-4 border-b align-middle"
       >
-        {/* Kategori Butonu (Tam ekran olmaması için `w-auto`) */}
-        <Button
-          color="secondary"
-          variant="ghost"
-          radius="lg"
-          size="sm"
-          className="w-auto px-4 py-1"
-          onClick={() => navigate(`/blog/category/${post.category}`)}
-        >
-          {slugToReadable(post.category)}
-        </Button>
-
-        {/* Tarih, Yazar ve Görüntülenme Bilgileri YAN YANA olacak şekilde düzenlendi */}
+        {/* Sol Taraf: Kategori Butonu ve Post Bilgileri */}
         <div className="flex flex-wrap items-center gap-x-4 text-sm">
+          <Button
+            color="secondary"
+            variant="ghost"
+            radius="lg"
+            size="sm"
+            className="w-auto px-4 py-1"
+            onClick={() => navigate(`/blog/category/${post.category}`)}
+          >
+            {slugToReadable(post.category)}
+          </Button>
+
           <p className="flex items-center gap-1">
             🗓️{" "}
             {new Date(post.createdAt).toLocaleDateString("tr-TR", {
@@ -56,16 +64,36 @@ const BlogPostComponent = ({ post }) => {
             👀 {post.views} Görüntülenme
           </p>
         </div>
+
+        {/* Sağ Taraf: Paylaşım Butonları */}
+        <div className="flex items-center gap-2">
+          <ShareButtons url={currentURL} />
+        </div>
       </div>
 
+      {/* Sosyal Medyada Paylaş Butonları (Yalnızca İkon) */}
+
       {/* Blog İçeriği */}
-      <div className="overflow-x-auto pt-6 text-base  leading-relaxed">
+      <div className="overflow-x-auto pt-6 text-base leading-relaxed">
         <ReactMarkdown
           remarkPlugins={[remarkGfm]}
           rehypePlugins={[rehypeRaw, rehypeSlug]}
         >
           {post.content}
         </ReactMarkdown>
+      </div>
+
+      {/* Upvote & Downvote ve Yukarı Çık Butonu */}
+      <VoteButtons postId={post._id} />
+
+      {/* Yukarı Çık Butonu */}
+      <div className="fixed bottom-5 right-5">
+        <Button
+          onClick={scrollToTop}
+          className="bg-gray-700 text-white  rounded-full shadow-lg hover:bg-gray-900 hover:text-white transition-all"
+        >
+          <Icon icon="mdi:arrow-up" width="18" />
+        </Button>
       </div>
     </div>
   );

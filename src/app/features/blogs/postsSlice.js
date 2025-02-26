@@ -1,22 +1,56 @@
 // src/app/features/blogs/postsSlice.js
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
-import axios from "../../../api"; // Axios yapılandırmanızı kullanın
+import axios from "../../../api"; // kendi axios ayarınız
 
 // Tüm postları sayfalı getirme
 export const fetchPosts = createAsyncThunk(
   "posts/fetchPosts",
   async ({ page = 1, limit = 20 }, thunkAPI) => {
     try {
-      console.info(
-        `fetchPosts: Postlar getiriliyor (sayfa: ${page}, limit: ${limit})`
-      );
       const response = await axios.get("/posts", { params: { page, limit } });
-      console.info("fetchPosts: Postlar başarıyla getirildi.");
-      return response.data; // Backend yanıtına göre ayarlayın
+      return response.data;
     } catch (error) {
-      console.error("fetchPosts hata:", error.response?.data || error.message);
       return thunkAPI.rejectWithValue(
         error.response?.data?.error || "Postları getirirken hata oluştu."
+      );
+    }
+  }
+);
+
+// Post upvote (beğeni) işlemi
+export const upvotePost = createAsyncThunk(
+  "posts/upvotePost",
+  async (postId, thunkAPI) => {
+    try {
+      console.info("upvotePost: Posta upvote ekleniyor, ID:", postId);
+      const response = await axios.put(`/posts/${postId}/upvote`);
+      // Backend yanıt formatınızı varsayıyoruz: { success: true, data: { ...post } }
+      console.log(response.data.data);
+      return response.data.data;
+    } catch (error) {
+      console.error("upvotePost hata:", error.response?.data || error.message);
+      return thunkAPI.rejectWithValue(
+        error.response?.data?.error || "Upvote eklenirken hata oluştu."
+      );
+    }
+  }
+);
+
+// Post downvote (beğenmeme) işlemi
+export const downvotePost = createAsyncThunk(
+  "posts/downvotePost",
+  async (postId, thunkAPI) => {
+    try {
+      console.info("downvotePost: Posta downvote ekleniyor, ID:", postId);
+      const response = await axios.put(`/posts/${postId}/downvote`);
+      return response.data.data;
+    } catch (error) {
+      console.error(
+        "downvotePost hata:",
+        error.response?.data || error.message
+      );
+      return thunkAPI.rejectWithValue(
+        error.response?.data?.error || "Downvote eklenirken hata oluştu."
       );
     }
   }
@@ -27,20 +61,9 @@ export const fetchPostsByCategory = createAsyncThunk(
   "posts/fetchPostsByCategory",
   async (category, thunkAPI) => {
     try {
-      console.info(
-        `fetchPostsByCategory: "${category}" kategorisine ait postlar getiriliyor.`
-      );
       const response = await axios.get(`/category/${category}`);
-      console.info(
-        "fetchPostsByCategory: Postlar başarıyla getirildi.",
-        response.data
-      );
       return response.data.posts;
     } catch (error) {
-      console.error(
-        "fetchPostsByCategory hata:",
-        error.response?.data || error.message
-      );
       return thunkAPI.rejectWithValue(
         error.response?.data?.error || "Postları getirirken hata oluştu."
       );
@@ -53,15 +76,9 @@ export const addNewPost = createAsyncThunk(
   "posts/addNewPost",
   async (postData, thunkAPI) => {
     try {
-      console.info(
-        "addNewPost: Yeni post ekleme işlemi başlatılıyor.",
-        postData
-      );
       const response = await axios.post("/posts", postData);
-      console.info("addNewPost: Post başarıyla eklendi.", response.data);
-      return response.data; // Backend yanıtına göre ayarlayın
+      return response.data; // { success: true, post: {...} } gibi döndüğünü varsayıyoruz
     } catch (error) {
-      console.error("addNewPost hata:", error.response?.data || error.message);
       return thunkAPI.rejectWithValue(
         error.response?.data?.error || "Post eklerken hata oluştu."
       );
@@ -74,12 +91,9 @@ export const updatePost = createAsyncThunk(
   "posts/updatePost",
   async ({ id, postData }, thunkAPI) => {
     try {
-      console.info("updatePost: Post güncelleme işlemi başlatılıyor. ID:", id);
       const response = await axios.put(`/posts/${id}`, postData);
-      console.info("updatePost: Post güncellendi.", response.data);
-      return response.data;
+      return response.data; // { success: true, post: {...} } gibi
     } catch (error) {
-      console.error("updatePost hata:", error.response?.data || error.message);
       return thunkAPI.rejectWithValue(
         error.response?.data?.error || "Post güncellerken hata oluştu."
       );
@@ -92,41 +106,25 @@ export const deletePost = createAsyncThunk(
   "posts/deletePost",
   async (id, thunkAPI) => {
     try {
-      console.info("deletePost: Post silme işlemi başlatılıyor. ID:", id);
       await axios.delete(`/posts/${id}`);
-      console.info("deletePost: Post başarıyla silindi. ID:", id);
-      return id;
+      return id; // Sadece silinen ID dönüyoruz
     } catch (error) {
-      console.error("deletePost hata:", error.response?.data || error.message);
       return thunkAPI.rejectWithValue(
         error.response?.data?.error || "Post silerken hata oluştu."
       );
     }
   }
 );
+
 // Post görüntülenme sayısını artırma
 export const incrementPostView = createAsyncThunk(
   "posts/incrementPostView",
   async (postId, { rejectWithValue }) => {
     try {
-      console.info(
-        "incrementPostView: Görüntülenme sayısı artırılıyor, ID:",
-        postId
-      );
-      // API'de görüntülenme arttırma endpoint'iniz:
-      // Örneğin: PUT /posts/inc/:id
       const response = await axios.put(`/posts/${postId}/view`);
-      // response.data içinde güncellenmiş post verisini döndürüyor varsayıyoruz
-      console.info(
-        "incrementPostView: Başarılı, güncellenmiş post:",
-        response.data.data
-      );
-      return response.data.data; // güncellenmiş post objesi
+      // { success: true, data: {...} }
+      return response.data.data;
     } catch (error) {
-      console.error(
-        "incrementPostView hata:",
-        error.response?.data || error.message
-      );
       return rejectWithValue(
         error.response?.data?.error || "View artırırken hata oluştu."
       );
@@ -134,7 +132,6 @@ export const incrementPostView = createAsyncThunk(
   }
 );
 
-// Redux slice
 const postsSlice = createSlice({
   name: "posts",
   initialState: {
@@ -143,6 +140,9 @@ const postsSlice = createSlice({
     isSuccess: false,
     isError: false,
     errorMessage: "",
+    // Post ID -> oy sayısı şeklinde bir dictionary
+    votes: {},
+    // İsterseniz pagination, total vs. ek alanlar
     pagination: { next: null, total: 0, count: 0 },
   },
   reducers: {
@@ -167,14 +167,16 @@ const postsSlice = createSlice({
       .addCase(fetchPosts.fulfilled, (state, action) => {
         state.isLoading = false;
         state.isSuccess = true;
+        // response.data'da posts veya data alanını kullandığınızı varsayıyoruz
         state.posts = action.payload.posts || action.payload.data;
         state.pagination = action.payload.pagination || {
           next: null,
           total: 0,
           count: 0,
         };
-        state.count = action.payload.count || action.payload.total;
-        state.total = action.payload.total || action.payload.count;
+        // total, count vs. isterseniz
+        state.count = action.payload.count || 0;
+        state.total = action.payload.total || 0;
       })
       .addCase(fetchPosts.rejected, (state, action) => {
         state.isLoading = false;
@@ -182,6 +184,39 @@ const postsSlice = createSlice({
         state.errorMessage =
           action.payload || "Postları getirirken hata oluştu.";
       })
+
+      // Upvote
+      .addCase(upvotePost.pending, (state) => {
+        // Dilerseniz isLoading veya başka state güncellemesi yapabilirsiniz
+      })
+      .addCase(upvotePost.fulfilled, (state, action) => {
+        const updatedPost = action.payload;
+        const index = state.posts.findIndex((p) => p._id === updatedPost._id);
+        if (index !== -1) {
+          state.posts[index] = updatedPost; // Store'daki post'u güncelle
+        }
+        // votes özelliğini global saklamak istiyorsanız:
+        state.votes[updatedPost._id] = updatedPost.votes;
+      })
+      .addCase(upvotePost.rejected, (state, action) => {
+        state.isError = true;
+        state.errorMessage = action.payload || "Upvote eklerken hata oluştu.";
+      })
+
+      // Downvote
+      .addCase(downvotePost.fulfilled, (state, action) => {
+        const updatedPost = action.payload;
+        const index = state.posts.findIndex((p) => p._id === updatedPost._id);
+        if (index !== -1) {
+          state.posts[index] = updatedPost;
+        }
+        state.votes[updatedPost._id] = updatedPost.votes;
+      })
+      .addCase(downvotePost.rejected, (state, action) => {
+        state.isError = true;
+        state.errorMessage = action.payload || "Downvote eklerken hata oluştu.";
+      })
+
       // fetchPostsByCategory
       .addCase(fetchPostsByCategory.pending, (state) => {
         state.isLoading = true;
@@ -197,6 +232,7 @@ const postsSlice = createSlice({
         state.isError = true;
         state.errorMessage = action.payload;
       })
+
       // addNewPost
       .addCase(addNewPost.pending, (state) => {
         state.isLoading = true;
@@ -206,13 +242,16 @@ const postsSlice = createSlice({
       .addCase(addNewPost.fulfilled, (state, action) => {
         state.isLoading = false;
         state.isSuccess = true;
-        state.posts.unshift(action.payload.post || action.payload);
+        // backend yanıtında { post: {...} } varsa
+        const newPost = action.payload.post || action.payload;
+        state.posts.unshift(newPost);
       })
       .addCase(addNewPost.rejected, (state, action) => {
         state.isLoading = false;
         state.isError = true;
         state.errorMessage = action.payload || "Post eklerken hata oluştu.";
       })
+
       // updatePost
       .addCase(updatePost.pending, (state) => {
         state.isLoading = true;
@@ -224,7 +263,7 @@ const postsSlice = createSlice({
         state.isSuccess = true;
         const updatedPost = action.payload.post || action.payload;
         const index = state.posts.findIndex(
-          (post) => post.id === updatedPost.id
+          (post) => post._id === updatedPost._id
         );
         if (index !== -1) {
           state.posts[index] = updatedPost;
@@ -235,6 +274,7 @@ const postsSlice = createSlice({
         state.isError = true;
         state.errorMessage = action.payload || "Post güncellerken hata oluştu.";
       })
+
       // deletePost
       .addCase(deletePost.pending, (state) => {
         state.isLoading = true;
@@ -251,27 +291,19 @@ const postsSlice = createSlice({
         state.isError = true;
         state.errorMessage = action.payload || "Post silerken hata oluştu.";
       })
-      // incrementPostView (views artırma)
+
+      // incrementPostView
       .addCase(incrementPostView.pending, (state) => {
-        state.isLoading = true;
-        state.isError = false;
-        state.errorMessage = "";
+        // İsteğe göre isLoading vs güncelleyebilirsiniz
       })
       .addCase(incrementPostView.fulfilled, (state, action) => {
-        state.isLoading = false;
-        state.isSuccess = true;
-        // action.payload => Güncellenmiş post nesnesi
         const updatedPost = action.payload;
-
-        // Mevcut posts array'inde bulup güncelleriz
         const index = state.posts.findIndex((p) => p._id === updatedPost._id);
         if (index !== -1) {
-          // Yeni view sayısını store'a kaydediyoruz
           state.posts[index] = updatedPost;
         }
       })
       .addCase(incrementPostView.rejected, (state, action) => {
-        state.isLoading = false;
         state.isError = true;
         state.errorMessage =
           action.payload || "Görüntülenme sayısı artırılırken hata oluştu.";

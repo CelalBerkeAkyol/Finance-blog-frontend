@@ -12,8 +12,8 @@ export default {
   theme: {
     extend: {
       colors: {
-        primary: "#90A1B8",
-        secondary: "#1F2936", // Özel secondary rengi
+        primary: "#6A7282",
+        secondary: "#4A5565", // Özel secondary rengi
       },
       typography: (theme) => ({
         DEFAULT: {

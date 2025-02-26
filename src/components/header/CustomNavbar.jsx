@@ -1,6 +1,6 @@
 // src/components/header/CustomNavbar.jsx
 import React, { useState } from "react";
-import { Link } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { Icon } from "@iconify/react";
 import {
   Navbar,
@@ -29,50 +29,60 @@ export const AcmeLogo = () => {
 };
 
 export default function CustomNavbar() {
-  // Arama modalının açılıp kapanma durumu
   const [isSearchOpen, setIsSearchOpen] = useState(false);
+  const navigate = useNavigate(); // Yönlendirme için `useNavigate` kullanılıyor.
+
+  const navbarLinks = [
+    { name: "Ana Sayfa", path: "/" },
+    { name: "Blog", path: "/blog/posts" },
+
+    { name: "Araştırma", path: "/blog/category/arastirma" },
+    { name: "Data Science", path: "/blog/category/data-science" },
+    { name: "Machine Learning", path: "/blog/category/machine-learning" },
+  ];
+
+  const categories = [
+    { name: "Makro Ekonomi", path: "/blog/category/makro-ekonomi" },
+    { name: "Mikro Ekonomi", path: "/blog/category/mikro-ekonomi" },
+    { name: "Finans", path: "/blog/category/finans" },
+    { name: "Kişisel Finans", path: "/blog/category/kişisel-finans" },
+  ];
 
   return (
     <>
-      {/* Navbar Container */}
-      <Navbar className="bg-gray-50 w-screen" maxWidth="xl">
-        {/* Sol Taraf: Logo ve Başlık */}
-        <NavbarContent className="flex" justify="center">
+      <Navbar className="bg-gray-50 w-screen" maxWidth="lg">
+        <NavbarContent className="flex " justify="start">
           <AcmeLogo />
           <p className="font-bold text-inherit text-lg">Fin AI</p>
         </NavbarContent>
 
-        {/* Orta Kısım: Dropdown Menü */}
-
-        <NavbarContent className="hidden sm:flex gap-4" justify="center">
-          {[
-            "Ana Sayfa",
-            "Finans",
-            "Kişisel Finans",
-            "Araştırma",
-            "Data Science",
-            "Machine Learning",
-          ].map((item, index) => (
+        <NavbarContent className="hidden sm:flex gap-2" justify="start">
+          {navbarLinks.map((item, index) => (
             <NavbarItem key={index}>
-              <Link to="/blog/posts/">{item}</Link>
+              <button
+                onClick={() => navigate(item.path)}
+                className="hover:text-primary px-2"
+              >
+                {item.name}
+              </button>
             </NavbarItem>
           ))}
 
           <Dropdown>
             <DropdownTrigger color="secondary">
-              <Button variant="bordered">Tüm Kategoriler</Button>
+              <Button
+                variant="flat"
+                className="text-gray-900  text-sm hover:text-secondary"
+                endContent={
+                  <Icon icon="material-symbols:arrow-drop-down" width="20" />
+                }
+              >
+                Ekonomi & Finans
+              </Button>
             </DropdownTrigger>
             <DropdownMenu aria-label="Kategoriler" color="primary">
-              {[
-                { name: "Makro Ekonomi", link: "/blog/makro-ekonomi/" },
-                { name: "Mikro Ekonomi", link: "/blog/mikro-ekonomi/" },
-                { name: "Finans", link: "/blog/finans/" },
-                { name: "Kişisel Finans", link: "/blog/kisisel-finans/" },
-                { name: "Araştırma", link: "/blog/arastirma/" },
-                { name: "Data Science", link: "/blog/data-science/" },
-                { name: "Machine Learning", link: "/blog/machine-learning/" },
-              ].map((item, index) => (
-                <DropdownItem key={index} as={Link} to={item.link}>
+              {categories.map((item, index) => (
+                <DropdownItem key={index} onClick={() => navigate(item.path)}>
                   {item.name}
                 </DropdownItem>
               ))}
@@ -80,8 +90,7 @@ export default function CustomNavbar() {
           </Dropdown>
         </NavbarContent>
 
-        {/* Sağ Taraf: Arama Butonu */}
-        <NavbarItem justify="end" className="mx-2 w-24">
+        <NavbarItem justify="start" className="mx-2 w-24">
           <Button
             variant="bordered"
             color="secondary"
@@ -96,7 +105,6 @@ export default function CustomNavbar() {
         </NavbarItem>
       </Navbar>
 
-      {/* Arama Modalı */}
       <SearchModal
         isOpen={isSearchOpen}
         onClose={() => setIsSearchOpen(false)}

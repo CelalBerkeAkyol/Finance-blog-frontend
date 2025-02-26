@@ -73,7 +73,7 @@ export default function SearchModal({ isOpen, onClose }) {
                 <Icon icon="material-symbols:search" width="20" height="20" />
               }
             />
-            <Button color="default" onPress={() => setSearchTerm("")}>
+            <Button color="primary" onPress={() => setSearchTerm("")}>
               Temizle
             </Button>
           </div>
@@ -98,7 +98,7 @@ export default function SearchModal({ isOpen, onClose }) {
 
         {/* Footer */}
         <ModalFooter>
-          <Button color="default" onPress={onClose}>
+          <Button color="primary" onPress={onClose}>
             Kapat
           </Button>
         </ModalFooter>

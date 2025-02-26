@@ -1,17 +1,20 @@
 // src/components/header/CustomNavbar.jsx
+import React, { useState } from "react";
+import { Link } from "react-router-dom";
+import { Icon } from "@iconify/react";
 import {
   Navbar,
-  NavbarBrand,
   NavbarContent,
   NavbarItem,
   Button,
+  Dropdown,
+  DropdownTrigger,
+  DropdownMenu,
+  DropdownItem,
 } from "@nextui-org/react";
-import { Link } from "react-router-dom";
-import React, { useEffect, useState } from "react";
-
 import SearchModal from "../yardımcılar/SearchModal";
-import { Icon } from "@iconify/react";
 
+// Logo Bileşeni
 export const AcmeLogo = () => {
   return (
     <svg fill="none" height="36" viewBox="0 0 32 32" width="36">
@@ -26,38 +29,62 @@ export const AcmeLogo = () => {
 };
 
 export default function CustomNavbar() {
-  // Arama modalının açılıp kapanma durumunu yönetiyoruz
+  // Arama modalının açılıp kapanma durumu
   const [isSearchOpen, setIsSearchOpen] = useState(false);
 
   return (
     <>
-      <Navbar className="bg-gray-50">
-        <NavbarBrand>
+      {/* Navbar Container */}
+      <Navbar className="bg-gray-50 w-screen" maxWidth="xl">
+        {/* Sol Taraf: Logo ve Başlık */}
+        <NavbarContent className="flex" justify="center">
           <AcmeLogo />
           <p className="font-bold text-inherit text-lg">Fin AI</p>
-        </NavbarBrand>
-
-        {/* Orta kısım (menü) */}
-        <NavbarContent className="hidden sm:flex gap-4" justify="center">
-          <NavbarItem>
-            <Link to="/blog/posts/">Anasayfa</Link>
-          </NavbarItem>
-          <NavbarItem>
-            <Link to="/blog/posts/">Makro Ekonomi</Link>
-          </NavbarItem>
-          <NavbarItem>
-            <Link to="/blog/posts/">Mikro Ekonomi</Link>
-          </NavbarItem>
-          <NavbarItem>
-            <Link to="/blog/posts/">Finans</Link>
-          </NavbarItem>
         </NavbarContent>
 
-        {/* Arama butonu */}
+        {/* Orta Kısım: Dropdown Menü */}
+
+        <NavbarContent className="hidden sm:flex gap-4" justify="center">
+          {[
+            "Ana Sayfa",
+            "Finans",
+            "Kişisel Finans",
+            "Araştırma",
+            "Data Science",
+            "Machine Learning",
+          ].map((item, index) => (
+            <NavbarItem key={index}>
+              <Link to="/blog/posts/">{item}</Link>
+            </NavbarItem>
+          ))}
+
+          <Dropdown>
+            <DropdownTrigger color="secondary">
+              <Button variant="bordered">Tüm Kategoriler</Button>
+            </DropdownTrigger>
+            <DropdownMenu aria-label="Kategoriler" color="primary">
+              {[
+                { name: "Makro Ekonomi", link: "/blog/makro-ekonomi/" },
+                { name: "Mikro Ekonomi", link: "/blog/mikro-ekonomi/" },
+                { name: "Finans", link: "/blog/finans/" },
+                { name: "Kişisel Finans", link: "/blog/kisisel-finans/" },
+                { name: "Araştırma", link: "/blog/arastirma/" },
+                { name: "Data Science", link: "/blog/data-science/" },
+                { name: "Machine Learning", link: "/blog/machine-learning/" },
+              ].map((item, index) => (
+                <DropdownItem key={index} as={Link} to={item.link}>
+                  {item.name}
+                </DropdownItem>
+              ))}
+            </DropdownMenu>
+          </Dropdown>
+        </NavbarContent>
+
+        {/* Sağ Taraf: Arama Butonu */}
         <NavbarItem justify="end" className="mx-2 w-24">
           <Button
-            variant="ghost"
-            color="default"
+            variant="bordered"
+            color="secondary"
             radius="lg"
             fullWidth={true}
             startContent={<Icon icon="material-symbols:search" width="16" />}
@@ -67,21 +94,6 @@ export default function CustomNavbar() {
             Ara
           </Button>
         </NavbarItem>
-
-        {/* Sağ kısım: Yalnızca giriş yapmamışsa “Mail Bültenine Katıl” */}
-        <NavbarContent>
-          <NavbarItem>
-            <Button
-              as={Link}
-              color="default"
-              to="/signup"
-              variant="ghost"
-              radius="lg"
-            >
-              Mail Bültenimize Katıl
-            </Button>
-          </NavbarItem>
-        </NavbarContent>
       </Navbar>
 
       {/* Arama Modalı */}

@@ -115,7 +115,7 @@ const BlogsTable = () => {
         />
         <Dropdown>
           <DropdownTrigger>
-            <Button size="sm">
+            <Button size="sm" color="primary">
               Durum:{" "}
               {statusFilter === "all" ? "Tümü" : capitalize(statusFilter)}
             </Button>
@@ -141,7 +141,7 @@ const BlogsTable = () => {
         </Dropdown>
         <div className="flex items-center gap-2">
           <Button
-            color="primary"
+            color="default"
             variant="flat"
             size="sm"
             onClick={handleNavigate}

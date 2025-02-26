@@ -29,7 +29,7 @@ const BlogPostComponent = ({ post }) => {
       >
         {/* Kategori Butonu (Tam ekran olmaması için `w-auto`) */}
         <Button
-          color="primary"
+          color="secondary"
           variant="ghost"
           radius="lg"
           size="sm"

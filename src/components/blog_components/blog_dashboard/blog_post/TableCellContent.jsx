@@ -15,8 +15,8 @@ import { deletePost } from "../../../../app/features/blogs/postsSlice";
 const statusColorMap = {
   yayında: "success",
   düzenleniyor: "warning",
-  arşivlenmiş: "secondary",
-  taslak: "secondary",
+  arşivlenmiş: "danger",
+  taslak: "warning",
 };
 
 const TableCellContent = ({ posts, columnKey }) => {

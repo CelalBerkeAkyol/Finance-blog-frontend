@@ -25,15 +25,15 @@ export default function BannerComponent() {
       {isAdmin ? (
         <AdminNavbar />
       ) : (
-        <div className="flex w-full items-center justify-center gap-x-3 border-b-1 bg-gray-800 border-stone-200 border-divider bg-background/[0.15] px-6 py-2 backdrop-blur-xl sm:px-3.5">
+        <div className="flex w-full items-center justify-center gap-x-3 border-b-1 bg-gray-800 border-stone-200 border-divider bg-background/[0.15] px-6 py-2 backdrop-blur-xl sm:px-3.5 z-[9999]">
           <p className="text-small text-foreground text-white">
-            <Link className="text-inherit" to="/chatbot">
+            <Link className="text-inherit" to="/about-us">
               Çalışmalarımızı beğeniyorsanız bize destek olabilirsiniz.&nbsp;
             </Link>
           </p>
           <Button
             as={Link}
-            to="/chatbot"
+            to="/about-us"
             className="group relative h-9 overflow-hidden bg-transparent text-small text-white font-normal"
             color="default"
             endContent={

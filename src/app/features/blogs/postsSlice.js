@@ -8,6 +8,7 @@ export const fetchPosts = createAsyncThunk(
   async ({ page = 1, limit = 20 }, thunkAPI) => {
     try {
       const response = await axios.get("/posts", { params: { page, limit } });
+      console.log("heyyyyyyyy fetchPosts çalıştı " + response.data);
       return response.data;
     } catch (error) {
       return thunkAPI.rejectWithValue(

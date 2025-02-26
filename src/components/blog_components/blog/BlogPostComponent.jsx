@@ -84,7 +84,16 @@ const BlogPostComponent = ({ post }) => {
       </div>
 
       {/* Upvote & Downvote ve Yukarı Çık Butonu */}
-      <VoteButtons postId={post._id} />
+
+      <div className="flex justify-between items-center w-full mt-4">
+        {/* Beğeni Butonları (Sol Tarafta) */}
+        <VoteButtons postId={post._id} />
+
+        {/* Paylaşım Butonları (Sağ Tarafta) */}
+        <div className="flex items-center gap-2">
+          <ShareButtons url={currentURL} />
+        </div>
+      </div>
 
       {/* Yukarı Çık Butonu */}
       <div className="fixed bottom-5 right-5">

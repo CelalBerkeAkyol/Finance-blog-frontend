@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React from "react";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import rehypeRaw from "rehype-raw";
@@ -18,7 +18,6 @@ function slugToReadable(slug) {
 
 const BlogPostComponent = ({ post }) => {
   const navigate = useNavigate();
-  const [votes, setVotes] = useState(0); // Upvote / Downvote için state
   const currentURL = window.location.href; // Sayfanın mevcut URL'si
 
   // Sayfanın en yukarısına çıkma fonksiyonu
@@ -34,10 +33,10 @@ const BlogPostComponent = ({ post }) => {
       {/* Blog detayları */}
       <div
         id="blog-details"
-        className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 text-gray-600 pb-4 border-b align-middle"
+        className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4  pb-4 border-b"
       >
         {/* Sol Taraf: Kategori Butonu ve Post Bilgileri */}
-        <div className="flex flex-wrap items-center gap-x-4 text-sm">
+        <div className="flex flex-wrap  gap-4 text-sm leading-tight">
           <Button
             color="secondary"
             variant="ghost"
@@ -48,7 +47,6 @@ const BlogPostComponent = ({ post }) => {
           >
             {slugToReadable(post.category)}
           </Button>
-
           <p className="flex items-center gap-1">
             🗓️{" "}
             {new Date(post.createdAt).toLocaleDateString("tr-TR", {
@@ -71,10 +69,8 @@ const BlogPostComponent = ({ post }) => {
         </div>
       </div>
 
-      {/* Sosyal Medyada Paylaş Butonları (Yalnızca İkon) */}
-
       {/* Blog İçeriği */}
-      <div className="overflow-x-auto pt-6 text-base leading-relaxed">
+      <div className="overflow-x-auto pt-4 text-base leading-relaxed">
         <ReactMarkdown
           remarkPlugins={[remarkGfm]}
           rehypePlugins={[rehypeRaw, rehypeSlug]}
@@ -85,12 +81,12 @@ const BlogPostComponent = ({ post }) => {
 
       {/* Upvote & Downvote ve Yukarı Çık Butonu */}
 
-      <div className="flex justify-between items-center w-full mt-4">
+      <div className="flex justify-between items-center w-full mt-2 pt-4 border-t-1">
         {/* Beğeni Butonları (Sol Tarafta) */}
         <VoteButtons postId={post._id} />
 
         {/* Paylaşım Butonları (Sağ Tarafta) */}
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 algin-middle">
           <ShareButtons url={currentURL} />
         </div>
       </div>

@@ -53,17 +53,6 @@ const ShareButtons = ({ url }) => {
         <Icon icon="mdi:whatsapp" width="16" className="text-white" />
       </Button>
 
-      {/* Instagram */}
-      <Button
-        as="a"
-        href={`https://www.instagram.com/?url=${encodeURIComponent(url)}`}
-        target="_blank"
-        isIconOnly
-        className="bg-[#E4405F] text-white rounded-full hover:bg-[#d72c4a] hover:text-white min-w-0 w-8 h-8 flex items-center justify-center"
-      >
-        <Icon icon="mdi:instagram" width="16" className="text-white" />
-      </Button>
-
       {/* E-posta (Mail) */}
       <Button
         as="a"

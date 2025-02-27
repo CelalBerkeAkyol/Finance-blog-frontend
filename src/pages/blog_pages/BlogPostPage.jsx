@@ -1,6 +1,10 @@
 import React, { useState, useEffect } from "react";
 import { useParams } from "react-router-dom";
-import api from "../../api";
+import { useDispatch, useSelector } from "react-redux";
+import {
+  fetchPostById,
+  incrementPostView,
+} from "../../app/features/blogs/postsSlice";
 import BlogPostComponent from "../../components/blog_components/blog/BlogPostComponent";
 import TableOfContents from "../../components/blog_components/blog/TableOfContents";
 import BannerComponent from "../../components/header/BannerComponent";
@@ -8,74 +12,52 @@ import CustomNavbar from "../../components/header/CustomNavbar";
 import BlogPostSkeleton from "../../components/blog_components/blog/BlogPostSkeleton";
 import TableSkeleton from "../../components/blog_components/blog/TableSkeleton";
 
-import { useDispatch } from "react-redux";
-import { incrementPostView } from "../../app/features/blogs/postsSlice";
 function BlogPostPage() {
   const { id } = useParams();
-  const [post, setPost] = useState(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState("");
-
-  useEffect(() => {
-    if (!id) {
-      setError("Geçersiz post id");
-      setLoading(false);
-      return;
-    }
-
-    api
-      .get(`/posts/one-post/${id}`)
-      .then((response) => {
-        setPost(response.data.post);
-      })
-      .catch(() => {
-        setError("Blog yazısı yüklenirken hata oluştu.");
-      })
-      .finally(() => {
-        setLoading(false);
-      });
-  }, [id]);
-
   const dispatch = useDispatch();
+  const { posts, isLoading, errorMessage } = useSelector(
+    (state) => state.posts
+  );
+  const post = posts.find((p) => p._id === id);
+
+  // Local state flag to ensure the view is incremented only once
+  const [hasIncremented, setHasIncremented] = useState(false);
 
   useEffect(() => {
-    if (post && post._id) {
-      // Post yüklendikten sonra 1 kere views'i artır
-      dispatch(incrementPostView(post._id));
+    if (id) {
+      dispatch(fetchPostById(id));
     }
-  }, [post, dispatch]);
+  }, [id, dispatch]);
 
-  // Eğer bir hata varsa, isterseniz content kısmında gösterebilirsiniz.
-  // Ama header/footer yine görünür kalsın.
-  // Örnekte "error" durumunu content alanında göstereceğim.
+  useEffect(() => {
+    if (post && !hasIncremented) {
+      dispatch(incrementPostView(post._id));
+      setHasIncremented(true);
+    }
+  }, [post, dispatch, hasIncremented]);
+
   return (
     <div className="flex flex-col">
-      {/* Üst kısım her zaman görünüyor */}
       <BannerComponent />
       <CustomNavbar />
-
       <div className="flex flex-col md:flex-row gap-8 py-8 container">
-        {/* Sol kolon (içindekiler) */}
         <div className="md:w-[25%] w-full border-r min-w-[20%]">
-          {/* Burada TOC'yi sabitleyip kendi içinde scroll ekliyoruz */}
           <div className="sticky top-20 max-h-[calc(100vh-8rem)] overflow-y-auto py-4">
-            {loading ? (
+            {isLoading ? (
               <TableSkeleton />
-            ) : (
+            ) : post ? (
               <TableOfContents content={post.content} />
-            )}
+            ) : null}
           </div>
         </div>
-
-        {/* Sağ kolon (asıl blog içeriği) */}
         <div className="md:w-[70%] w-full margin-auto px-4">
-          {loading ? (
+          {isLoading ? (
             <BlogPostSkeleton />
-          ) : error ? (
-            <div className="text-red-600">{error}</div>
-          ) : (
+          ) : errorMessage ? (
+            <div className="text-red-600">{errorMessage}</div>
+          ) : post ? (
             <BlogPostComponent post={post} />
-          )}
+          ) : null}
         </div>
       </div>
     </div>

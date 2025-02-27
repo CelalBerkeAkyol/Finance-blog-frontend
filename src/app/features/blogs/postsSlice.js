@@ -17,16 +17,32 @@ export const fetchPosts = createAsyncThunk(
     }
   }
 );
+// Tek bir postu ID'ye göre getiren thunk
+export const fetchPostById = createAsyncThunk(
+  "posts/fetchPostById",
+  async (postId, thunkAPI) => {
+    try {
+      // Tek post endpoint'i örnek: GET /posts/:id
+      const response = await axios.get(`/posts/one-post/${postId}`);
+      // response.data.post döndüğünü varsayıyoruz
+      return response.data.post;
+    } catch (error) {
+      return thunkAPI.rejectWithValue(
+        error.response?.data?.error || "Tekil post getirilirken hata oluştu."
+      );
+    }
+  }
+);
 
-// Post upvote (beğeni) işlemi
+// Upvote thunk – backend’den güncellenmiş post objesi döndüğünü varsayıyoruz
 export const upvotePost = createAsyncThunk(
   "posts/upvotePost",
   async (postId, thunkAPI) => {
     try {
       console.info("upvotePost: Posta upvote ekleniyor, ID:", postId);
       const response = await axios.put(`/posts/${postId}/upvote`);
-      // Backend yanıt formatınızı varsayıyoruz: { success: true, data: { ...post } }
-      console.log(response.data.data);
+      // response.data.data: güncellenmiş post objesiü
+      // TO DO we can return only view data in the future
       return response.data.data;
     } catch (error) {
       console.error("upvotePost hata:", error.response?.data || error.message);
@@ -37,7 +53,7 @@ export const upvotePost = createAsyncThunk(
   }
 );
 
-// Post downvote (beğenmeme) işlemi
+// Downvote thunk – aynı şekilde güncellenmiş post objesi döndüğünü varsayıyoruz
 export const downvotePost = createAsyncThunk(
   "posts/downvotePost",
   async (postId, thunkAPI) => {
@@ -141,8 +157,7 @@ const postsSlice = createSlice({
     isSuccess: false,
     isError: false,
     errorMessage: "",
-    // Post ID -> oy sayısı şeklinde bir dictionary
-    votes: {},
+
     // İsterseniz pagination, total vs. ek alanlar
     pagination: { next: null, total: 0, count: 0 },
   },
@@ -185,37 +200,50 @@ const postsSlice = createSlice({
         state.errorMessage =
           action.payload || "Postları getirirken hata oluştu.";
       })
-
-      // Upvote
-      .addCase(upvotePost.pending, (state) => {
-        // Dilerseniz isLoading veya başka state güncellemesi yapabilirsiniz
+      // Fetch post by ıd
+      .addCase(fetchPostById.fulfilled, (state, action) => {
+        const fetchedPost = action.payload;
+        // posts dizisinde aynı ID var mı?
+        const index = state.posts.findIndex((p) => p._id === fetchedPost._id);
+        if (index !== -1) {
+          // varsa güncelle
+          state.posts[index] = fetchedPost;
+        } else {
+          // yoksa ekle
+          state.posts.push(fetchedPost);
+        }
       })
+      .addCase(fetchPostById.rejected, (state, action) => {
+        state.isError = true;
+        state.errorMessage = action.payload || "Post getirilirken hata oluştu.";
+      })
+
+      // Upvote işlemi sonrası güncellenmiş post objesini store’da güncelle
       .addCase(upvotePost.fulfilled, (state, action) => {
         const updatedPost = action.payload;
-        const index = state.posts.findIndex((p) => p._id === updatedPost._id);
-        if (index !== -1) {
-          state.posts[index] = updatedPost; // Store'daki post'u güncelle
-        }
-        // votes özelliğini global saklamak istiyorsanız:
-        state.votes[updatedPost._id] = updatedPost.votes;
-      })
-      .addCase(upvotePost.rejected, (state, action) => {
-        state.isError = true;
-        state.errorMessage = action.payload || "Upvote eklerken hata oluştu.";
-      })
-
-      // Downvote
-      .addCase(downvotePost.fulfilled, (state, action) => {
-        const updatedPost = action.payload;
-        const index = state.posts.findIndex((p) => p._id === updatedPost._id);
+        const index = state.posts.findIndex(
+          (post) => post._id === updatedPost._id
+        );
         if (index !== -1) {
           state.posts[index] = updatedPost;
         }
-        state.votes[updatedPost._id] = updatedPost.votes;
+      })
+      .addCase(upvotePost.rejected, (state, action) => {
+        state.isError = true;
+      })
+
+      // Downvote işlemi sonrası güncellenmiş post objesini store’da güncelle
+      .addCase(downvotePost.fulfilled, (state, action) => {
+        const updatedPost = action.payload;
+        const index = state.posts.findIndex(
+          (post) => post._id === updatedPost._id
+        );
+        if (index !== -1) {
+          state.posts[index] = updatedPost;
+        }
       })
       .addCase(downvotePost.rejected, (state, action) => {
         state.isError = true;
-        state.errorMessage = action.payload || "Downvote eklerken hata oluştu.";
       })
 
       // fetchPostsByCategory

@@ -1,28 +1,45 @@
 import React from "react";
 import { useDispatch, useSelector } from "react-redux";
+import { useNavigate } from "react-router-dom";
 import { upvotePost, downvotePost } from "../../app/features/blogs/postsSlice";
 import { Icon } from "@iconify/react";
 
 const VoteButtons = ({ postId }) => {
   const dispatch = useDispatch();
+  const navigate = useNavigate();
 
-  // Redux store'dan bu post'u buluyoruz
+  // This pulls the logged-in status from your user slice
+  const isLoggedIn = useSelector((state) => state.user.isLoggedIn);
+
+  // Get the post from Redux to display current likes
   const post = useSelector((state) =>
     state.posts.posts.find((p) => p._id === postId)
   );
-
-  // likes alanı varsa göster, yoksa 0
   const likeCount = post?.likes ?? 0;
 
-  // Oy artırma fonksiyonu
   const handleUpvote = () => {
     if (!postId) return;
+
+    // If user is not logged in, redirect to login
+    if (!isLoggedIn) {
+      navigate("/login");
+      return;
+    }
+
+    // Otherwise dispatch the upvote
     dispatch(upvotePost(postId));
   };
 
-  // Oy azaltma fonksiyonu
   const handleDownvote = () => {
     if (!postId) return;
+
+    // If user is not logged in, redirect to login
+    if (!isLoggedIn) {
+      navigate("/login");
+      return;
+    }
+
+    // Otherwise dispatch the downvote
     dispatch(downvotePost(postId));
   };
 

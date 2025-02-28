@@ -1,4 +1,3 @@
-// src/components/header/CustomNavbar.jsx
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Icon } from "@iconify/react";
@@ -35,7 +34,6 @@ export default function CustomNavbar() {
   const navbarLinks = [
     { name: "Ana Sayfa", path: "/" },
     { name: "Blog", path: "/blog/posts" },
-
     { name: "Araştırma", path: "/blog/category/arastirma" },
     { name: "Data Science", path: "/blog/category/data-science" },
     { name: "Machine Learning", path: "/blog/category/machine-learning" },
@@ -50,8 +48,8 @@ export default function CustomNavbar() {
 
   return (
     <>
-      <Navbar className="bg-gray-50 w-screen" maxWidth="lg">
-        <NavbarContent className="flex " justify="start">
+      <Navbar className="bg-gray-50 w-screen" maxWidth="xl">
+        <NavbarContent className="flex" justify="start">
           <AcmeLogo />
           <p className="font-bold text-inherit text-lg">Fin AI</p>
         </NavbarContent>
@@ -72,7 +70,7 @@ export default function CustomNavbar() {
             <DropdownTrigger color="secondary">
               <Button
                 variant="flat"
-                className="text-gray-900  text-sm hover:text-secondary"
+                className="text-gray-900 text-sm hover:text-secondary"
                 endContent={
                   <Icon icon="material-symbols:arrow-drop-down" width="20" />
                 }
@@ -90,19 +88,41 @@ export default function CustomNavbar() {
           </Dropdown>
         </NavbarContent>
 
-        <NavbarItem justify="start" className="mx-2 w-24">
-          <Button
-            variant="bordered"
-            color="secondary"
-            radius="lg"
-            fullWidth={true}
-            startContent={<Icon icon="material-symbols:search" width="16" />}
-            size="md"
-            onClick={() => setIsSearchOpen(true)}
-          >
-            Ara
-          </Button>
-        </NavbarItem>
+        {/* Sağ Tarafa Eklenen Arama ve Kullanıcı Butonları */}
+        <NavbarContent justify="end" className="gap-4">
+          <NavbarItem>
+            <Button
+              variant="bordered"
+              color="secondary"
+              radius="lg"
+              startContent={<Icon icon="material-symbols:search" width="16" />}
+              size="md"
+              onClick={() => setIsSearchOpen(true)}
+            >
+              Ara
+            </Button>
+          </NavbarItem>
+
+          {/* Login Icon */}
+          <NavbarItem>
+            <button
+              onClick={() => navigate("/login")}
+              className=" pl-4 hover:text-primary"
+            >
+              Login
+            </button>
+          </NavbarItem>
+
+          {/* Register Icon */}
+          <NavbarItem>
+            <button
+              onClick={() => navigate("/register")}
+              className=" hover:text-primary"
+            >
+              Register
+            </button>
+          </NavbarItem>
+        </NavbarContent>
       </Navbar>
 
       <SearchModal

@@ -25,6 +25,7 @@ import EditPostPage from "./pages/dashboard_pages/EditPostPage";
 import DashboardHomePage from "./pages/dashboard_pages/DashboardHomePage";
 import NewPostPage from "./pages/dashboard_pages/NewPostPage";
 import AllBlogPostsPage from "./pages/dashboard_pages/AllBlogPostsPage";
+import LoginPage from "./pages/other_pages/LoginPage";
 
 function App() {
   return (
@@ -40,6 +41,7 @@ function App() {
             <Route path="/about-us" element={<AboutUsPage />} />
             <Route path="/disclaimer" element={<DisclaimerPage />} />
             <Route path="/privacy-policy" element={<PrivacyPolicyPage />} />
+            <Route path="/login" element={<LoginPage />} />
             <Route
               path="/dashboard/home"
               element={

@@ -25,9 +25,9 @@ import EditPostPage from "./pages/dashboard_pages/EditPostPage";
 import DashboardHomePage from "./pages/dashboard_pages/DashboardHomePage";
 import NewPostPage from "./pages/dashboard_pages/NewPostPage";
 import AllBlogPostsPage from "./pages/dashboard_pages/AllBlogPostsPage";
-import LoginPage from "./pages/other_pages/LoginPage";
-import RegisterComponent from "./components/auth/RegisterComponent";
-import RegisterPage from "./pages/other_pages/RegisterPage";
+
+import LoginPage from "./pages/auth/LoginPage";
+import RegisterPage from "./pages/auth/RegisterPage";
 
 function App() {
   return (

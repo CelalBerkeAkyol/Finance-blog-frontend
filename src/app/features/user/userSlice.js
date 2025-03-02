@@ -5,15 +5,15 @@ import axios from "../../../api"; // Axios yapılandırmanızı kullanın
 // Kullanıcı giriş yapma thunk'ı
 export const loginUser = createAsyncThunk(
   "user/loginUser",
-  async ({ username, password }, thunkAPI) => {
+  async ({ email, password }, thunkAPI) => {
     try {
       console.info("loginUser: Giriş isteği gönderiliyor...", {
-        username,
+        email,
         password,
       });
       const response = await axios.post(
         "/auth/login",
-        { username, password },
+        { email, password },
         { withCredentials: true }
       );
       console.info(

@@ -12,11 +12,27 @@ import {
   DropdownItem,
 } from "@nextui-org/react";
 import SearchModal from "../yardımcılar/SearchModal";
-import { useSelector } from "react-redux";
+import { useSelector, useDispatch } from "react-redux";
+import { logoutUser } from "../../app/features/user/userSlice";
 
 export default function CustomNavbar() {
   const [isSearchOpen, setIsSearchOpen] = useState(false);
-  const navigate = useNavigate(); // Yönlendirme için `useNavigate` kullanılıyor.
+  const navigate = useNavigate();
+  const dispatch = useDispatch();
+
+  const { isLoggedIn, userInfo, isAdmin } = useSelector((state) => state.user);
+
+  const handleLogout = () => {
+    dispatch(logoutUser())
+      .unwrap()
+      .then(() => {
+        navigate("/");
+      })
+      .catch((err) => console.error("Logout failed", err));
+  };
+
+  const userName = userInfo?.username || "Guest";
+  const userRole = isAdmin ? "Admin" : "User";
 
   const navbarLinks = [
     { name: "Ana Sayfa", path: "/" },
@@ -32,7 +48,7 @@ export default function CustomNavbar() {
     { name: "Finans", path: "/blog/category/finans" },
     { name: "Kişisel Finans", path: "/blog/category/kişisel-finans" },
   ];
-  const { isLoggedIn } = useSelector((state) => state.user);
+
   return (
     <>
       <Navbar className="bg-gray-50 w-screen" maxWidth="xl">
@@ -40,7 +56,7 @@ export default function CustomNavbar() {
           <p className="font-bold text-inherit text-lg">Fin AI</p>
         </NavbarContent>
 
-        <NavbarContent className="hidden sm:flex " justify="center">
+        <NavbarContent className="hidden sm:flex" justify="center">
           {navbarLinks.map((item, index) => (
             <NavbarItem key={index}>
               <button
@@ -74,7 +90,6 @@ export default function CustomNavbar() {
           </Dropdown>
         </NavbarContent>
 
-        {/* Sağ Tarafa Eklenen Arama ve Kullanıcı Butonları */}
         <NavbarContent justify="center">
           <NavbarItem>
             <Button
@@ -88,9 +103,30 @@ export default function CustomNavbar() {
               Ara
             </Button>
           </NavbarItem>
-          {/* Login Icon */}
 
-          {!isLoggedIn && (
+          {/* Eğer kullanıcı giriş yapmışsa profil ve çıkış butonu */}
+          {isLoggedIn ? (
+            <>
+              <NavbarItem>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  startContent={<Icon icon="ic:round-person" width="20" />}
+                  onClick={() => navigate("/profile")}
+                >
+                  {userName} - {userRole}
+                </Button>
+              </NavbarItem>
+              <NavbarItem>
+                <Button
+                  variant="bordered"
+                  size="sm"
+                  startContent={<Icon icon="ic:round-logout" width="20" />}
+                  onClick={handleLogout}
+                ></Button>
+              </NavbarItem>
+            </>
+          ) : (
             <>
               <NavbarItem>
                 <button

@@ -12,7 +12,7 @@ export default function AuthorLoginComponent() {
     (state) => state.user
   );
   const [isVisible, setIsVisible] = useState(false);
-  const [formData, setFormData] = useState({ username: "", password: "" });
+  const [formData, setFormData] = useState({ email: "", password: "" });
 
   useEffect(() => {
     if (isSuccess) {
@@ -57,12 +57,12 @@ export default function AuthorLoginComponent() {
         <p className="pb-2 text-xl font-medium">Log In</p>
         <form className="flex flex-col gap-3" onSubmit={handleSubmit}>
           <Input
-            label="Username"
-            name="username"
-            placeholder="Enter your username"
+            label="email"
+            name="email"
+            placeholder="Enter your email"
             type="text"
             variant="bordered"
-            value={formData.username}
+            value={formData.email}
             onChange={handleChange}
             required
           />

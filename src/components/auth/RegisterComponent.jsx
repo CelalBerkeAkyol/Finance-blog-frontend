@@ -1,27 +1,55 @@
-import React from "react";
+import React, { useState } from "react";
 import { Button, Input, Checkbox, Link, Divider } from "@heroui/react";
 import { Icon } from "@iconify/react";
+import { useDispatch } from "react-redux";
+import { registerUser } from "../../app/features/user/userSlice";
 
 export default function RegisterComponent() {
-  const [isVisible, setIsVisible] = React.useState(false);
-  const [isConfirmVisible, setIsConfirmVisible] = React.useState(false);
+  const dispatch = useDispatch();
+  const [isVisible, setIsVisible] = useState(false);
+  const [isConfirmVisible, setIsConfirmVisible] = useState(false);
+  const [error, setError] = useState(null);
 
   const toggleVisibility = () => setIsVisible(!isVisible);
   const toggleConfirmVisibility = () => setIsConfirmVisible(!isConfirmVisible);
 
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    const formData = new FormData(e.target);
+    const userName = formData.get("username");
+    const email = formData.get("email");
+    const password = formData.get("password");
+    const confirmPassword = formData.get("confirmPassword");
+
+    // Şifre kontrolü
+    if (password !== confirmPassword) {
+      setError("Passwords do not match.");
+      return;
+    }
+    setError(null);
+
+    try {
+      const response = await dispatch(
+        registerUser({ userName, email, password })
+      ).unwrap();
+      console.log("Registration successful:", response);
+      // Kayıt sonrası yönlendirme veya bildirim ekleyebilirsiniz.
+    } catch (err) {
+      console.error("Registration failed:", err);
+      // Hata durumunda kullanıcıya bildirim ekleyebilirsiniz.
+    }
+  };
+
   return (
     <div className="flex h-full w-full items-center justify-center py-8">
-      <div className="flex w-full max-w-sm flex-col gap-4 rounded-large">
+      <div className="flex w-full max-w-sm flex-col gap-4 rounded-large bg-content1 px-8 pb-10 pt-6 shadow-small">
         <div className="flex flex-col items-center pb-6">
           <p className="text-xl font-medium">Welcome</p>
           <p className="text-small text-default-500">
             Create an account to get started
           </p>
         </div>
-        <form
-          className="flex flex-col gap-3"
-          onSubmit={(e) => e.preventDefault()}
-        >
+        <form className="flex flex-col gap-3" onSubmit={handleSubmit}>
           <div className="flex flex-col">
             <Input
               isRequired
@@ -107,6 +135,7 @@ export default function RegisterComponent() {
               variant="bordered"
             />
           </div>
+          {error && <p className="text-red-500 text-sm">{error}</p>}
           <Checkbox isRequired className="py-4" size="sm">
             I agree with the&nbsp;
             <Link href="#" size="sm">

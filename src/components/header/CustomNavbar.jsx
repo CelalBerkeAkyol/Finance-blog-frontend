@@ -12,6 +12,8 @@ import {
   DropdownItem,
 } from "@nextui-org/react";
 import SearchModal from "../yardımcılar/SearchModal";
+import { useDispatch, useSelector } from "react-redux";
+import { logoutUser, clearState } from "../../app/features/user/userSlice";
 
 // Logo Bileşeni
 export const AcmeLogo = () => {
@@ -29,7 +31,9 @@ export const AcmeLogo = () => {
 
 export default function CustomNavbar() {
   const [isSearchOpen, setIsSearchOpen] = useState(false);
-  const navigate = useNavigate(); // Yönlendirme için `useNavigate` kullanılıyor.
+  const navigate = useNavigate();
+  const dispatch = useDispatch();
+  const { isLoggedIn } = useSelector((state) => state.user);
 
   const navbarLinks = [
     { name: "Ana Sayfa", path: "/" },
@@ -45,6 +49,16 @@ export default function CustomNavbar() {
     { name: "Finans", path: "/blog/category/finans" },
     { name: "Kişisel Finans", path: "/blog/category/kişisel-finans" },
   ];
+
+  const handleLogout = async () => {
+    try {
+      await dispatch(logoutUser()).unwrap();
+      dispatch(clearState());
+      navigate("/");
+    } catch (error) {
+      console.error("Logout hatası:", error);
+    }
+  };
 
   return (
     <>
@@ -103,25 +117,35 @@ export default function CustomNavbar() {
             </Button>
           </NavbarItem>
 
-          {/* Login Icon */}
-          <NavbarItem>
-            <button
-              onClick={() => navigate("/login")}
-              className=" pl-4 hover:text-primary"
-            >
-              Login
-            </button>
-          </NavbarItem>
-
-          {/* Register Icon */}
-          <NavbarItem>
-            <button
-              onClick={() => navigate("/register")}
-              className=" hover:text-primary"
-            >
-              Register
-            </button>
-          </NavbarItem>
+          {isLoggedIn ? (
+            <NavbarItem>
+              <button
+                onClick={handleLogout}
+                className="pl-4 hover:text-primary"
+              >
+                Logout
+              </button>
+            </NavbarItem>
+          ) : (
+            <>
+              <NavbarItem>
+                <button
+                  onClick={() => navigate("/login")}
+                  className="pl-4 hover:text-primary"
+                >
+                  Login
+                </button>
+              </NavbarItem>
+              <NavbarItem>
+                <button
+                  onClick={() => navigate("/register")}
+                  className="hover:text-primary"
+                >
+                  Register
+                </button>
+              </NavbarItem>
+            </>
+          )}
         </NavbarContent>
       </Navbar>
 

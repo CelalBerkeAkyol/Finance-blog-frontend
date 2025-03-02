@@ -1,16 +1,42 @@
-import React from "react";
-import { Button, Input, Checkbox, Link, Form, Divider } from "@heroui/react";
+import React, { useState, useEffect } from "react";
+import { Button, Input, Checkbox, Link, Divider } from "@heroui/react";
 import { Icon } from "@iconify/react";
+import { useDispatch, useSelector } from "react-redux";
+import { loginUser, clearState } from "../../app/features/user/userSlice";
+import { useNavigate } from "react-router-dom";
 
 export default function LoginComponent() {
-  const [isVisible, setIsVisible] = React.useState(false);
+  const dispatch = useDispatch();
+  const navigate = useNavigate();
+  const { isLoading, isError, isSuccess, errorMessage, token } = useSelector(
+    (state) => state.user
+  );
+  const [isVisible, setIsVisible] = useState(false);
 
   const toggleVisibility = () => setIsVisible(!isVisible);
 
   const handleSubmit = (event) => {
     event.preventDefault();
-    console.log("handleSubmit");
+    const formData = new FormData(event.target);
+    const email = formData.get("email");
+    const password = formData.get("password");
+    dispatch(loginUser({ email, password }));
   };
+
+  useEffect(() => {
+    if (isSuccess || token) {
+      console.info("LoginComponent: Giriş başarılı, yönlendiriliyor.");
+      navigate("/blog/posts");
+    }
+    if (isError) {
+      console.error("LoginComponent: Giriş hatası:", errorMessage);
+      // Hata bildirimi ekleyebilirsiniz.
+    }
+    // Cleanup kısmını kaldırıyoruz, böylece kullanıcı state'i korunuyor.
+    // return () => {
+    //   dispatch(clearState());
+    // };
+  }, [isSuccess, isError, token, errorMessage, navigate, dispatch]);
 
   return (
     <div className="flex h-full w-full items-center justify-center pt-8">
@@ -20,11 +46,7 @@ export default function LoginComponent() {
           <p className="text-small text-default-500">to continue to Acme</p>
         </div>
 
-        <Form
-          className="flex flex-col gap-3"
-          validationBehavior="native"
-          onSubmit={handleSubmit}
-        >
+        <form className="flex flex-col gap-3" onSubmit={handleSubmit}>
           <Input
             isRequired
             label="Email Address"
@@ -66,15 +88,22 @@ export default function LoginComponent() {
               Forgot password?
             </Link>
           </div>
-          <Button className="w-full" color="primary" type="submit">
-            Sign In
+          <Button
+            className="w-full"
+            color="primary"
+            type="submit"
+            isDisabled={isLoading}
+          >
+            {isLoading ? "Loading..." : "Sign In"}
           </Button>
-        </Form>
+        </form>
+
         <div className="flex items-center gap-4 py-2">
           <Divider className="flex-1" />
           <p className="shrink-0 text-tiny text-default-500">OR</p>
           <Divider className="flex-1" />
         </div>
+
         <div className="flex flex-col gap-2">
           <Button
             startContent={<Icon icon="flat-color-icons:google" width={24} />}
@@ -91,6 +120,7 @@ export default function LoginComponent() {
             Continue with Github
           </Button>
         </div>
+
         <p className="text-center text-small">
           Need to create an account?&nbsp;
           <Link href="#" size="sm">

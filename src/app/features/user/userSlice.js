@@ -1,30 +1,49 @@
-// src/app/features/user/userSlice.js
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import axios from "../../../api"; // Axios yapılandırmanızı kullanın
 
 // Kullanıcı giriş yapma thunk'ı
 export const loginUser = createAsyncThunk(
   "user/loginUser",
-  async ({ username, password }, thunkAPI) => {
+  async ({ email, password }, thunkAPI) => {
     try {
       console.info("loginUser: Giriş isteği gönderiliyor...", {
-        username,
+        email,
         password,
       });
       const response = await axios.post(
         "/auth/login",
-        { username, password },
+        { email, password },
         { withCredentials: true }
       );
-      console.info(
-        "loginUser: Giriş başarılı! Backend'den gelen veri:",
-        response.data
-      );
+      console.info("loginUser: Giriş başarılı!", response.data);
       return response.data;
     } catch (error) {
       console.error("loginUser hata:", error.response?.data || error.message);
       return thunkAPI.rejectWithValue(
         error.response?.data?.error || "Giriş başarısız."
+      );
+    }
+  }
+);
+
+// Kullanıcı kayıt olma thunk'ı
+export const registerUser = createAsyncThunk(
+  "user/registerUser",
+  async (userData, thunkAPI) => {
+    try {
+      console.info("registerUser: Kayıt isteği gönderiliyor...", userData);
+      const response = await axios.post("/auth/register", userData, {
+        withCredentials: true,
+      });
+      console.info("registerUser: Kayıt başarılı!", response.data);
+      return response.data;
+    } catch (error) {
+      console.error(
+        "registerUser hata:",
+        error.response?.data || error.message
+      );
+      return thunkAPI.rejectWithValue(
+        error.response?.data?.error || "Kayıt başarısız."
       );
     }
   }
@@ -36,7 +55,6 @@ export const logoutUser = createAsyncThunk(
   async (_, thunkAPI) => {
     try {
       console.info("logoutUser: Çıkış işlemi başlatılıyor...");
-      // Port 5000'e istek yapılıyorsa, axios yapılandırmanızda baseURL varsa otomatik kullanılır.
       await axios.post("/auth/logout", {}, { withCredentials: true });
       console.info("logoutUser: Çıkış başarılı!");
       return true;
@@ -77,17 +95,20 @@ export const fetchUser = createAsyncThunk(
   }
 );
 
+const initialState = {
+  userInfo: null,
+  token: null,
+  isLoggedIn: false,
+  isAdmin: false,
+  isLoading: false,
+  isSuccess: false,
+  isError: false,
+  errorMessage: "",
+};
+
 const userSlice = createSlice({
   name: "user",
-  initialState: {
-    userInfo: null,
-    isLoggedIn: false,
-    isAdmin: false,
-    isLoading: false,
-    isSuccess: false,
-    isError: false,
-    errorMessage: "",
-  },
+  initialState,
   reducers: {
     clearState: (state) => {
       console.info("userSlice: State temizleniyor...");
@@ -113,18 +134,37 @@ const userSlice = createSlice({
         state.isSuccess = true;
         state.isLoggedIn = true;
         state.userInfo = action.payload.user;
-        if (action.payload?.userRole) {
-          state.isAdmin = action.payload.userRole === "admin";
-        } else {
-          console.warn("loginUser: userRole bilgisi eksik!");
-          state.isAdmin = false;
-        }
+        state.token = action.payload.token || null;
+        state.isAdmin = action.payload.user?.role === "admin";
       })
       .addCase(loginUser.rejected, (state, action) => {
         console.error("loginUser: Giriş başarısız!", action.payload);
         state.isLoading = false;
         state.isError = true;
         state.errorMessage = action.payload || "Giriş başarısız.";
+      })
+      // registerUser
+      .addCase(registerUser.pending, (state) => {
+        console.info("registerUser: Kayıt işlemi devam ediyor...");
+        state.isLoading = true;
+      })
+      .addCase(registerUser.fulfilled, (state, action) => {
+        console.info(
+          "registerUser: Kayıt başarılı. Güncellenen state:",
+          action.payload
+        );
+        state.isLoading = false;
+        state.isSuccess = true;
+        state.isLoggedIn = true;
+        state.userInfo = action.payload.user;
+        state.token = action.payload.token || null;
+        state.isAdmin = action.payload.user?.role === "admin";
+      })
+      .addCase(registerUser.rejected, (state, action) => {
+        console.error("registerUser: Kayıt başarısız!", action.payload);
+        state.isLoading = false;
+        state.isError = true;
+        state.errorMessage = action.payload || "Kayıt başarısız.";
       })
       // logoutUser
       .addCase(logoutUser.pending, (state) => {
@@ -136,6 +176,7 @@ const userSlice = createSlice({
         state.isLoading = false;
         state.isSuccess = true;
         state.userInfo = null;
+        state.token = null;
         state.isLoggedIn = false;
         state.isAdmin = false;
       })
@@ -161,12 +202,7 @@ const userSlice = createSlice({
         state.isSuccess = true;
         state.isLoggedIn = action.payload.valid;
         state.userInfo = action.payload.user;
-        if (action.payload.user?.role) {
-          state.isAdmin = action.payload.user.role === "admin";
-        } else {
-          console.warn("fetchUser: role bilgisi eksik!");
-          state.isAdmin = false;
-        }
+        state.isAdmin = action.payload.user?.role === "admin";
       })
       .addCase(fetchUser.rejected, (state, action) => {
         console.error(

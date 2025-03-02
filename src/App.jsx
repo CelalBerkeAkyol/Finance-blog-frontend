@@ -15,7 +15,7 @@ import CheatSheet from "./components/blog_components/blog_dashboard/helpers/Chea
 import AboutUsPage from "./pages/other_pages/AboutUsPage";
 import DisclaimerPage from "./pages/other_pages/DisclaimerPage";
 import PrivacyPolicyPage from "./pages/other_pages/PrivacyPolicyPage";
-import AuthorLoginPage from "./pages/dashboard_pages/AuthorLoginPage";
+
 {
   /* dashboard pages */
 }
@@ -38,7 +38,7 @@ function App() {
             <Route path="/" element={<HomePage />} />
 
             {/* Blog yazarları için */}
-            <Route path="/blog-admin/login" element={<AuthorLoginPage />} />
+
             <Route path="/plans" element={<PricePage />} />
             <Route path="/about-us" element={<AboutUsPage />} />
             <Route path="/disclaimer" element={<DisclaimerPage />} />

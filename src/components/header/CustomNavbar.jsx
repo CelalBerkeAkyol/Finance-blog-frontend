@@ -12,24 +12,27 @@ import {
   DropdownItem,
 } from "@nextui-org/react";
 import SearchModal from "../yardımcılar/SearchModal";
-
-// Logo Bileşeni
-export const AcmeLogo = () => {
-  return (
-    <svg fill="none" height="36" viewBox="0 0 32 32" width="36">
-      <path
-        clipRule="evenodd"
-        d="M17.6482 10.1305L15.8785 7.02583L7.02979 22.5499H10.5278L17.6482 10.1305ZM19.8798 14.0457L18.11 17.1983L19.394 19.4511H16.8453L15.1056 22.5499H24.7272L19.8798 14.0457Z"
-        fill="currentColor"
-        fillRule="evenodd"
-      />
-    </svg>
-  );
-};
+import { useSelector, useDispatch } from "react-redux";
+import { logoutUser } from "../../app/features/user/userSlice";
 
 export default function CustomNavbar() {
   const [isSearchOpen, setIsSearchOpen] = useState(false);
-  const navigate = useNavigate(); // Yönlendirme için `useNavigate` kullanılıyor.
+  const navigate = useNavigate();
+  const dispatch = useDispatch();
+
+  const { isLoggedIn, userInfo, isAdmin } = useSelector((state) => state.user);
+
+  const handleLogout = () => {
+    dispatch(logoutUser())
+      .unwrap()
+      .then(() => {
+        navigate("/");
+      })
+      .catch((err) => console.error("Logout failed", err));
+  };
+
+  const userName = userInfo?.username || "Guest";
+  const userRole = isAdmin ? "Admin" : "User";
 
   const navbarLinks = [
     { name: "Ana Sayfa", path: "/" },
@@ -49,12 +52,11 @@ export default function CustomNavbar() {
   return (
     <>
       <Navbar className="bg-gray-50 w-screen" maxWidth="xl">
-        <NavbarContent className="flex" justify="start">
-          <AcmeLogo />
+        <NavbarContent className="flex" justify="center">
           <p className="font-bold text-inherit text-lg">Fin AI</p>
         </NavbarContent>
 
-        <NavbarContent className="hidden sm:flex gap-2" justify="start">
+        <NavbarContent className="hidden sm:flex" justify="center">
           {navbarLinks.map((item, index) => (
             <NavbarItem key={index}>
               <button
@@ -88,14 +90,13 @@ export default function CustomNavbar() {
           </Dropdown>
         </NavbarContent>
 
-        {/* Sağ Tarafa Eklenen Arama ve Kullanıcı Butonları */}
-        <NavbarContent justify="end" className="gap-4">
+        <NavbarContent justify="center">
           <NavbarItem>
             <Button
               variant="bordered"
               color="secondary"
               radius="lg"
-              startContent={<Icon icon="material-symbols:search" width="16" />}
+              startContent={<Icon icon="material-symbols:search" width="14" />}
               size="md"
               onClick={() => setIsSearchOpen(true)}
             >
@@ -103,25 +104,49 @@ export default function CustomNavbar() {
             </Button>
           </NavbarItem>
 
-          {/* Login Icon */}
-          <NavbarItem>
-            <button
-              onClick={() => navigate("/login")}
-              className=" pl-4 hover:text-primary"
-            >
-              Login
-            </button>
-          </NavbarItem>
+          {/* Eğer kullanıcı giriş yapmışsa profil ve çıkış butonu */}
+          {isLoggedIn ? (
+            <>
+              <NavbarItem>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  startContent={<Icon icon="ic:round-person" width="20" />}
+                  onClick={() => navigate("/profile")}
+                >
+                  {userName} - {userRole}
+                </Button>
+              </NavbarItem>
+              <NavbarItem>
+                <Button
+                  variant="bordered"
+                  size="sm"
+                  startContent={<Icon icon="ic:round-logout" width="20" />}
+                  onClick={handleLogout}
+                ></Button>
+              </NavbarItem>
+            </>
+          ) : (
+            <>
+              <NavbarItem>
+                <button
+                  onClick={() => navigate("/login")}
+                  className="pl-4 hover:text-primary"
+                >
+                  Login
+                </button>
+              </NavbarItem>
 
-          {/* Register Icon */}
-          <NavbarItem>
-            <button
-              onClick={() => navigate("/register")}
-              className=" hover:text-primary"
-            >
-              Register
-            </button>
-          </NavbarItem>
+              <NavbarItem>
+                <button
+                  onClick={() => navigate("/register")}
+                  className="hover:text-primary"
+                >
+                  Register
+                </button>
+              </NavbarItem>
+            </>
+          )}
         </NavbarContent>
       </Navbar>
 

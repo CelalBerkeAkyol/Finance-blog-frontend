@@ -23,7 +23,7 @@ function ProtectedRoute({ children }) {
   }, [dispatch]);
 
   if (isValid === null) return <p>Loading...</p>; // Doğrulama bekleniyor
-  return isValid ? children : <Navigate to="/blog-admin/login" />;
+  return isValid ? children : <Navigate to="/login" />;
 }
 
 export default ProtectedRoute;

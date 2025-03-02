@@ -1,43 +1,71 @@
-import React from "react";
-import { Button, Input, Checkbox, Link, Form, Divider } from "@heroui/react";
+import React, { useState, useEffect } from "react";
+import { Button, Input, Checkbox, Link } from "@nextui-org/react";
 import { Icon } from "@iconify/react";
+import { useDispatch, useSelector } from "react-redux";
+import { loginUser, clearState } from "../../app/features/user/userSlice";
+import { useNavigate } from "react-router-dom";
 
 export default function LoginComponent() {
-  const [isVisible, setIsVisible] = React.useState(false);
+  const dispatch = useDispatch();
+  const navigate = useNavigate();
+  const { isLoading, isError, isSuccess, errorMessage } = useSelector(
+    (state) => state.user
+  );
+  const [isVisible, setIsVisible] = useState(false);
+  const [formData, setFormData] = useState({ email: "", password: "" });
 
-  const toggleVisibility = () => setIsVisible(!isVisible);
+  useEffect(() => {
+    if (isSuccess) {
+      console.info("Login Component: Giriş başarılı, yönlendiriliyor.");
+      navigate("/");
+    }
+    if (isError) {
+      console.error("Login Component: Giriş hatası:", errorMessage);
+      // Örneğin, toast mesajı eklenebilir.
+    }
+    return () => {
+      dispatch(clearState());
+    };
+  }, [isSuccess, isError, navigate, dispatch, errorMessage]);
 
-  const handleSubmit = (event) => {
-    event.preventDefault();
-    console.log("handleSubmit");
+  const toggleVisibility = () => {
+    console.info("Login Component: Şifre görünürlüğü değiştiriliyor.");
+    setIsVisible(!isVisible);
+  };
+
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setFormData({ ...formData, [name]: value });
+  };
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    console.info("Login Component: Giriş formu gönderiliyor.", formData);
+    dispatch(loginUser(formData));
   };
 
   return (
-    <div className="flex h-full w-full items-center justify-center pt-8">
+    <div className="flex h-full justify-center my-14">
       <div className="flex w-full max-w-sm flex-col gap-4 rounded-large bg-content1 px-8 pb-10 pt-6 shadow-small">
-        <div className="flex flex-col gap-1">
-          <h1 className="text-large font-medium">Sign in to your account</h1>
-          <p className="text-small text-default-500">to continue to Acme</p>
-        </div>
-
-        <Form
-          className="flex flex-col gap-3"
-          validationBehavior="native"
-          onSubmit={handleSubmit}
-        >
+        <p className="pb-2 text-xl font-medium">Log In</p>
+        <form className="flex flex-col gap-3" onSubmit={handleSubmit}>
           <Input
-            isRequired
-            label="Email Address"
+            label="email"
             name="email"
             placeholder="Enter your email"
-            type="email"
+            type="text"
             variant="bordered"
+            value={formData.email}
+            onChange={handleChange}
+            required
           />
-
           <Input
-            isRequired
             endContent={
-              <button type="button" onClick={toggleVisibility}>
+              <button
+                type="button"
+                onClick={toggleVisibility}
+                className="focus:outline-none"
+              >
                 {isVisible ? (
                   <Icon
                     className="pointer-events-none text-2xl text-default-400"
@@ -56,9 +84,12 @@ export default function LoginComponent() {
             placeholder="Enter your password"
             type={isVisible ? "text" : "password"}
             variant="bordered"
+            value={formData.password}
+            onChange={handleChange}
+            required
           />
-
-          <div className="flex w-full items-center justify-between px-1 py-2">
+          {isError && <p className="text-red-500 text-sm">{errorMessage}</p>}
+          <div className="flex items-center justify-between px-1 py-2">
             <Checkbox name="remember" size="sm">
               Remember me
             </Checkbox>
@@ -66,37 +97,10 @@ export default function LoginComponent() {
               Forgot password?
             </Link>
           </div>
-          <Button className="w-full" color="primary" type="submit">
-            Sign In
+          <Button color="primary" type="submit" isDisabled={isLoading}>
+            {isLoading ? "Loading..." : "Log In"}
           </Button>
-        </Form>
-        <div className="flex items-center gap-4 py-2">
-          <Divider className="flex-1" />
-          <p className="shrink-0 text-tiny text-default-500">OR</p>
-          <Divider className="flex-1" />
-        </div>
-        <div className="flex flex-col gap-2">
-          <Button
-            startContent={<Icon icon="flat-color-icons:google" width={24} />}
-            variant="bordered"
-          >
-            Continue with Google
-          </Button>
-          <Button
-            startContent={
-              <Icon className="text-default-500" icon="fe:github" width={24} />
-            }
-            variant="bordered"
-          >
-            Continue with Github
-          </Button>
-        </div>
-        <p className="text-center text-small">
-          Need to create an account?&nbsp;
-          <Link href="#" size="sm">
-            Sign Up
-          </Link>
-        </p>
+        </form>
       </div>
     </div>
   );

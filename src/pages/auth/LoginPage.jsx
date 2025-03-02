@@ -1,4 +1,4 @@
-import AuthorLoginComponent from "../../components/auth/AuthtorLoginComponent";
+import LoginComponent from "../../components/auth/LoginComponent";
 import BannerComponent from "../../components/header/BannerComponent";
 import CustomNavbar from "../../components/header/CustomNavbar";
 
@@ -7,7 +7,7 @@ function LoginPage() {
     <>
       <BannerComponent />
       <CustomNavbar />
-      <AuthorLoginComponent />
+      <LoginComponent />
     </>
   );
 }

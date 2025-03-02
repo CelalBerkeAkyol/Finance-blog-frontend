@@ -5,10 +5,10 @@ import { useDispatch, useSelector } from "react-redux";
 import { loginUser, clearState } from "../../app/features/user/userSlice";
 import { useNavigate } from "react-router-dom";
 
-export default function AuthorLoginComponent() {
+export default function LoginComponent() {
   const dispatch = useDispatch();
   const navigate = useNavigate();
-  const { isLoading, isError, isSuccess, errorMessage, token } = useSelector(
+  const { isLoading, isError, isSuccess, errorMessage } = useSelector(
     (state) => state.user
   );
   const [isVisible, setIsVisible] = useState(false);
@@ -16,11 +16,11 @@ export default function AuthorLoginComponent() {
 
   useEffect(() => {
     if (isSuccess) {
-      console.info("AuthorLoginComponent: Giriş başarılı, yönlendiriliyor.");
-      navigate("/dashboard/home");
+      console.info("Login Component: Giriş başarılı, yönlendiriliyor.");
+      navigate("/");
     }
     if (isError) {
-      console.error("AuthorLoginComponent: Giriş hatası:", errorMessage);
+      console.error("Login Component: Giriş hatası:", errorMessage);
       // Örneğin, toast mesajı eklenebilir.
     }
     return () => {
@@ -28,15 +28,8 @@ export default function AuthorLoginComponent() {
     };
   }, [isSuccess, isError, navigate, dispatch, errorMessage]);
 
-  useEffect(() => {
-    if (token) {
-      console.info("AuthorLoginComponent: Token mevcut, yönlendiriliyor.");
-      navigate("/dashboard/home");
-    }
-  }, [token, navigate]);
-
   const toggleVisibility = () => {
-    console.info("AuthorLoginComponent: Şifre görünürlüğü değiştiriliyor.");
+    console.info("Login Component: Şifre görünürlüğü değiştiriliyor.");
     setIsVisible(!isVisible);
   };
 
@@ -47,7 +40,7 @@ export default function AuthorLoginComponent() {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    console.info("AuthorLoginComponent: Giriş formu gönderiliyor.", formData);
+    console.info("Login Component: Giriş formu gönderiliyor.", formData);
     dispatch(loginUser(formData));
   };
 

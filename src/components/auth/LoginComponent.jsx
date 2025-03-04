@@ -26,7 +26,7 @@ export default function LoginComponent() {
     return () => {
       dispatch(clearState());
     };
-  }, [isSuccess, isError, navigate, dispatch, errorMessage]);
+  }, [isSuccess, isError, errorMessage]);
 
   const toggleVisibility = () => {
     console.info("Login Component: Şifre görünürlüğü değiştiriliyor.");

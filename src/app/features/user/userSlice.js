@@ -113,12 +113,8 @@ const userSlice = createSlice({
         state.isSuccess = true;
         state.isLoggedIn = true;
         state.userInfo = action.payload.user;
-        if (action.payload?.userRole) {
-          state.isAdmin = action.payload.userRole === "admin";
-        } else {
-          console.warn("loginUser: userRole bilgisi eksik!");
-          state.isAdmin = false;
-        }
+        // Eğer role bilgisi admin kontrolü için kullanılacaksa:
+        state.isAdmin = action.payload.user?.role === "admin";
       })
       .addCase(loginUser.rejected, (state, action) => {
         console.error("loginUser: Giriş başarısız!", action.payload);

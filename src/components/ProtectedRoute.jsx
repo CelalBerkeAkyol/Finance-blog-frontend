@@ -10,9 +10,14 @@ function ProtectedRoute({ children }) {
 
   useEffect(() => {
     const verifyToken = async () => {
+      if (userInfo) {
+        setIsValid(true); // Kullanıcı hali hazırda varsa, direkt geç
+        console.log("Protected Route: ", userInfo);
+        return;
+      }
       try {
-        const response = await dispatch(fetchUser()).unwrap(); // Kullanıcıyı Redux state'e yükle
-        setIsValid(response.valid);
+        await dispatch(fetchUser()).unwrap();
+        setIsValid(true);
       } catch (error) {
         console.error("Doğrulama hatası:", error);
         setIsValid(false);
@@ -20,9 +25,10 @@ function ProtectedRoute({ children }) {
     };
 
     verifyToken();
-  }, [dispatch]);
+  }, [dispatch, userInfo]);
 
-  if (isValid === null) return <p>Loading...</p>; // Doğrulama bekleniyor
+  if (isValid === null) return <p>Loading...</p>;
+
   return isValid ? children : <Navigate to="/login" />;
 }
 

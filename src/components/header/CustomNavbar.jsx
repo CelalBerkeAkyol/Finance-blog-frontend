@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { Icon } from "@iconify/react";
 import {
@@ -16,6 +16,13 @@ import { useSelector, useDispatch } from "react-redux";
 import { logoutUser } from "../../app/features/user/userSlice";
 
 export default function CustomNavbar() {
+  const renderCount = useRef(0);
+
+  // Her render olduğunda sayaç artar ve konsola yazılır
+  renderCount.current += 1;
+  console.log(
+    `BannerComponent render edildi. Toplam render sayısı: ${renderCount.current}`
+  );
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const navigate = useNavigate();
   const dispatch = useDispatch();

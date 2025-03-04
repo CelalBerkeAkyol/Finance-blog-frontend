@@ -28,8 +28,9 @@ import AllBlogPostsPage from "./pages/dashboard_pages/AllBlogPostsPage";
 
 import LoginPage from "./pages/auth/LoginPage";
 import RegisterPage from "./pages/auth/RegisterPage";
-
+import { logRender } from "./utils/LogRender";
 function App() {
+  logRender("App");
   return (
     <div className="min-h-screen flex flex-col">
       <Router>

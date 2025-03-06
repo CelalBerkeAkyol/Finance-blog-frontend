@@ -12,8 +12,9 @@ import {
   DropdownItem,
 } from "@nextui-org/react";
 import SearchModal from "../yardımcılar/SearchModal";
-import { useSelector, useDispatch } from "react-redux";
-import { logoutUser } from "../../app/features/user/userSlice";
+import { useSelector } from "react-redux";
+
+import LogoutComponent from "../auth/LogoutComponent";
 
 export default function CustomNavbar() {
   const renderCount = useRef(0);
@@ -25,18 +26,8 @@ export default function CustomNavbar() {
   );
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const navigate = useNavigate();
-  const dispatch = useDispatch();
 
   const { isLoggedIn, userInfo, isAdmin } = useSelector((state) => state.user);
-
-  const handleLogout = () => {
-    dispatch(logoutUser())
-      .unwrap()
-      .then(() => {
-        navigate("/");
-      })
-      .catch((err) => console.error("Logout failed", err));
-  };
 
   const userName = userInfo?.username || "Guest";
   const userRole = isAdmin ? "Admin" : "User";
@@ -125,12 +116,7 @@ export default function CustomNavbar() {
                 </Button>
               </NavbarItem>
               <NavbarItem>
-                <Button
-                  variant="bordered"
-                  size="sm"
-                  startContent={<Icon icon="ic:round-logout" width="20" />}
-                  onClick={handleLogout}
-                ></Button>
+                <LogoutComponent />
               </NavbarItem>
             </>
           ) : (

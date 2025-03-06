@@ -38,6 +38,7 @@ export const logoutUser = createAsyncThunk(
       console.info("logoutUser: Çıkış işlemi başlatılıyor...");
       // Port 5000'e istek yapılıyorsa, axios yapılandırmanızda baseURL varsa otomatik kullanılır.
       await axios.post("/auth/logout", {}, { withCredentials: true });
+
       console.info("logoutUser: Çıkış başarılı!");
       return true;
     } catch (error) {
@@ -76,7 +77,37 @@ export const fetchUser = createAsyncThunk(
     }
   }
 );
-
+// user register thunk
+export const registerUser = createAsyncThunk(
+  "user/registerUser",
+  async ({ userName, email, password }, thunkAPI) => {
+    try {
+      console.info("registerUser: Registration request is being sent...", {
+        userName,
+        email,
+        password,
+      });
+      const response = await axios.post(
+        "/auth/register",
+        { userName, email, password },
+        { withCredentials: true }
+      );
+      console.info(
+        "registerUser: Registration successful! Data from backend:",
+        response.data
+      );
+      return response.data;
+    } catch (error) {
+      console.error(
+        "registerUser error:",
+        error.response?.data || error.message
+      );
+      return thunkAPI.rejectWithValue(
+        error.response?.data?.error || "Registration failed."
+      );
+    }
+  }
+);
 const userSlice = createSlice({
   name: "user",
   initialState: {
@@ -121,6 +152,28 @@ const userSlice = createSlice({
         state.isLoading = false;
         state.isError = true;
         state.errorMessage = action.payload || "Giriş başarısız.";
+      })
+      // register
+      .addCase(registerUser.pending, (state) => {
+        console.info("registerUser: Registration is in progress...");
+        state.isLoading = true;
+      })
+      .addCase(registerUser.fulfilled, (state, action) => {
+        console.info(
+          "registerUser: Registration successful. Updated state:",
+          action.payload
+        );
+        state.isLoading = false;
+        state.isSuccess = true;
+        state.userInfo = action.payload.user;
+        state.isLoggedIn = true;
+        state.isAdmin = action.payload.user?.role === "admin";
+      })
+      .addCase(registerUser.rejected, (state, action) => {
+        console.error("registerUser: Registration failed!", action.payload);
+        state.isLoading = false;
+        state.isError = true;
+        state.errorMessage = action.payload || "Registration failed.";
       })
       // logoutUser
       .addCase(logoutUser.pending, (state) => {

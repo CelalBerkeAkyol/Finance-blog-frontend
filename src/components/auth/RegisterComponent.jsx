@@ -1,13 +1,38 @@
 import React from "react";
+import { useDispatch, useSelector } from "react-redux";
+import { registerUser } from "../../app/features/user/userSlice";
 import { Button, Input, Checkbox, Link, Divider } from "@heroui/react";
 import { Icon } from "@iconify/react";
 
 export default function RegisterComponent() {
   const [isVisible, setIsVisible] = React.useState(false);
   const [isConfirmVisible, setIsConfirmVisible] = React.useState(false);
+  const dispatch = useDispatch();
+  const [formData, setFormData] = React.useState({
+    userName: "",
+    email: "",
+    password: "",
+    confirmPassword: "",
+  });
 
   const toggleVisibility = () => setIsVisible(!isVisible);
   const toggleConfirmVisibility = () => setIsConfirmVisible(!isConfirmVisible);
+
+  const handleChange = (e) => {
+    setFormData({
+      ...formData,
+      [e.target.name]: e.target.value,
+    });
+  };
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    if (formData.password !== formData.confirmPassword) {
+      alert("Passwords do not match");
+      return;
+    }
+    dispatch(registerUser(formData));
+  };
 
   return (
     <div className="flex h-full w-full items-center justify-center py-8">
@@ -18,10 +43,7 @@ export default function RegisterComponent() {
             Create an account to get started
           </p>
         </div>
-        <form
-          className="flex flex-col gap-3"
-          onSubmit={(e) => e.preventDefault()}
-        >
+        <form className="flex flex-col gap-3" onSubmit={handleSubmit}>
           <div className="flex flex-col">
             <Input
               isRequired
@@ -31,10 +53,11 @@ export default function RegisterComponent() {
                   "rounded-b-none data-[hover=true]:z-10 group-data-[focus-visible=true]:z-10",
               }}
               label="Username"
-              name="username"
-              placeholder="Enter your username"
+              name="userName"
+              placeholder="Enter your userName"
               type="text"
               variant="bordered"
+              onChange={handleChange}
             />
 
             <Input
@@ -49,6 +72,7 @@ export default function RegisterComponent() {
               placeholder="Enter your email"
               type="email"
               variant="bordered"
+              onChange={handleChange}
             />
 
             <Input
@@ -78,6 +102,7 @@ export default function RegisterComponent() {
               placeholder="Enter your password"
               type={isVisible ? "text" : "password"}
               variant="bordered"
+              onChange={handleChange}
             />
 
             <Input
@@ -105,6 +130,7 @@ export default function RegisterComponent() {
               placeholder="Confirm your password"
               type={isConfirmVisible ? "text" : "password"}
               variant="bordered"
+              onChange={handleChange}
             />
           </div>
           <Checkbox isRequired className="py-4" size="sm">

@@ -29,7 +29,7 @@ export default function CustomNavbar() {
 
   const { isLoggedIn, userInfo, isAdmin } = useSelector((state) => state.user);
 
-  const userName = userInfo?.username || "Guest";
+  const userName = userInfo?.username || userInfo?.userName || "Guest";
   const userRole = isAdmin ? "Admin" : "User";
 
   const navbarLinks = [

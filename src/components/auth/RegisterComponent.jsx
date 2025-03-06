@@ -1,22 +1,30 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { registerUser } from "../../app/features/user/userSlice";
+import { registerUser, clearState } from "../../app/features/user/userSlice";
 import { Button, Input, Checkbox, Link, Divider } from "@heroui/react";
 import { Icon } from "@iconify/react";
+import { useNavigate } from "react-router-dom";
 
 export default function RegisterComponent() {
-  const [isVisible, setIsVisible] = React.useState(false);
-  const [isConfirmVisible, setIsConfirmVisible] = React.useState(false);
   const dispatch = useDispatch();
-  const [formData, setFormData] = React.useState({
+  const navigate = useNavigate();
+
+  const { isSuccess, isError, errorMessage } = useSelector(
+    (state) => state.user
+  );
+
+  const [formData, setFormData] = useState({
     userName: "",
     email: "",
     password: "",
     confirmPassword: "",
   });
 
-  const toggleVisibility = () => setIsVisible(!isVisible);
-  const toggleConfirmVisibility = () => setIsConfirmVisible(!isConfirmVisible);
+  const [isVisible, setIsVisible] = useState(false);
+  const [isConfirmVisible, setIsConfirmVisible] = useState(false);
+
+  const toggleVisibility = () => setIsVisible((prev) => !prev);
+  const toggleConfirmVisibility = () => setIsConfirmVisible((prev) => !prev);
 
   const handleChange = (e) => {
     setFormData({
@@ -34,6 +42,23 @@ export default function RegisterComponent() {
     dispatch(registerUser(formData));
   };
 
+  // Kayıt başarılı olduğunda yönlendirme ve state temizleme
+  useEffect(() => {
+    if (isSuccess) {
+      console.info("Register successful. Redirecting to login page.");
+      dispatch(clearState()); // State temizliği
+      navigate("/"); // Login sayfasına yönlendirme
+    }
+
+    if (isError) {
+      console.error("Register failed:", errorMessage);
+    }
+
+    return () => {
+      dispatch(clearState()); // Component unmount olduğunda state sıfırlama
+    };
+  }, [isSuccess, isError, errorMessage, dispatch, navigate]);
+
   return (
     <div className="flex h-full w-full items-center justify-center py-8">
       <div className="flex w-full max-w-sm flex-col gap-4 rounded-large">
@@ -43,115 +68,96 @@ export default function RegisterComponent() {
             Create an account to get started
           </p>
         </div>
+
         <form className="flex flex-col gap-3" onSubmit={handleSubmit}>
-          <div className="flex flex-col">
-            <Input
-              isRequired
-              classNames={{
-                base: "-mb-[2px]",
-                inputWrapper:
-                  "rounded-b-none data-[hover=true]:z-10 group-data-[focus-visible=true]:z-10",
-              }}
-              label="Username"
-              name="userName"
-              placeholder="Enter your userName"
-              type="text"
-              variant="bordered"
-              onChange={handleChange}
-            />
+          <Input
+            isRequired
+            label="Username"
+            name="userName"
+            placeholder="Enter your userName"
+            type="text"
+            variant="bordered"
+            onChange={handleChange}
+          />
 
-            <Input
-              isRequired
-              classNames={{
-                base: "-mb-[2px]",
-                inputWrapper:
-                  "rounded-none data-[hover=true]:z-10 group-data-[focus-visible=true]:z-10",
-              }}
-              label="Email Address"
-              name="email"
-              placeholder="Enter your email"
-              type="email"
-              variant="bordered"
-              onChange={handleChange}
-            />
+          <Input
+            isRequired
+            label="Email Address"
+            name="email"
+            placeholder="Enter your email"
+            type="email"
+            variant="bordered"
+            onChange={handleChange}
+          />
 
-            <Input
-              isRequired
-              classNames={{
-                base: "-mb-[2px]",
-                inputWrapper:
-                  "rounded-none data-[hover=true]:z-10 group-data-[focus-visible=true]:z-10",
-              }}
-              endContent={
-                <button type="button" onClick={toggleVisibility}>
-                  {isVisible ? (
-                    <Icon
-                      className="pointer-events-none text-2xl text-default-400"
-                      icon="solar:eye-closed-linear"
-                    />
-                  ) : (
-                    <Icon
-                      className="pointer-events-none text-2xl text-default-400"
-                      icon="solar:eye-bold"
-                    />
-                  )}
-                </button>
-              }
-              label="Password"
-              name="password"
-              placeholder="Enter your password"
-              type={isVisible ? "text" : "password"}
-              variant="bordered"
-              onChange={handleChange}
-            />
+          <Input
+            isRequired
+            label="Password"
+            name="password"
+            placeholder="Enter your password"
+            type={isVisible ? "text" : "password"}
+            variant="bordered"
+            endContent={
+              <button type="button" onClick={toggleVisibility}>
+                <Icon
+                  className="pointer-events-none text-2xl text-default-400"
+                  icon={
+                    isVisible ? "solar:eye-closed-linear" : "solar:eye-bold"
+                  }
+                />
+              </button>
+            }
+            onChange={handleChange}
+          />
 
-            <Input
-              isRequired
-              classNames={{
-                inputWrapper: "rounded-t-none",
-              }}
-              endContent={
-                <button type="button" onClick={toggleConfirmVisibility}>
-                  {isConfirmVisible ? (
-                    <Icon
-                      className="pointer-events-none text-2xl text-default-400"
-                      icon="solar:eye-closed-linear"
-                    />
-                  ) : (
-                    <Icon
-                      className="pointer-events-none text-2xl text-default-400"
-                      icon="solar:eye-bold"
-                    />
-                  )}
-                </button>
-              }
-              label="Confirm Password"
-              name="confirmPassword"
-              placeholder="Confirm your password"
-              type={isConfirmVisible ? "text" : "password"}
-              variant="bordered"
-              onChange={handleChange}
-            />
-          </div>
+          <Input
+            isRequired
+            label="Confirm Password"
+            name="confirmPassword"
+            placeholder="Confirm your password"
+            type={isConfirmVisible ? "text" : "password"}
+            variant="bordered"
+            endContent={
+              <button type="button" onClick={toggleConfirmVisibility}>
+                <Icon
+                  className="pointer-events-none text-2xl text-default-400"
+                  icon={
+                    isConfirmVisible
+                      ? "solar:eye-closed-linear"
+                      : "solar:eye-bold"
+                  }
+                />
+              </button>
+            }
+            onChange={handleChange}
+          />
+
           <Checkbox isRequired className="py-4" size="sm">
             I agree with the&nbsp;
             <Link href="#" size="sm">
               Terms
             </Link>
-            &nbsp; and&nbsp;
+            &nbsp;and&nbsp;
             <Link href="#" size="sm">
               Privacy Policy
             </Link>
           </Checkbox>
+
           <Button color="primary" type="submit">
             Sign Up
           </Button>
         </form>
+
+        {isError && (
+          <p className="text-red-500 text-sm text-center">{errorMessage}</p>
+        )}
+
         <div className="flex items-center gap-4 py-2">
           <Divider className="flex-1" />
           <p className="shrink-0 text-tiny text-default-500">OR</p>
           <Divider className="flex-1" />
         </div>
+
         <div className="flex flex-col gap-2">
           <Button
             startContent={<Icon icon="flat-color-icons:google" width={24} />}
@@ -168,9 +174,10 @@ export default function RegisterComponent() {
             Sign Up with Github
           </Button>
         </div>
+
         <p className="text-center text-small">
           Already have an account?&nbsp;
-          <Link href="#" size="sm">
+          <Link href="/login" size="sm">
             Log In
           </Link>
         </p>

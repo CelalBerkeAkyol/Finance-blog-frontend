@@ -19,6 +19,10 @@ import {
   ModalBody,
   ModalFooter,
   useDisclosure,
+  Dropdown,
+  DropdownTrigger,
+  DropdownMenu,
+  DropdownItem,
 } from "@nextui-org/react";
 import { Icon } from "@iconify/react";
 
@@ -31,6 +35,12 @@ const UserListComponent = () => {
   const [deleteLoading, setDeleteLoading] = useState(false);
   const [deleteError, setDeleteError] = useState(null);
   const { isOpen, onOpen, onClose } = useDisclosure();
+
+  // Rol değiştirme modalı için state'ler
+  const [roleModalOpen, setRoleModalOpen] = useState(false);
+  const [selectedRole, setSelectedRole] = useState("");
+  const [roleUpdateLoading, setRoleUpdateLoading] = useState(false);
+  const [roleUpdateError, setRoleUpdateError] = useState(null);
 
   // Pagination state
   const [page, setPage] = useState(1);
@@ -87,11 +97,57 @@ const UserListComponent = () => {
     }
   };
 
+  // Kullanıcı rolünü güncelleme işlemi
+  const handleUpdateRole = async () => {
+    if (!selectedUser || !selectedRole) return;
+
+    try {
+      setRoleUpdateLoading(true);
+      setRoleUpdateError(null);
+
+      const response = await axios.patch(
+        `/user/${selectedUser._id}/role`,
+        { role: selectedRole },
+        { withCredentials: true }
+      );
+
+      console.info(
+        `Kullanıcı rolü başarıyla güncellendi: ${selectedUser._id}, Yeni rol: ${selectedRole}`
+      );
+
+      // Kullanıcı listesini güncelle
+      setUsers(
+        users.map((user) =>
+          user._id === selectedUser._id ? { ...user, role: selectedRole } : user
+        )
+      );
+
+      // Modal'ı kapat
+      setRoleModalOpen(false);
+    } catch (err) {
+      console.error("Kullanıcı rol güncelleme hatası:", err);
+      setRoleUpdateError(
+        err.response?.data?.message ||
+          "Kullanıcı rolü güncellenirken bir hata oluştu"
+      );
+    } finally {
+      setRoleUpdateLoading(false);
+    }
+  };
+
   // Silme modalını aç
   const openDeleteModal = (user) => {
     setSelectedUser(user);
     setDeleteError(null);
     onOpen();
+  };
+
+  // Rol değiştirme modalını aç
+  const openRoleModal = (user) => {
+    setSelectedUser(user);
+    setSelectedRole(user.role || "user");
+    setRoleUpdateError(null);
+    setRoleModalOpen(true);
   };
 
   // Component mount olduğunda kullanıcıları getir
@@ -135,7 +191,7 @@ const UserListComponent = () => {
       case "admin":
         color = "danger";
         break;
-      case "editor":
+      case "author":
         color = "warning";
         break;
       default:
@@ -143,7 +199,7 @@ const UserListComponent = () => {
     }
     return (
       <Chip color={color} size="sm" variant="flat">
-        {role || "HATA"}
+        {role || "User"}
       </Chip>
     );
   };
@@ -161,9 +217,14 @@ const UserListComponent = () => {
   const renderActions = (user) => {
     return (
       <div className="flex gap-2">
-        <Tooltip content="Edit User">
-          <Button isIconOnly size="sm" variant="light">
-            <Icon icon="mdi:pencil" className="text-default-500" />
+        <Tooltip content="Change Role">
+          <Button
+            isIconOnly
+            size="sm"
+            variant="light"
+            onClick={() => openRoleModal(user)}
+          >
+            <Icon icon="mdi:account-convert" className="text-warning" />
           </Button>
         </Tooltip>
         <Tooltip content="Delete User">
@@ -292,6 +353,67 @@ const UserListComponent = () => {
                   isLoading={deleteLoading}
                 >
                   Sil
+                </Button>
+              </ModalFooter>
+            </>
+          )}
+        </ModalContent>
+      </Modal>
+
+      {/* Rol Değiştirme Modalı */}
+      <Modal isOpen={roleModalOpen} onClose={() => setRoleModalOpen(false)}>
+        <ModalContent>
+          {(onClose) => (
+            <>
+              <ModalHeader className="flex flex-col gap-1">
+                Kullanıcı Rolünü Değiştir
+              </ModalHeader>
+              <ModalBody>
+                {selectedUser && (
+                  <div className="flex flex-col gap-4">
+                    <p>
+                      <b>{selectedUser.userName}</b> ({selectedUser.email})
+                      kullanıcısının rolünü değiştir:
+                    </p>
+                    <Dropdown>
+                      <DropdownTrigger>
+                        <Button
+                          variant="bordered"
+                          className="w-full justify-between"
+                          endContent={<Icon icon="mdi:chevron-down" />}
+                        >
+                          {selectedRole || "Rol seçin"}
+                        </Button>
+                      </DropdownTrigger>
+                      <DropdownMenu
+                        aria-label="Roller"
+                        selectionMode="single"
+                        selectedKeys={[selectedRole]}
+                        onSelectionChange={(keys) =>
+                          setSelectedRole(Array.from(keys)[0])
+                        }
+                      >
+                        <DropdownItem key="user">User</DropdownItem>
+                        <DropdownItem key="author">Author</DropdownItem>
+                        <DropdownItem key="admin">Admin</DropdownItem>
+                      </DropdownMenu>
+                    </Dropdown>
+                  </div>
+                )}
+                {roleUpdateError && (
+                  <p className="text-danger">{roleUpdateError}</p>
+                )}
+              </ModalBody>
+              <ModalFooter>
+                <Button variant="flat" onPress={() => setRoleModalOpen(false)}>
+                  İptal
+                </Button>
+                <Button
+                  color="primary"
+                  onPress={handleUpdateRole}
+                  isLoading={roleUpdateLoading}
+                >
+                  Güncelle
                 </Button>
               </ModalFooter>
             </>

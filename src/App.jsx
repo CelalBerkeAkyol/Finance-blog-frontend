@@ -28,6 +28,7 @@ import EditPostPage from "./pages/dashboard_pages/EditPostPage";
 import DashboardHomePage from "./pages/dashboard_pages/DashboardHomePage";
 import NewPostPage from "./pages/dashboard_pages/NewPostPage";
 import AllBlogPostsPage from "./pages/dashboard_pages/AllBlogPostsPage";
+import UsersPage from "./pages/dashboard_pages/UsersPage";
 
 import LoginPage from "./pages/auth/LoginPage";
 import RegisterPage from "./pages/auth/RegisterPage";
@@ -117,6 +118,14 @@ function App() {
             <Route
               path="/blog/category/:category"
               element={<CategoryBasePostsPage />}
+            />
+            <Route
+              path="/dashboard/users"
+              element={
+                <ProtectedRoute>
+                  <UsersPage />
+                </ProtectedRoute>
+              }
             />
 
             {/* 404 Sayfası */}

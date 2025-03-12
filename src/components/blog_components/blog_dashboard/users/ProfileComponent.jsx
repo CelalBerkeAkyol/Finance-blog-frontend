@@ -39,6 +39,18 @@ const ProfileComponent = () => {
   const [saveLoading, setSaveLoading] = useState(false);
   const [saveError, setSaveError] = useState(null);
   const { isOpen, onOpen, onClose } = useDisclosure();
+  const [isUserDataReady, setIsUserDataReady] = useState(false);
+
+  // Kullanıcı bilgilerinin hazır olup olmadığını kontrol et
+  useEffect(() => {
+    if (userInfo && (userInfo._id || userInfo.id)) {
+      setIsUserDataReady(true);
+    } else {
+      setIsUserDataReady(false);
+      // Kullanıcı bilgileri eksikse, yeniden getir
+      dispatch(fetchUser());
+    }
+  }, [userInfo, dispatch]);
 
   // Form verilerini başlat
   const initializeFormData = (userData) => {
@@ -58,6 +70,29 @@ const ProfileComponent = () => {
       },
       profileImage: userData.profileImage || "",
     });
+  };
+
+  // Düzenleme modunu başlat
+  const handleStartEdit = async () => {
+    // Kullanıcı bilgileri hazır değilse, önce bilgileri getir
+    if (!isUserDataReady) {
+      console.log("Kullanıcı bilgileri hazır değil, bilgiler getiriliyor...");
+      try {
+        await dispatch(fetchUser());
+        // Bilgiler geldikten sonra düzenleme modunu başlat
+        setEditMode(true);
+        onOpen();
+      } catch (error) {
+        console.error("Kullanıcı bilgileri getirilemedi:", error);
+        alert(
+          "Kullanıcı bilgileri getirilemedi. Lütfen sayfayı yenileyip tekrar deneyin."
+        );
+      }
+    } else {
+      // Kullanıcı bilgileri hazırsa, düzenleme modunu başlat
+      setEditMode(true);
+      onOpen();
+    }
   };
 
   // Profil güncelleme
@@ -151,7 +186,7 @@ const ProfileComponent = () => {
     return (
       <div className="flex flex-col justify-center items-center h-64 text-danger gap-4">
         <p>Hata: {errorMessage}</p>
-        <Button color="primary" onClick={() => window.location.reload()}>
+        <Button color="primary" onClick={() => dispatch(fetchUser())}>
           Tekrar Dene
         </Button>
       </div>
@@ -163,7 +198,7 @@ const ProfileComponent = () => {
     return (
       <div className="flex flex-col justify-center items-center h-64 gap-4">
         <p>Kullanıcı bilgileri bulunamadı.</p>
-        <Button color="primary" onClick={() => window.location.reload()}>
+        <Button color="primary" onClick={() => dispatch(fetchUser())}>
           Tekrar Dene
         </Button>
       </div>
@@ -193,10 +228,7 @@ const ProfileComponent = () => {
           <Button
             color="primary"
             variant="flat"
-            onClick={() => {
-              setEditMode(true);
-              onOpen();
-            }}
+            onClick={handleStartEdit}
             startContent={<Icon icon="mdi:pencil" />}
           >
             Profili Düzenle

@@ -11,7 +11,7 @@ import {
   DropdownMenu,
   DropdownItem,
 } from "@nextui-org/react";
-import SearchModal from "../yardımcılar/SearchModal";
+import SearchModal from "../modals/SearchModal";
 import { useSelector } from "react-redux";
 
 import LogoutComponent from "../auth/LogoutComponent";

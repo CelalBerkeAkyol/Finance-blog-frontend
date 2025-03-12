@@ -1,11 +1,12 @@
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import React, { useEffect } from "react";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { fetchUser } from "./app/features/user/userSlice"; // Adjust the path as necessary
 
 import HomePage from "./pages/HomePage";
 import PricePage from "./pages/other_pages/PricePage";
 import PageNotFound from "./pages/other_pages/PageNotFound";
+import ProfilePage from "./pages/other_pages/ProfilePage";
 
 import ProtectedRoute from "./components/ProtectedRoute";
 import BlogPostPage from "./pages/blog_pages/BlogPostPage";
@@ -36,6 +37,7 @@ import { logRender } from "./utils/LogRender";
 
 function App() {
   const dispatch = useDispatch();
+  const { userInfo, isLoggedIn } = useSelector((state) => state.user);
 
   useEffect(() => {
     dispatch(fetchUser());
@@ -56,6 +58,14 @@ function App() {
             <Route path="/privacy-policy" element={<PrivacyPolicyPage />} />
             <Route path="/login" element={<LoginPage />} />
             <Route path="/register" element={<RegisterPage />} />
+            <Route
+              path="/profile"
+              element={
+                <ProtectedRoute>
+                  <ProfilePage />
+                </ProtectedRoute>
+              }
+            />
             <Route
               path="/dashboard/home"
               element={

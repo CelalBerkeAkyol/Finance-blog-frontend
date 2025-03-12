@@ -1,5 +1,10 @@
 import React, { useState, useEffect } from "react";
 import axios from "../../../../api";
+import { useSelector, useDispatch } from "react-redux";
+import {
+  updateUserProfile,
+  fetchUser,
+} from "../../../../app/features/user/userSlice";
 import {
   Card,
   CardHeader,
@@ -23,70 +28,22 @@ import {
 } from "@nextui-org/react";
 import { Icon } from "@iconify/react";
 
-const ProfileComponent = ({ userId, userInfo: propUserInfo }) => {
-  const [user, setUser] = useState(propUserInfo || null);
-  const [loading, setLoading] = useState(!propUserInfo);
-  const [error, setError] = useState(null);
+const ProfileComponent = () => {
+  const dispatch = useDispatch();
+  const { userInfo, isLoading, isError, errorMessage } = useSelector(
+    (state) => state.user
+  );
+
   const [editMode, setEditMode] = useState(false);
   const [formData, setFormData] = useState({});
   const [saveLoading, setSaveLoading] = useState(false);
   const [saveError, setSaveError] = useState(null);
   const { isOpen, onOpen, onClose } = useDisclosure();
 
-  // Kullanıcı bilgilerini getir
-  const fetchUserProfile = async () => {
-    // Eğer prop olarak userInfo verilmişse, API çağrısı yapmaya gerek yok
-    if (propUserInfo) {
-      console.log("Using provided userInfo:", propUserInfo);
-      setUser(propUserInfo);
-      initializeFormData(propUserInfo);
-      setLoading(false);
-      return;
-    }
-
-    // userId yoksa API çağrısı yapma
-    if (!userId) {
-      console.error("No userId provided to fetch user profile");
-      setError("Kullanıcı ID'si bulunamadı");
-      setLoading(false);
-      return;
-    }
-
-    try {
-      setLoading(true);
-      setError(null);
-
-      console.log("Fetching user profile for ID:", userId);
-      const response = await axios.get(`/user/${userId}`, {
-        withCredentials: true,
-      });
-      console.info("Kullanıcı profili başarıyla alındı:", response.data);
-
-      if (response.data && response.data.data) {
-        setUser(response.data.data);
-        initializeFormData(response.data.data);
-      } else {
-        console.error(
-          "API yanıtında beklenen veri yapısı bulunamadı:",
-          response.data
-        );
-        setError(
-          "Kullanıcı bilgileri alınamadı. Lütfen daha sonra tekrar deneyin."
-        );
-      }
-    } catch (err) {
-      console.error("Kullanıcı profili getirme hatası:", err);
-      setError(
-        err.response?.data?.message ||
-          "Kullanıcı profili yüklenirken bir hata oluştu"
-      );
-    } finally {
-      setLoading(false);
-    }
-  };
-
   // Form verilerini başlat
   const initializeFormData = (userData) => {
+    if (!userData) return;
+
     setFormData({
       userName: userData.userName || userData.username || "",
       fullName: userData.fullName || "",
@@ -109,37 +66,43 @@ const ProfileComponent = ({ userId, userInfo: propUserInfo }) => {
       setSaveLoading(true);
       setSaveError(null);
 
-      const username = user.userName || user.username;
-      if (!username) {
+      // Kullanıcı ID'si kontrolü
+      const userId = userInfo._id || userInfo.id;
+
+      console.log("Kullanıcı bilgileri:", userInfo); // Hata ayıklama için
+
+      if (!userId) {
         setSaveError(
-          "Kullanıcı bilgileri eksik. Lütfen sayfayı yenileyip tekrar deneyin."
+          "Kullanıcı ID'si bulunamadı. Lütfen sayfayı yenileyip tekrar deneyin."
         );
         return;
       }
 
-      const response = await axios.put(`/user/${username}`, formData, {
-        withCredentials: true,
-      });
-      console.info("Kullanıcı profili başarıyla güncellendi:", response.data);
+      // Redux action'ını kullanarak profil güncelleme
+      const resultAction = await dispatch(
+        updateUserProfile({ userId, userData: formData })
+      );
 
-      if (response.data && response.data.data) {
-        setUser(response.data.data);
+      if (updateUserProfile.fulfilled.match(resultAction)) {
+        console.info(
+          "Kullanıcı profili başarıyla güncellendi:",
+          resultAction.payload
+        );
+
+        // Kullanıcı bilgilerini yeniden getir
+        await dispatch(fetchUser());
+
         setEditMode(false);
         onClose();
-      } else {
-        console.error(
-          "API yanıtında beklenen veri yapısı bulunamadı:",
-          response.data
-        );
+      } else if (updateUserProfile.rejected.match(resultAction)) {
+        console.error("Profil güncelleme hatası:", resultAction.payload);
         setSaveError(
-          "Profil güncellenemedi. Lütfen daha sonra tekrar deneyin."
+          resultAction.payload || "Profil güncellenirken bir hata oluştu"
         );
       }
     } catch (err) {
       console.error("Kullanıcı profili güncelleme hatası:", err);
-      setSaveError(
-        err.response?.data?.message || "Profil güncellenirken bir hata oluştu"
-      );
+      setSaveError("Profil güncellenirken bir hata oluştu");
     } finally {
       setSaveLoading(false);
     }
@@ -166,19 +129,16 @@ const ProfileComponent = ({ userId, userInfo: propUserInfo }) => {
     }
   };
 
-  // Component mount olduğunda kullanıcı bilgilerini getir
+  // Component mount olduğunda form verilerini başlat
   useEffect(() => {
-    console.log(
-      "ProfileComponent mounted with userId:",
-      userId,
-      "and userInfo:",
-      propUserInfo
-    );
-    fetchUserProfile();
-  }, [userId, propUserInfo]);
+    if (userInfo) {
+      console.log("Redux'tan gelen userInfo:", userInfo); // Kullanıcı bilgilerini konsola yazdır
+      initializeFormData(userInfo);
+    }
+  }, [userInfo]);
 
   // Yükleme durumunda gösterilecek içerik
-  if (loading) {
+  if (isLoading) {
     return (
       <div className="flex justify-center items-center h-64">
         <Spinner size="lg" label="Profil yükleniyor..." />
@@ -187,11 +147,11 @@ const ProfileComponent = ({ userId, userInfo: propUserInfo }) => {
   }
 
   // Hata durumunda gösterilecek içerik
-  if (error) {
+  if (isError) {
     return (
       <div className="flex flex-col justify-center items-center h-64 text-danger gap-4">
-        <p>Hata: {error}</p>
-        <Button color="primary" onClick={fetchUserProfile}>
+        <p>Hata: {errorMessage}</p>
+        <Button color="primary" onClick={() => window.location.reload()}>
           Tekrar Dene
         </Button>
       </div>
@@ -199,11 +159,11 @@ const ProfileComponent = ({ userId, userInfo: propUserInfo }) => {
   }
 
   // Kullanıcı bulunamadığında gösterilecek içerik
-  if (!user) {
+  if (!userInfo) {
     return (
       <div className="flex flex-col justify-center items-center h-64 gap-4">
         <p>Kullanıcı bilgileri bulunamadı.</p>
-        <Button color="primary" onClick={fetchUserProfile}>
+        <Button color="primary" onClick={() => window.location.reload()}>
           Tekrar Dene
         </Button>
       </div>
@@ -216,17 +176,17 @@ const ProfileComponent = ({ userId, userInfo: propUserInfo }) => {
         <CardHeader className="justify-between">
           <div className="flex gap-4">
             <Avatar
-              src={user.profileImage}
+              src={userInfo.profileImage}
               size="lg"
               isBordered
-              color={user.role === "admin" ? "danger" : "primary"}
+              color={userInfo.role === "admin" ? "danger" : "primary"}
             />
             <div className="flex flex-col gap-1 items-start justify-center">
               <h4 className="text-lg font-semibold">
-                {user.fullName || user.userName || user.username}
+                {userInfo.fullName || userInfo.userName || userInfo.username}
               </h4>
               <p className="text-small text-default-500">
-                {user.occupation || user.role}
+                {userInfo.occupation || userInfo.role}
               </p>
             </div>
           </div>
@@ -252,27 +212,29 @@ const ProfileComponent = ({ userId, userInfo: propUserInfo }) => {
                     Biyografi
                   </h5>
                   <p className="mt-1">
-                    {user.bio || "Henüz bir biyografi eklenmemiş."}
+                    {userInfo.bio || "Henüz bir biyografi eklenmemiş."}
                   </p>
                 </div>
                 <div>
                   <h5 className="text-sm font-semibold text-default-500">
                     Meslek
                   </h5>
-                  <p className="mt-1">{user.occupation || "Belirtilmemiş"}</p>
+                  <p className="mt-1">
+                    {userInfo.occupation || "Belirtilmemiş"}
+                  </p>
                 </div>
                 <div>
                   <h5 className="text-sm font-semibold text-default-500">
                     Web Sitesi
                   </h5>
-                  {user.website ? (
+                  {userInfo.website ? (
                     <Link
-                      href={user.website}
+                      href={userInfo.website}
                       target="_blank"
                       rel="noopener noreferrer"
                       className="mt-1"
                     >
-                      {user.website}
+                      {userInfo.website}
                     </Link>
                   ) : (
                     <p className="mt-1">Belirtilmemiş</p>
@@ -286,43 +248,43 @@ const ProfileComponent = ({ userId, userInfo: propUserInfo }) => {
                   <h5 className="text-sm font-semibold text-default-500">
                     E-posta
                   </h5>
-                  <p className="mt-1">{user.email}</p>
+                  <p className="mt-1">{userInfo.email}</p>
                 </div>
                 <div>
                   <h5 className="text-sm font-semibold text-default-500">
                     Sosyal Medya
                   </h5>
                   <div className="flex gap-4 mt-2">
-                    {user.socialLinks?.twitter && (
+                    {userInfo.socialLinks?.twitter && (
                       <Link
-                        href={user.socialLinks.twitter}
+                        href={userInfo.socialLinks.twitter}
                         target="_blank"
                         rel="noopener noreferrer"
                       >
                         <Icon icon="mdi:twitter" width={24} />
                       </Link>
                     )}
-                    {user.socialLinks?.linkedin && (
+                    {userInfo.socialLinks?.linkedin && (
                       <Link
-                        href={user.socialLinks.linkedin}
+                        href={userInfo.socialLinks.linkedin}
                         target="_blank"
                         rel="noopener noreferrer"
                       >
                         <Icon icon="mdi:linkedin" width={24} />
                       </Link>
                     )}
-                    {user.socialLinks?.github && (
+                    {userInfo.socialLinks?.github && (
                       <Link
-                        href={user.socialLinks.github}
+                        href={userInfo.socialLinks.github}
                         target="_blank"
                         rel="noopener noreferrer"
                       >
                         <Icon icon="mdi:github" width={24} />
                       </Link>
                     )}
-                    {!user.socialLinks?.twitter &&
-                      !user.socialLinks?.linkedin &&
-                      !user.socialLinks?.github && (
+                    {!userInfo.socialLinks?.twitter &&
+                      !userInfo.socialLinks?.linkedin &&
+                      !userInfo.socialLinks?.github && (
                         <p>Sosyal medya hesapları belirtilmemiş</p>
                       )}
                   </div>
@@ -335,20 +297,22 @@ const ProfileComponent = ({ userId, userInfo: propUserInfo }) => {
                   <h5 className="text-sm font-semibold text-default-500">
                     Kullanıcı Adı
                   </h5>
-                  <p className="mt-1">{user.userName || user.username}</p>
+                  <p className="mt-1">
+                    {userInfo.userName || userInfo.username}
+                  </p>
                 </div>
                 <div>
                   <h5 className="text-sm font-semibold text-default-500">
                     Rol
                   </h5>
-                  <p className="mt-1">{user.role}</p>
+                  <p className="mt-1">{userInfo.role}</p>
                 </div>
                 <div>
                   <h5 className="text-sm font-semibold text-default-500">
                     Hesap Durumu
                   </h5>
                   <p className="mt-1">
-                    {user.isVerified ? "Doğrulanmış" : "Doğrulanmamış"}
+                    {userInfo.isVerified ? "Doğrulanmış" : "Doğrulanmamış"}
                   </p>
                 </div>
                 <div>
@@ -356,8 +320,8 @@ const ProfileComponent = ({ userId, userInfo: propUserInfo }) => {
                     Kayıt Tarihi
                   </h5>
                   <p className="mt-1">
-                    {user.createdAt
-                      ? new Date(user.createdAt).toLocaleDateString("tr-TR")
+                    {userInfo.createdAt
+                      ? new Date(userInfo.createdAt).toLocaleDateString("tr-TR")
                       : "Belirtilmemiş"}
                   </p>
                 </div>

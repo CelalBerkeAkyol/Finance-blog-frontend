@@ -55,7 +55,7 @@ const ProfilePage = () => {
           Bu sayfada profil bilgilerinizi görüntüleyebilir ve
           düzenleyebilirsiniz.
         </p>
-        <ProfileComponent userInfo={userInfo} />
+        <ProfileComponent />
       </div>
     </div>
   );

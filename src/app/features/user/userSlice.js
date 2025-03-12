@@ -54,17 +54,52 @@ export const fetchUser = createAsyncThunk(
   async (_, thunkAPI) => {
     try {
       console.info("fetchUser: Kullanıcı bilgisi getiriliyor...");
-      const response = await axios.post(
+
+      // Token doğrulama
+      const tokenResponse = await axios.post(
         "/auth/verify-token",
         {},
         { withCredentials: true }
       );
-      const { valid, user } = response.data;
+
+      const { valid, user } = tokenResponse.data;
       if (!valid) {
         console.warn("fetchUser: Token geçersiz!");
         throw new Error("Token geçersiz.");
       }
-      console.info("fetchUser: Kullanıcı bilgisi başarıyla alındı.", user);
+
+      // Eğer token geçerliyse ve kullanıcı ID'si varsa, güncel bilgileri getir
+      if (user && (user._id || user.id)) {
+        const userId = user._id || user.id;
+        console.info(
+          "fetchUser: Kullanıcı ID'si ile güncel bilgiler getiriliyor:",
+          userId
+        );
+
+        try {
+          const userResponse = await axios.get(`/user/${userId}`, {
+            withCredentials: true,
+          });
+          if (userResponse.data && userResponse.data.data) {
+            console.info(
+              "fetchUser: Kullanıcı bilgisi başarıyla alındı (ID ile):",
+              userResponse.data.data
+            );
+            return { valid, user: userResponse.data.data };
+          }
+        } catch (userError) {
+          console.warn(
+            "fetchUser: ID ile kullanıcı bilgisi getirilemedi, token bilgisi kullanılıyor:",
+            userError
+          );
+          // Hata durumunda token'dan gelen bilgileri kullan
+        }
+      }
+
+      console.info(
+        "fetchUser: Kullanıcı bilgisi başarıyla alındı (token ile):",
+        user
+      );
       return { valid, user };
     } catch (error) {
       console.error(
@@ -108,6 +143,39 @@ export const registerUser = createAsyncThunk(
     }
   }
 );
+
+// Kullanıcı profili güncelleme thunk'ı
+export const updateUserProfile = createAsyncThunk(
+  "user/updateUserProfile",
+  async ({ userId, userData }, thunkAPI) => {
+    try {
+      console.info(
+        "updateUserProfile: Profil güncelleme isteği gönderiliyor...",
+        {
+          userId,
+          userData,
+        }
+      );
+      const response = await axios.put(`/user/${userId}`, userData, {
+        withCredentials: true,
+      });
+      console.info(
+        "updateUserProfile: Güncelleme başarılı! Backend'den gelen veri:",
+        response.data
+      );
+      return response.data.data;
+    } catch (error) {
+      console.error(
+        "updateUserProfile hata:",
+        error.response?.data || error.message
+      );
+      return thunkAPI.rejectWithValue(
+        error.response?.data?.message || "Profil güncellenemedi."
+      );
+    }
+  }
+);
+
 const userSlice = createSlice({
   name: "user",
   initialState: {
@@ -225,6 +293,31 @@ const userSlice = createSlice({
         state.isLoading = false;
         state.isError = true;
         state.errorMessage = action.payload || "Kullanıcı bilgileri alınamadı.";
+      })
+      // updateUserProfile
+      .addCase(updateUserProfile.pending, (state) => {
+        console.info(
+          "updateUserProfile: Profil güncelleme işlemi devam ediyor..."
+        );
+        state.isLoading = true;
+      })
+      .addCase(updateUserProfile.fulfilled, (state, action) => {
+        console.info(
+          "updateUserProfile: Profil güncelleme başarılı. Güncellenen state:",
+          action.payload
+        );
+        state.isLoading = false;
+        state.isSuccess = true;
+        state.userInfo = action.payload;
+      })
+      .addCase(updateUserProfile.rejected, (state, action) => {
+        console.error(
+          "updateUserProfile: Profil güncelleme başarısız!",
+          action.payload
+        );
+        state.isLoading = false;
+        state.isError = true;
+        state.errorMessage = action.payload || "Profil güncellenemedi.";
       });
   },
 });

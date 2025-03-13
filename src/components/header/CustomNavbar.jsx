@@ -30,7 +30,11 @@ export default function CustomNavbar() {
   const { isLoggedIn, userInfo, isAdmin } = useSelector((state) => state.user);
 
   const userName = userInfo?.username || userInfo?.userName || "Guest";
-  const userRole = isAdmin ? "Admin" : "User";
+  const userRole = userInfo?.role || "User";
+
+  // Admin veya author rolüne sahip kullanıcılar profil sayfasına erişebilir
+  const canAccessProfile =
+    userInfo?.role === "admin" || userInfo?.role === "author";
 
   const navbarLinks = [
     { name: "Ana Sayfa", path: "/" },
@@ -89,7 +93,7 @@ export default function CustomNavbar() {
         </NavbarContent>
 
         <NavbarContent justify="center">
-          <NavbarItem>
+          <NavbarItem className="mr-2">
             <Button
               variant="bordered"
               color="secondary"
@@ -105,23 +109,28 @@ export default function CustomNavbar() {
           {/* Eğer kullanıcı giriş yapmışsa profil ve çıkış butonu */}
           {isLoggedIn ? (
             <>
-              <NavbarItem>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  startContent={<Icon icon="ic:round-person" width="20" />}
-                  onClick={() => navigate("/profile")}
-                >
-                  {userName} - {userRole}
-                </Button>
-              </NavbarItem>
-              <NavbarItem>
+              {/* Sadece admin ve author rollerine sahip kullanıcılar için profil butonu göster */}
+              {canAccessProfile && (
+                <NavbarItem className="ml-2">
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    startContent={<Icon icon="ic:round-person" width="20" />}
+                    onClick={() => navigate("/profile")}
+                  >
+                    {userName} - {userRole}
+                  </Button>
+                </NavbarItem>
+              )}
+
+              {/* Tüm giriş yapmış kullanıcılar için çıkış butonu */}
+              <NavbarItem className={canAccessProfile ? "" : "ml-2"}>
                 <LogoutComponent />
               </NavbarItem>
             </>
           ) : (
             <>
-              <NavbarItem>
+              <NavbarItem className="ml-2">
                 <button
                   onClick={() => navigate("/login")}
                   className="pl-4 hover:text-primary"

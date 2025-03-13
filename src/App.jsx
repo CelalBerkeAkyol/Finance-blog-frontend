@@ -37,7 +37,6 @@ import { logRender } from "./utils/LogRender";
 
 function App() {
   const dispatch = useDispatch();
-  const { userInfo, isLoggedIn } = useSelector((state) => state.user);
 
   useEffect(() => {
     dispatch(fetchUser());
@@ -61,7 +60,7 @@ function App() {
             <Route
               path="/profile"
               element={
-                <ProtectedRoute>
+                <ProtectedRoute requiredRoles={["admin", "author"]}>
                   <ProfilePage />
                 </ProtectedRoute>
               }
@@ -69,7 +68,7 @@ function App() {
             <Route
               path="/dashboard/home"
               element={
-                <ProtectedRoute>
+                <ProtectedRoute requiredRoles={["admin", "author"]}>
                   <DashboardHomePage />
                 </ProtectedRoute>
               }
@@ -77,7 +76,7 @@ function App() {
             <Route
               path="/dashboard/posts"
               element={
-                <ProtectedRoute>
+                <ProtectedRoute requiredRoles={["admin", "author"]}>
                   <AllBlogPostsPage />
                 </ProtectedRoute>
               }
@@ -85,7 +84,7 @@ function App() {
             <Route
               path="/dashboard/post/new"
               element={
-                <ProtectedRoute>
+                <ProtectedRoute requiredRoles={["admin", "author"]}>
                   <NewPostPage />
                 </ProtectedRoute>
               }
@@ -93,7 +92,7 @@ function App() {
             <Route
               path="/dashboard/post/edit/:id"
               element={
-                <ProtectedRoute>
+                <ProtectedRoute requiredRoles={["admin", "author"]}>
                   <EditPostPage />
                 </ProtectedRoute>
               }
@@ -101,7 +100,7 @@ function App() {
             <Route
               path="/dashboard/images"
               element={
-                <ProtectedRoute>
+                <ProtectedRoute requiredRoles={["admin", "author"]}>
                   <ImagePage />
                 </ProtectedRoute>
               }
@@ -109,7 +108,7 @@ function App() {
             <Route
               path="/dashboard/cheat-sheet"
               element={
-                <ProtectedRoute>
+                <ProtectedRoute requiredRoles={["admin", "author"]}>
                   <CheatSheet />
                 </ProtectedRoute>
               }
@@ -117,7 +116,7 @@ function App() {
             <Route
               path="/dashboard/gallery"
               element={
-                <ProtectedRoute>
+                <ProtectedRoute requiredRoles={["admin", "author"]}>
                   <GalleryPage />
                 </ProtectedRoute>
               }
@@ -132,7 +131,7 @@ function App() {
             <Route
               path="/dashboard/users"
               element={
-                <ProtectedRoute>
+                <ProtectedRoute requiredRoles={["admin"]}>
                   <UsersPage />
                 </ProtectedRoute>
               }

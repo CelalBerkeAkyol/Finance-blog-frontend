@@ -23,11 +23,17 @@ export const fetchPostById = createAsyncThunk(
   "posts/fetchPostById",
   async (postId, thunkAPI) => {
     try {
-      // Tek post endpoint'i örnek: GET /posts/:id
+      console.info("fetchPostById: Post getiriliyor, ID:", postId);
       const response = await axios.get(`/posts/one-post/${postId}`);
-      // response.data.post döndüğünü varsayıyoruz
-      return response.data.post;
+      console.info("fetchPostById: Post başarıyla getirildi", response.data);
+
+      // Yeni response yapısına göre post verisini al
+      return response.data.data;
     } catch (error) {
+      console.error(
+        "fetchPostById hata:",
+        error.response?.data || error.message
+      );
       return thunkAPI.rejectWithValue(
         error.response?.data?.error || "Tekil post getirilirken hata oluştu."
       );
@@ -203,6 +209,11 @@ const postsSlice = createSlice({
       })
       // Fetch post by ıd
       .addCase(fetchPostById.fulfilled, (state, action) => {
+        if (!action.payload) {
+          console.error("fetchPostById: Post verisi bulunamadı");
+          return;
+        }
+
         const fetchedPost = action.payload;
         // posts dizisinde aynı ID var mı?
         const index = state.posts.findIndex((p) => p._id === fetchedPost._id);

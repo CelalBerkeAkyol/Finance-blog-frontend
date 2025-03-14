@@ -41,15 +41,14 @@ export const fetchPostById = createAsyncThunk(
   }
 );
 
-// Upvote thunk – backend'den güncellenmiş post objesi döndüğünü varsayıyoruz
+// Upvote thunk
 export const upvotePost = createAsyncThunk(
   "posts/upvotePost",
   async (postId, thunkAPI) => {
     try {
       console.info("upvotePost: Posta upvote ekleniyor, ID:", postId);
       const response = await axios.put(`/posts/${postId}/upvote`);
-      // response.data.data: güncellenmiş post objesiü
-      // TO DO we can return only view data in the future
+      console.info("upvotePost: Post başarıyla güncellendi", response.data);
       return response.data.data;
     } catch (error) {
       console.error("upvotePost hata:", error.response?.data || error.message);
@@ -60,13 +59,14 @@ export const upvotePost = createAsyncThunk(
   }
 );
 
-// Downvote thunk – aynı şekilde güncellenmiş post objesi döndüğünü varsayıyoruz
+// Downvote thunk
 export const downvotePost = createAsyncThunk(
   "posts/downvotePost",
   async (postId, thunkAPI) => {
     try {
       console.info("downvotePost: Posta downvote ekleniyor, ID:", postId);
       const response = await axios.put(`/posts/${postId}/downvote`);
+      console.info("downvotePost: Post başarıyla güncellendi", response.data);
       return response.data.data;
     } catch (error) {
       console.error(
@@ -85,9 +85,21 @@ export const fetchPostsByCategory = createAsyncThunk(
   "posts/fetchPostsByCategory",
   async (category, thunkAPI) => {
     try {
+      console.info(
+        "fetchPostsByCategory: Kategoriye göre postlar getiriliyor:",
+        category
+      );
       const response = await axios.get(`/category/${category}`);
-      return response.data.posts;
+      console.info(
+        "fetchPostsByCategory: Postlar başarıyla getirildi",
+        response.data
+      );
+      return response.data.data;
     } catch (error) {
+      console.error(
+        "fetchPostsByCategory hata:",
+        error.response?.data || error.message
+      );
       return thunkAPI.rejectWithValue(
         error.response?.data?.error || "Postları getirirken hata oluştu."
       );
@@ -100,9 +112,12 @@ export const addNewPost = createAsyncThunk(
   "posts/addNewPost",
   async (postData, thunkAPI) => {
     try {
+      console.info("addNewPost: Yeni post ekleniyor");
       const response = await axios.post("/posts", postData);
-      return response.data; // { success: true, post: {...} } gibi döndüğünü varsayıyoruz
+      console.info("addNewPost: Post başarıyla eklendi", response.data);
+      return response.data.data;
     } catch (error) {
+      console.error("addNewPost hata:", error.response?.data || error.message);
       return thunkAPI.rejectWithValue(
         error.response?.data?.error || "Post eklerken hata oluştu."
       );
@@ -115,9 +130,12 @@ export const updatePost = createAsyncThunk(
   "posts/updatePost",
   async ({ id, postData }, thunkAPI) => {
     try {
+      console.info("updatePost: Post güncelleniyor, ID:", id);
       const response = await axios.put(`/posts/${id}`, postData);
-      return response.data; // { success: true, post: {...} } gibi
+      console.info("updatePost: Post başarıyla güncellendi", response.data);
+      return response.data.data;
     } catch (error) {
+      console.error("updatePost hata:", error.response?.data || error.message);
       return thunkAPI.rejectWithValue(
         error.response?.data?.error || "Post güncellerken hata oluştu."
       );
@@ -130,9 +148,12 @@ export const deletePost = createAsyncThunk(
   "posts/deletePost",
   async (id, thunkAPI) => {
     try {
-      await axios.delete(`/posts/${id}`);
-      return id; // Sadece silinen ID dönüyoruz
+      console.info("deletePost: Post siliniyor, ID:", id);
+      const response = await axios.delete(`/posts/${id}`);
+      console.info("deletePost: Post başarıyla silindi", response.data);
+      return response.data.data;
     } catch (error) {
+      console.error("deletePost hata:", error.response?.data || error.message);
       return thunkAPI.rejectWithValue(
         error.response?.data?.error || "Post silerken hata oluştu."
       );
@@ -145,10 +166,21 @@ export const incrementPostView = createAsyncThunk(
   "posts/incrementPostView",
   async (postId, { rejectWithValue }) => {
     try {
+      console.info(
+        "incrementPostView: Görüntülenme sayısı artırılıyor, ID:",
+        postId
+      );
       const response = await axios.put(`/posts/${postId}/view`);
-      // { success: true, data: {...} }
+      console.info(
+        "incrementPostView: Görüntülenme sayısı başarıyla artırıldı",
+        response.data
+      );
       return response.data.data;
     } catch (error) {
+      console.error(
+        "incrementPostView hata:",
+        error.response?.data || error.message
+      );
       return rejectWithValue(
         error.response?.data?.error || "View artırırken hata oluştu."
       );

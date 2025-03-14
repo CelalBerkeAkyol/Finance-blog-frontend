@@ -23,8 +23,11 @@ export const loginUser = createAsyncThunk(
       return response.data;
     } catch (error) {
       console.error("loginUser hata:", error.response?.data || error.message);
+      console.log(error);
       return thunkAPI.rejectWithValue(
-        error.response?.data?.error || "Giriş başarısız."
+        error.response?.data?.message ||
+          error.response?.data?.error?.details?.[0] ||
+          "Giriş başarısız."
       );
     }
   }

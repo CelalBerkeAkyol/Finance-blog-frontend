@@ -88,7 +88,13 @@ export default function LoginComponent() {
             onChange={handleChange}
             required
           />
-          {isError && <p className="text-red-500 text-sm">{errorMessage}</p>}
+          {isError && (
+            <p className="text-red-500 text-sm">
+              {typeof errorMessage === "object"
+                ? errorMessage.details?.[0] || "An error occurred"
+                : errorMessage}
+            </p>
+          )}
           <div className="flex items-center justify-between px-1 py-2">
             <Checkbox name="remember" size="sm">
               Remember me

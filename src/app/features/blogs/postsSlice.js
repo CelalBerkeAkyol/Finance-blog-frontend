@@ -8,9 +8,10 @@ export const fetchPosts = createAsyncThunk(
   async ({ page = 1, limit = 20 }, thunkAPI) => {
     try {
       const response = await axios.get("/posts", { params: { page, limit } });
-      console.log("heyyyyyyyy fetchPosts çalıştı " + response.data);
+      console.info("fetchPosts: Postlar başarıyla getirildi", response.data);
       return response.data;
     } catch (error) {
+      console.error("fetchPosts hata:", error.response?.data || error.message);
       return thunkAPI.rejectWithValue(
         error.response?.data?.error || "Postları getirirken hata oluştu."
       );
@@ -34,7 +35,7 @@ export const fetchPostById = createAsyncThunk(
   }
 );
 
-// Upvote thunk – backend’den güncellenmiş post objesi döndüğünü varsayıyoruz
+// Upvote thunk – backend'den güncellenmiş post objesi döndüğünü varsayıyoruz
 export const upvotePost = createAsyncThunk(
   "posts/upvotePost",
   async (postId, thunkAPI) => {
@@ -183,16 +184,16 @@ const postsSlice = createSlice({
       .addCase(fetchPosts.fulfilled, (state, action) => {
         state.isLoading = false;
         state.isSuccess = true;
-        // response.data'da posts veya data alanını kullandığınızı varsayıyoruz
-        state.posts = action.payload.posts || action.payload.data;
-        state.pagination = action.payload.pagination || {
+        // Yeni response yapısına göre posts'u al
+        state.posts = action.payload.data.posts;
+        state.pagination = action.payload.data.pagination || {
           next: null,
           total: 0,
           count: 0,
         };
         // total, count vs. isterseniz
-        state.count = action.payload.count || 0;
-        state.total = action.payload.total || 0;
+        state.count = action.payload.data.count || 0;
+        state.total = action.payload.data.total || 0;
       })
       .addCase(fetchPosts.rejected, (state, action) => {
         state.isLoading = false;
@@ -218,7 +219,7 @@ const postsSlice = createSlice({
         state.errorMessage = action.payload || "Post getirilirken hata oluştu.";
       })
 
-      // Upvote işlemi sonrası güncellenmiş post objesini store’da güncelle
+      // Upvote işlemi sonrası güncellenmiş post objesini store'da güncelle
       .addCase(upvotePost.fulfilled, (state, action) => {
         const updatedPost = action.payload;
         const index = state.posts.findIndex(
@@ -232,7 +233,7 @@ const postsSlice = createSlice({
         state.isError = true;
       })
 
-      // Downvote işlemi sonrası güncellenmiş post objesini store’da güncelle
+      // Downvote işlemi sonrası güncellenmiş post objesini store'da güncelle
       .addCase(downvotePost.fulfilled, (state, action) => {
         const updatedPost = action.payload;
         const index = state.posts.findIndex(

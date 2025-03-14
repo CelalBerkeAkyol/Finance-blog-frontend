@@ -62,15 +62,20 @@ export const fetchUser = createAsyncThunk(
         { withCredentials: true }
       );
 
-      const { valid, user } = tokenResponse.data;
-      if (!valid) {
+      if (!tokenResponse.data.success) {
         console.warn("fetchUser: Token geçersiz!");
         throw new Error("Token geçersiz.");
       }
 
-      // Eğer token geçerliyse ve kullanıcı ID'si varsa, güncel bilgileri getir
-      if (user && (user._id || user.id)) {
-        const userId = user._id || user.id;
+      const userData = tokenResponse.data.data;
+      if (!userData || !userData.user) {
+        console.warn("fetchUser: Kullanıcı bilgisi bulunamadı!");
+        throw new Error("Kullanıcı bilgisi bulunamadı.");
+      }
+
+      // Eğer kullanıcı ID'si varsa, güncel bilgileri getir
+      if (userData.user.id || userData.user._id) {
+        const userId = userData.user.id || userData.user._id;
         console.info(
           "fetchUser: Kullanıcı ID'si ile güncel bilgiler getiriliyor:",
           userId
@@ -80,12 +85,12 @@ export const fetchUser = createAsyncThunk(
           const userResponse = await axios.get(`/user/${userId}`, {
             withCredentials: true,
           });
-          if (userResponse.data && userResponse.data.data) {
+          if (userResponse.data.success && userResponse.data.data) {
             console.info(
               "fetchUser: Kullanıcı bilgisi başarıyla alındı (ID ile):",
               userResponse.data.data
             );
-            return { valid, user: userResponse.data.data };
+            return { valid: true, user: userResponse.data.data };
           }
         } catch (userError) {
           console.warn(
@@ -98,9 +103,9 @@ export const fetchUser = createAsyncThunk(
 
       console.info(
         "fetchUser: Kullanıcı bilgisi başarıyla alındı (token ile):",
-        user
+        userData.user
       );
-      return { valid, user };
+      return { valid: true, user: userData.user };
     } catch (error) {
       console.error(
         "fetchUser hata:",

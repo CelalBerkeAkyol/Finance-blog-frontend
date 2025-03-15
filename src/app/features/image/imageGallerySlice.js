@@ -10,7 +10,7 @@ export const fetchImages = createAsyncThunk(
     try {
       // API isteğinde page ve limit'i kullan
       const response = await api.get(`/images?page=${page}&limit=${limit}`);
-      return response.data; // { images, page, totalPages, ... }
+      return response.data.data; // Backend'den gelen data.data yapısını kullan
     } catch (error) {
       return thunkAPI.rejectWithValue(
         error.message || "Görseller yüklenemedi."
@@ -18,18 +18,20 @@ export const fetchImages = createAsyncThunk(
     }
   }
 );
+
 // Görsel silme işlemi
 export const deleteImage = createAsyncThunk(
   "imageGallery/deleteImage",
   async (imageId, thunkAPI) => {
     try {
       const response = await api.delete(`/images/${imageId}`);
-      return response.data; // { message, image }
+      return response.data.data; // Backend'den gelen data.data yapısını kullan
     } catch (error) {
       return thunkAPI.rejectWithValue(error.message || "Görsel silinemedi.");
     }
   }
 );
+
 const imageGallerySlice = createSlice({
   name: "imageGallery",
   initialState: {
@@ -40,7 +42,19 @@ const imageGallerySlice = createSlice({
     totalPages: 1,
     total: 0,
   },
-  reducers: {},
+  reducers: {
+    clearImageErrors: (state) => {
+      state.error = null;
+    },
+    resetImageGallery: (state) => {
+      state.images = [];
+      state.loading = false;
+      state.error = null;
+      state.page = 1;
+      state.totalPages = 1;
+      state.total = 0;
+    },
+  },
   extraReducers: (builder) => {
     builder
       .addCase(fetchImages.pending, (state) => {
@@ -86,4 +100,6 @@ const imageGallerySlice = createSlice({
   },
 });
 
+export const { clearImageErrors, resetImageGallery } =
+  imageGallerySlice.actions;
 export default imageGallerySlice.reducer;

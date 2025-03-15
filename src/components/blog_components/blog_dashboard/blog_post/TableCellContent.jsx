@@ -6,6 +6,12 @@ import {
   DropdownTrigger,
   DropdownMenu,
   DropdownItem,
+  Modal,
+  ModalContent,
+  ModalHeader,
+  ModalBody,
+  ModalFooter,
+  useDisclosure,
 } from "@nextui-org/react";
 import { capitalize } from "../../../../utils/capitalize";
 import { useNavigate } from "react-router-dom";
@@ -23,6 +29,7 @@ const TableCellContent = ({ posts, columnKey }) => {
   const cellValue = posts[columnKey];
   const navigate = useNavigate();
   const dispatch = useDispatch();
+  const { isOpen, onOpen, onClose } = useDisclosure();
 
   const handleView = () => {
     console.info(`TableCellContent: Post ${posts._id} görüntüleniyor.`);
@@ -37,25 +44,23 @@ const TableCellContent = ({ posts, columnKey }) => {
   };
 
   const handleDelete = () => {
-    if (window.confirm("Bu postu silmek istediğinize emin misiniz?")) {
-      console.info(
-        `TableCellContent: Post ${posts._id} silme işlemi başlatılıyor.`
-      );
-      dispatch(deletePost(posts._id))
-        .then((result) => {
-          if (result.meta.requestStatus === "fulfilled") {
-            console.info("TableCellContent: Post başarıyla silindi!");
-          } else {
-            console.error(
-              "TableCellContent: Post silinirken hata oluştu:",
-              result.payload
-            );
-          }
-        })
-        .catch((error) =>
-          console.error("TableCellContent: Silme işlemi hata verdi:", error)
-        );
-    }
+    onOpen(); // Silme onayı için modal'ı aç
+  };
+
+  const confirmDelete = () => {
+    console.info(
+      `TableCellContent: Post ${posts._id} silme işlemi başlatılıyor.`
+    );
+    dispatch(deletePost(posts._id))
+      .unwrap()
+      .then(() => {
+        onClose(); // Modal'ı kapat
+      })
+      .catch((error) => {
+        onClose(); // Modal'ı kapat
+        console.error("TableCellContent: Silme işlemi hata verdi:", error);
+        // Hata mesajı Redux store'da zaten kaydedilecek ve BlogsTable tarafından gösterilecek
+      });
   };
 
   switch (columnKey) {
@@ -75,30 +80,56 @@ const TableCellContent = ({ posts, columnKey }) => {
       return new Date(cellValue).toLocaleDateString();
     case "actions":
       return (
-        <div className="relative flex justify-end items-center gap-2">
-          <Dropdown>
-            <DropdownTrigger>
-              <Button isIconOnly radius="full" size="sm" variant="light">
-                <span>⋮</span>
-              </Button>
-            </DropdownTrigger>
-            <DropdownMenu>
-              <DropdownItem key={`view-${posts._id}`} onClick={handleView}>
-                Görüntüle
-              </DropdownItem>
-              <DropdownItem key={`edit-${posts._id}`} onClick={handleEdit}>
-                Düzenle
-              </DropdownItem>
-              <DropdownItem
-                key={`delete-${posts._id}`}
-                color="danger"
-                onClick={handleDelete}
-              >
-                Sil
-              </DropdownItem>
-            </DropdownMenu>
-          </Dropdown>
-        </div>
+        <>
+          <div className="relative flex justify-end items-center gap-2">
+            <Dropdown>
+              <DropdownTrigger>
+                <Button isIconOnly radius="full" size="sm" variant="light">
+                  <span>⋮</span>
+                </Button>
+              </DropdownTrigger>
+              <DropdownMenu>
+                <DropdownItem key={`view-${posts._id}`} onClick={handleView}>
+                  Görüntüle
+                </DropdownItem>
+                <DropdownItem key={`edit-${posts._id}`} onClick={handleEdit}>
+                  Düzenle
+                </DropdownItem>
+                <DropdownItem
+                  key={`delete-${posts._id}`}
+                  color="danger"
+                  onClick={handleDelete}
+                >
+                  Sil
+                </DropdownItem>
+              </DropdownMenu>
+            </Dropdown>
+          </div>
+
+          {/* Silme Onay Modalı */}
+          <Modal isOpen={isOpen} onClose={onClose}>
+            <ModalContent>
+              <ModalHeader className="flex flex-col gap-1">
+                Post Silme Onayı
+              </ModalHeader>
+              <ModalBody>
+                <p>
+                  "{posts.title}" başlıklı postu silmek istediğinize emin
+                  misiniz?
+                </p>
+                <p className="text-sm text-gray-500">Bu işlem geri alınamaz.</p>
+              </ModalBody>
+              <ModalFooter>
+                <Button color="default" variant="light" onPress={onClose}>
+                  İptal
+                </Button>
+                <Button color="danger" onPress={confirmDelete}>
+                  Sil
+                </Button>
+              </ModalFooter>
+            </ModalContent>
+          </Modal>
+        </>
       );
     default:
       return cellValue;

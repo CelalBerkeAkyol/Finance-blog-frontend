@@ -3,6 +3,7 @@ import React, { useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { fetchUser } from "./app/features/user/userSlice"; // Adjust the path as necessary
 import { logRender } from "./utils/logger";
+import ErrorBoundary from "./components/ErrorBoundary";
 
 import HomePage from "./pages/HomePage";
 import PricePage from "./pages/other_pages/PricePage";
@@ -46,108 +47,110 @@ function App() {
   logRender("App", false);
 
   return (
-    <div className="min-h-screen flex flex-col">
-      <Router>
-        <main className="flex-1">
-          <Routes>
-            <Route path="/" element={<HomePage />} />
+    <ErrorBoundary>
+      <div className="min-h-screen flex flex-col">
+        <Router>
+          <main className="flex-1">
+            <Routes>
+              <Route path="/" element={<HomePage />} />
 
-            {/* Blog yazarları için */}
+              {/* Blog yazarları için */}
 
-            <Route path="/plans" element={<PricePage />} />
-            <Route path="/about-us" element={<AboutUsPage />} />
-            <Route path="/disclaimer" element={<DisclaimerPage />} />
-            <Route path="/privacy-policy" element={<PrivacyPolicyPage />} />
-            <Route path="/login" element={<LoginPage />} />
-            <Route path="/register" element={<RegisterPage />} />
-            <Route
-              path="/profile"
-              element={
-                <ProtectedRoute>
-                  <ProfilePage />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/dashboard/home"
-              element={
-                <ProtectedRoute>
-                  <DashboardHomePage />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/dashboard/posts"
-              element={
-                <ProtectedRoute>
-                  <AllBlogPostsPage />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/dashboard/post/new"
-              element={
-                <ProtectedRoute>
-                  <NewPostPage />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/dashboard/post/edit/:id"
-              element={
-                <ProtectedRoute>
-                  <EditPostPage />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/dashboard/images"
-              element={
-                <ProtectedRoute>
-                  <ImagePage />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/dashboard/cheat-sheet"
-              element={
-                <ProtectedRoute>
-                  <CheatSheet />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/dashboard/gallery"
-              element={
-                <ProtectedRoute>
-                  <GalleryPage />
-                </ProtectedRoute>
-              }
-            />
-            <Route path="/blog/posts/" element={<BlogsPage />} />
-            <Route path="/blog/post/:id" element={<BlogPostPage />} />
-            <Route path="/blog/categories" element={<CategoriesPage />} />
-            <Route
-              path="/blog/category/:category"
-              element={<CategoryBasePostsPage />}
-            />
-            <Route
-              path="/dashboard/users"
-              element={
-                <ProtectedRoute>
-                  <UsersPage />
-                </ProtectedRoute>
-              }
-            />
+              <Route path="/plans" element={<PricePage />} />
+              <Route path="/about-us" element={<AboutUsPage />} />
+              <Route path="/disclaimer" element={<DisclaimerPage />} />
+              <Route path="/privacy-policy" element={<PrivacyPolicyPage />} />
+              <Route path="/login" element={<LoginPage />} />
+              <Route path="/register" element={<RegisterPage />} />
+              <Route
+                path="/profile"
+                element={
+                  <ProtectedRoute>
+                    <ProfilePage />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/dashboard/home"
+                element={
+                  <ProtectedRoute>
+                    <DashboardHomePage />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/dashboard/posts"
+                element={
+                  <ProtectedRoute>
+                    <AllBlogPostsPage />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/dashboard/post/new"
+                element={
+                  <ProtectedRoute>
+                    <NewPostPage />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/dashboard/post/edit/:id"
+                element={
+                  <ProtectedRoute>
+                    <EditPostPage />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/dashboard/images"
+                element={
+                  <ProtectedRoute>
+                    <ImagePage />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/dashboard/cheat-sheet"
+                element={
+                  <ProtectedRoute>
+                    <CheatSheet />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/dashboard/gallery"
+                element={
+                  <ProtectedRoute>
+                    <GalleryPage />
+                  </ProtectedRoute>
+                }
+              />
+              <Route path="/blog/posts/" element={<BlogsPage />} />
+              <Route path="/blog/post/:id" element={<BlogPostPage />} />
+              <Route path="/blog/categories" element={<CategoriesPage />} />
+              <Route
+                path="/blog/category/:category"
+                element={<CategoryBasePostsPage />}
+              />
+              <Route
+                path="/dashboard/users"
+                element={
+                  <ProtectedRoute>
+                    <UsersPage />
+                  </ProtectedRoute>
+                }
+              />
 
-            {/* 404 Sayfası */}
-            <Route path="*" element={<PageNotFound />} />
-            {/* Blog author sayfaları */}
-          </Routes>
-        </main>
-        <Footer />
-      </Router>
-    </div>
+              {/* 404 Sayfası */}
+              <Route path="*" element={<PageNotFound />} />
+              {/* Blog author sayfaları */}
+            </Routes>
+          </main>
+          <Footer />
+        </Router>
+      </div>
+    </ErrorBoundary>
   );
 }
 

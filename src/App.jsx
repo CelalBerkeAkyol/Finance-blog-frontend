@@ -65,7 +65,7 @@ function App() {
               <Route
                 path="/profile"
                 element={
-                  <ProtectedRoute>
+                  <ProtectedRoute allowedRoles={["admin", "author"]}>
                     <ProfilePage />
                   </ProtectedRoute>
                 }
@@ -73,7 +73,7 @@ function App() {
               <Route
                 path="/dashboard/home"
                 element={
-                  <ProtectedRoute>
+                  <ProtectedRoute allowedRoles={["admin", "author"]}>
                     <DashboardHomePage />
                   </ProtectedRoute>
                 }
@@ -81,7 +81,7 @@ function App() {
               <Route
                 path="/dashboard/posts"
                 element={
-                  <ProtectedRoute>
+                  <ProtectedRoute allowedRoles={["admin", "author"]}>
                     <AllBlogPostsPage />
                   </ProtectedRoute>
                 }
@@ -89,7 +89,7 @@ function App() {
               <Route
                 path="/dashboard/post/new"
                 element={
-                  <ProtectedRoute>
+                  <ProtectedRoute allowedRoles={["admin", "author"]}>
                     <NewPostPage />
                   </ProtectedRoute>
                 }
@@ -97,7 +97,7 @@ function App() {
               <Route
                 path="/dashboard/post/edit/:id"
                 element={
-                  <ProtectedRoute>
+                  <ProtectedRoute allowedRoles={["admin", "author"]}>
                     <EditPostPage />
                   </ProtectedRoute>
                 }
@@ -105,7 +105,7 @@ function App() {
               <Route
                 path="/dashboard/images"
                 element={
-                  <ProtectedRoute>
+                  <ProtectedRoute allowedRoles={["admin", "author"]}>
                     <ImagePage />
                   </ProtectedRoute>
                 }
@@ -113,7 +113,7 @@ function App() {
               <Route
                 path="/dashboard/cheat-sheet"
                 element={
-                  <ProtectedRoute>
+                  <ProtectedRoute allowedRoles={["admin", "author"]}>
                     <CheatSheet />
                   </ProtectedRoute>
                 }
@@ -121,7 +121,7 @@ function App() {
               <Route
                 path="/dashboard/gallery"
                 element={
-                  <ProtectedRoute>
+                  <ProtectedRoute allowedRoles={["admin", "author"]}>
                     <GalleryPage />
                   </ProtectedRoute>
                 }
@@ -136,7 +136,7 @@ function App() {
               <Route
                 path="/dashboard/users"
                 element={
-                  <ProtectedRoute>
+                  <ProtectedRoute allowedRoles={["admin"]}>
                     <UsersPage />
                   </ProtectedRoute>
                 }

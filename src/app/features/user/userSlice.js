@@ -104,7 +104,7 @@ export const updateUserProfile = createAsyncThunk(
       const response = await axios.put(`/user/${userId}`, userData, {
         withCredentials: true,
       });
-      return response.data.data;
+      return response.data;
     } catch (error) {
       return thunkAPI.rejectWithValue(
         error.message || "Profil güncellenemedi."
@@ -126,7 +126,26 @@ const userSlice = createSlice({
   },
   reducers: {
     clearState: (state) => {
-      logInfo("🧹 State", "Kullanıcı state temizleniyor");
+      // Sadece başarı veya hata durumunda log yazalım, her render'da değil
+      if (state.isSuccess || state.isError) {
+        logInfo(
+          "🧹 State",
+          "Geçici durumlar temizleniyor (kullanıcı bilgileri korunuyor)"
+        );
+      }
+      // Sadece geçici durumları temizle, kullanıcı bilgilerini koru
+      state.isLoading = false;
+      state.isSuccess = false;
+      state.isError = false;
+      state.errorMessage = "";
+      // userInfo, isLoggedIn ve isAdmin değerlerini koruyoruz
+    },
+    // Tam temizleme için yeni bir reducer ekleyelim (logout için)
+    clearUserState: (state) => {
+      logInfo("🧹 State", "Kullanıcı state tamamen temizleniyor");
+      state.userInfo = null;
+      state.isLoggedIn = false;
+      state.isAdmin = false;
       state.isLoading = false;
       state.isSuccess = false;
       state.isError = false;
@@ -141,18 +160,23 @@ const userSlice = createSlice({
         state.isLoading = true;
       })
       .addCase(loginUser.fulfilled, (state, action) => {
-        logInfo(
-          "✅ Giriş",
-          `${
-            action.payload.user?.userName || action.payload.user?.email
-          } kullanıcısı giriş yaptı`
-        );
+        // API yanıtı: {success, message, data: {user}}
+        if (action.payload.success && action.payload.data?.user) {
+          const user = action.payload.data.user;
+          const userName = user.userName || user.email || "Kullanıcı";
+
+          logInfo("✅ Giriş", `${userName} kullanıcısı giriş yaptı`);
+
+          state.userInfo = user;
+          state.isAdmin = user.role === "admin";
+          state.isLoggedIn = true;
+        } else {
+          logInfo("⚠️ Giriş", "Giriş başarılı ancak kullanıcı bilgisi eksik");
+          state.isLoggedIn = false;
+        }
+
         state.isLoading = false;
         state.isSuccess = true;
-        state.isLoggedIn = true;
-        state.userInfo = action.payload.user;
-        // Eğer role bilgisi admin kontrolü için kullanılacaksa:
-        state.isAdmin = action.payload.user?.role === "admin";
       })
       .addCase(loginUser.rejected, (state, action) => {
         logInfo("❌ Giriş", `Giriş başarısız: ${action.payload}`);
@@ -166,17 +190,23 @@ const userSlice = createSlice({
         state.isLoading = true;
       })
       .addCase(registerUser.fulfilled, (state, action) => {
-        logInfo(
-          "✅ Kayıt",
-          `${
-            action.payload.user?.userName || action.payload.user?.email
-          } kullanıcısı kaydedildi`
-        );
+        // API yanıtı: {success, message, data: {user}}
+        if (action.payload.success && action.payload.data?.user) {
+          const user = action.payload.data.user;
+          const userName = user.userName || user.email || "Kullanıcı";
+
+          logInfo("✅ Kayıt", `${userName} kullanıcısı kaydedildi`);
+
+          state.userInfo = user;
+          state.isAdmin = user.role === "admin";
+          state.isLoggedIn = true;
+        } else {
+          logInfo("⚠️ Kayıt", "Kayıt başarılı ancak kullanıcı bilgisi eksik");
+          state.isLoggedIn = false;
+        }
+
         state.isLoading = false;
         state.isSuccess = true;
-        state.userInfo = action.payload.user;
-        state.isLoggedIn = true;
-        state.isAdmin = action.payload.user?.role === "admin";
       })
       .addCase(registerUser.rejected, (state, action) => {
         logInfo("❌ Kayıt", `Kayıt başarısız: ${action.payload}`);
@@ -209,27 +239,26 @@ const userSlice = createSlice({
         state.isLoading = true;
       })
       .addCase(fetchUser.fulfilled, (state, action) => {
-        if (action.payload.valid && action.payload.user) {
-          logInfo(
-            "✅ Kullanıcı",
-            `${
-              action.payload.user?.userName ||
-              action.payload.user?.email ||
-              "Kullanıcı"
-            } bilgisi alındı`
-          );
+        // fetchUser özel bir durum, kendi yapısı var
+        const isValid = action.payload.valid !== false;
+
+        if (isValid && action.payload.user) {
+          const user = action.payload.user;
+          const userName = user.userName || user.email || "Kullanıcı";
+
+          logInfo("✅ Kullanıcı", `${userName} bilgisi alındı`);
+
+          state.userInfo = user;
+          state.isAdmin = user.role === "admin";
+          state.isLoggedIn = true;
         } else {
           logInfo("✅ Kullanıcı", "Kullanıcı bilgisi alındı (oturum yok)");
-        }
-        state.isLoading = false;
-        state.isSuccess = true;
-        state.isLoggedIn = action.payload.valid;
-        state.userInfo = action.payload.user;
-        if (action.payload.user?.role) {
-          state.isAdmin = action.payload.user.role === "admin";
-        } else {
+          state.isLoggedIn = false;
           state.isAdmin = false;
         }
+
+        state.isLoading = false;
+        state.isSuccess = true;
       })
       .addCase(fetchUser.rejected, (state, action) => {
         logInfo(
@@ -246,15 +275,19 @@ const userSlice = createSlice({
         state.isLoading = true;
       })
       .addCase(updateUserProfile.fulfilled, (state, action) => {
-        logInfo(
-          "✅ Profil",
-          `${
-            action.payload?.userName || action.payload?.email || "Kullanıcı"
-          } profili güncellendi`
-        );
+        // API yanıtı: {success, message, data}
+        if (action.payload.success && action.payload.data) {
+          const user = action.payload.data;
+          const userName = user.userName || user.email || "Kullanıcı";
+
+          logInfo("✅ Profil", `${userName} profili güncellendi`);
+          state.userInfo = user;
+        } else {
+          logInfo("⚠️ Profil", "Profil güncelleme başarılı ancak veri eksik");
+        }
+
         state.isLoading = false;
         state.isSuccess = true;
-        state.userInfo = action.payload;
       })
       .addCase(updateUserProfile.rejected, (state, action) => {
         logInfo("❌ Profil", `Profil güncelleme başarısız: ${action.payload}`);
@@ -265,5 +298,5 @@ const userSlice = createSlice({
   },
 });
 
-export const { clearState } = userSlice.actions;
+export const { clearState, clearUserState } = userSlice.actions;
 export default userSlice.reducer;

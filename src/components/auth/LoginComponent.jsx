@@ -18,10 +18,13 @@ export default function LoginComponent() {
     if (isSuccess) {
       navigate("/");
     }
+  }, [isSuccess, navigate]);
+
+  useEffect(() => {
     return () => {
       dispatch(clearState());
     };
-  }, [isSuccess, isError, errorMessage]);
+  }, [dispatch]);
 
   const toggleVisibility = () => {
     setIsVisible(!isVisible);

@@ -1,6 +1,7 @@
 // src/app/features/imageGallery/imageGallerySlice.js
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import api from "../../../api";
+import { logInfo } from "../../../utils/logger";
 
 // Sayfalı görsel listeleme thunk'ı
 export const fetchImages = createAsyncThunk(
@@ -43,10 +44,15 @@ const imageGallerySlice = createSlice({
   extraReducers: (builder) => {
     builder
       .addCase(fetchImages.pending, (state) => {
+        logInfo("🔄 Görseller", "Görseller getiriliyor");
         state.loading = true;
         state.error = null;
       })
       .addCase(fetchImages.fulfilled, (state, action) => {
+        logInfo(
+          "✅ Görseller",
+          `${action.payload.images?.length || 0} görsel başarıyla getirildi`
+        );
         state.loading = false;
         state.images = action.payload.images;
         state.page = action.payload.page;
@@ -54,15 +60,27 @@ const imageGallerySlice = createSlice({
         state.total = action.payload.total;
       })
       .addCase(fetchImages.rejected, (state, action) => {
+        logInfo(
+          "❌ Görseller",
+          `Görseller getirilemedi: ${action.payload || action.error.message}`
+        );
         state.loading = false;
         state.error = action.payload || action.error.message;
+      })
+      .addCase(deleteImage.pending, (state) => {
+        logInfo("🔄 Görsel Silme", "Görsel siliniyor");
       })
       .addCase(deleteImage.fulfilled, (state, action) => {
         // Silme başarıyla bittiğinde, ilgili görseli state'ten çıkarabiliriz
         const deletedId = action.payload.image?._id;
+        logInfo("✅ Görsel Silme", `Görsel silindi: ${deletedId}`);
         state.images = state.images.filter((img) => img._id !== deletedId);
       })
       .addCase(deleteImage.rejected, (state, action) => {
+        logInfo(
+          "❌ Görsel Silme",
+          `Görsel silinemedi: ${action.payload || action.error.message}`
+        );
         state.error = action.payload || action.error.message;
       });
   },

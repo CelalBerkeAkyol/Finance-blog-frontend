@@ -1,6 +1,7 @@
 // src/app/features/blogs/postsSlice.js
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import axios from "../../../api"; // kendi axios ayarınız
+import { logInfo } from "../../../utils/logger";
 
 // Tüm postları sayfalı getirme
 export const fetchPosts = createAsyncThunk(
@@ -149,12 +150,14 @@ const postsSlice = createSlice({
   },
   reducers: {
     clearState: (state) => {
+      logInfo("🧹 State", "Post state temizleniyor");
       state.isLoading = false;
       state.isSuccess = false;
       state.isError = false;
       state.errorMessage = "";
     },
     removePost: (state, action) => {
+      logInfo("🗑️ Post", `Post siliniyor: ${action.payload}`);
       state.posts = state.posts.filter((post) => post._id !== action.payload);
     },
   },
@@ -162,11 +165,16 @@ const postsSlice = createSlice({
     builder
       // fetchPosts
       .addCase(fetchPosts.pending, (state) => {
+        logInfo("🔄 Postlar", "Postlar getiriliyor");
         state.isLoading = true;
         state.isError = false;
         state.errorMessage = "";
       })
       .addCase(fetchPosts.fulfilled, (state, action) => {
+        logInfo(
+          "✅ Postlar",
+          `${action.payload.data.posts?.length || 0} post başarıyla getirildi`
+        );
         state.isLoading = false;
         state.isSuccess = true;
         // Yeni response yapısına göre posts'u al
@@ -181,6 +189,7 @@ const postsSlice = createSlice({
         state.total = action.payload.data.total || 0;
       })
       .addCase(fetchPosts.rejected, (state, action) => {
+        logInfo("❌ Postlar", `Postlar getirilemedi: ${action.payload}`);
         state.isLoading = false;
         state.isError = true;
         state.errorMessage =
@@ -189,7 +198,7 @@ const postsSlice = createSlice({
       // Fetch post by ıd
       .addCase(fetchPostById.fulfilled, (state, action) => {
         if (!action.payload) {
-          console.error("fetchPostById: Post verisi bulunamadı");
+          logInfo("❌ Post", "Post verisi bulunamadı");
           return;
         }
 
@@ -198,13 +207,22 @@ const postsSlice = createSlice({
         const index = state.posts.findIndex((p) => p._id === fetchedPost._id);
         if (index !== -1) {
           // varsa güncelle
+          logInfo(
+            "✅ Post",
+            `Post güncellendi: ${fetchedPost.title || fetchedPost._id}`
+          );
           state.posts[index] = fetchedPost;
         } else {
           // yoksa ekle
+          logInfo(
+            "✅ Post",
+            `Yeni post eklendi: ${fetchedPost.title || fetchedPost._id}`
+          );
           state.posts.push(fetchedPost);
         }
       })
       .addCase(fetchPostById.rejected, (state, action) => {
+        logInfo("❌ Post", `Post getirilemedi: ${action.payload}`);
         state.isError = true;
         state.errorMessage = action.payload || "Post getirilirken hata oluştu.";
       })
@@ -216,10 +234,15 @@ const postsSlice = createSlice({
           (post) => post._id === updatedPost._id
         );
         if (index !== -1) {
+          logInfo(
+            "👍 Upvote",
+            `Post upvote edildi: ${updatedPost.title || updatedPost._id}`
+          );
           state.posts[index] = updatedPost;
         }
       })
       .addCase(upvotePost.rejected, (state, action) => {
+        logInfo("❌ Upvote", `Upvote başarısız: ${action.payload}`);
         state.isError = true;
       })
 
@@ -230,24 +253,38 @@ const postsSlice = createSlice({
           (post) => post._id === updatedPost._id
         );
         if (index !== -1) {
+          logInfo(
+            "👎 Downvote",
+            `Post downvote edildi: ${updatedPost.title || updatedPost._id}`
+          );
           state.posts[index] = updatedPost;
         }
       })
       .addCase(downvotePost.rejected, (state, action) => {
+        logInfo("❌ Downvote", `Downvote başarısız: ${action.payload}`);
         state.isError = true;
       })
 
       // fetchPostsByCategory
       .addCase(fetchPostsByCategory.pending, (state) => {
+        logInfo("🔄 Kategori", "Kategoriye göre postlar getiriliyor");
         state.isLoading = true;
         state.isError = false;
         state.errorMessage = "";
       })
       .addCase(fetchPostsByCategory.fulfilled, (state, action) => {
+        logInfo(
+          "✅ Kategori",
+          `${action.payload?.length || 0} post kategoriye göre getirildi`
+        );
         state.isLoading = false;
         state.posts = action.payload;
       })
       .addCase(fetchPostsByCategory.rejected, (state, action) => {
+        logInfo(
+          "❌ Kategori",
+          `Kategoriye göre postlar getirilemedi: ${action.payload}`
+        );
         state.isLoading = false;
         state.isError = true;
         state.errorMessage = action.payload;
@@ -255,18 +292,24 @@ const postsSlice = createSlice({
 
       // addNewPost
       .addCase(addNewPost.pending, (state) => {
+        logInfo("🔄 Yeni Post", "Post ekleniyor");
         state.isLoading = true;
         state.isError = false;
         state.errorMessage = "";
       })
       .addCase(addNewPost.fulfilled, (state, action) => {
-        state.isLoading = false;
-        state.isSuccess = true;
         // backend yanıtında { post: {...} } varsa
         const newPost = action.payload.post || action.payload;
+        logInfo(
+          "✅ Yeni Post",
+          `Post eklendi: ${newPost.title || newPost._id}`
+        );
+        state.isLoading = false;
+        state.isSuccess = true;
         state.posts.unshift(newPost);
       })
       .addCase(addNewPost.rejected, (state, action) => {
+        logInfo("❌ Yeni Post", `Post eklenemedi: ${action.payload}`);
         state.isLoading = false;
         state.isError = true;
         state.errorMessage = action.payload || "Post eklerken hata oluştu.";
@@ -274,14 +317,19 @@ const postsSlice = createSlice({
 
       // updatePost
       .addCase(updatePost.pending, (state) => {
+        logInfo("🔄 Post Güncelleme", "Post güncelleniyor");
         state.isLoading = true;
         state.isError = false;
         state.errorMessage = "";
       })
       .addCase(updatePost.fulfilled, (state, action) => {
+        const updatedPost = action.payload.post || action.payload;
+        logInfo(
+          "✅ Post Güncelleme",
+          `Post güncellendi: ${updatedPost.title || updatedPost._id}`
+        );
         state.isLoading = false;
         state.isSuccess = true;
-        const updatedPost = action.payload.post || action.payload;
         const index = state.posts.findIndex(
           (post) => post._id === updatedPost._id
         );
@@ -290,6 +338,7 @@ const postsSlice = createSlice({
         }
       })
       .addCase(updatePost.rejected, (state, action) => {
+        logInfo("❌ Post Güncelleme", `Post güncellenemedi: ${action.payload}`);
         state.isLoading = false;
         state.isError = true;
         state.errorMessage = action.payload || "Post güncellerken hata oluştu.";
@@ -297,33 +346,41 @@ const postsSlice = createSlice({
 
       // deletePost
       .addCase(deletePost.pending, (state) => {
+        logInfo("🔄 Post Silme", "Post siliniyor");
         state.isLoading = true;
         state.isError = false;
         state.errorMessage = "";
       })
       .addCase(deletePost.fulfilled, (state, action) => {
+        logInfo("✅ Post Silme", `Post silindi: ${action.payload}`);
         state.isLoading = false;
         state.isSuccess = true;
         state.posts = state.posts.filter((post) => post._id !== action.payload);
       })
       .addCase(deletePost.rejected, (state, action) => {
+        logInfo("❌ Post Silme", `Post silinemedi: ${action.payload}`);
         state.isLoading = false;
         state.isError = true;
         state.errorMessage = action.payload || "Post silerken hata oluştu.";
       })
 
       // incrementPostView
-      .addCase(incrementPostView.pending, (state) => {
-        // İsteğe göre isLoading vs güncelleyebilirsiniz
-      })
       .addCase(incrementPostView.fulfilled, (state, action) => {
         const updatedPost = action.payload;
         const index = state.posts.findIndex((p) => p._id === updatedPost._id);
         if (index !== -1) {
+          logInfo(
+            "👁️ Görüntülenme",
+            `Post görüntülendi: ${updatedPost.title || updatedPost._id}`
+          );
           state.posts[index] = updatedPost;
         }
       })
       .addCase(incrementPostView.rejected, (state, action) => {
+        logInfo(
+          "❌ Görüntülenme",
+          `Görüntülenme sayısı artırılamadı: ${action.payload}`
+        );
         state.isError = true;
         state.errorMessage =
           action.payload || "Görüntülenme sayısı artırılırken hata oluştu.";

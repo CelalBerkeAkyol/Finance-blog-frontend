@@ -1,6 +1,7 @@
 // src/app/features/user/userSlice.js
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import axios from "../../../api"; // Axios yapılandırmanızı kullanın
+import { logInfo } from "../../../utils/logger";
 
 // Kullanıcı giriş yapma thunk'ı
 export const loginUser = createAsyncThunk(
@@ -125,6 +126,7 @@ const userSlice = createSlice({
   },
   reducers: {
     clearState: (state) => {
+      logInfo("🧹 State", "Kullanıcı state temizleniyor");
       state.isLoading = false;
       state.isSuccess = false;
       state.isError = false;
@@ -135,9 +137,16 @@ const userSlice = createSlice({
     builder
       // loginUser
       .addCase(loginUser.pending, (state) => {
+        logInfo("🔄 Giriş", "Giriş işlemi başlatıldı");
         state.isLoading = true;
       })
       .addCase(loginUser.fulfilled, (state, action) => {
+        logInfo(
+          "✅ Giriş",
+          `${
+            action.payload.user?.userName || action.payload.user?.email
+          } kullanıcısı giriş yaptı`
+        );
         state.isLoading = false;
         state.isSuccess = true;
         state.isLoggedIn = true;
@@ -146,15 +155,23 @@ const userSlice = createSlice({
         state.isAdmin = action.payload.user?.role === "admin";
       })
       .addCase(loginUser.rejected, (state, action) => {
+        logInfo("❌ Giriş", `Giriş başarısız: ${action.payload}`);
         state.isLoading = false;
         state.isError = true;
         state.errorMessage = action.payload || "Giriş başarısız.";
       })
       // register
       .addCase(registerUser.pending, (state) => {
+        logInfo("🔄 Kayıt", "Kayıt işlemi başlatıldı");
         state.isLoading = true;
       })
       .addCase(registerUser.fulfilled, (state, action) => {
+        logInfo(
+          "✅ Kayıt",
+          `${
+            action.payload.user?.userName || action.payload.user?.email
+          } kullanıcısı kaydedildi`
+        );
         state.isLoading = false;
         state.isSuccess = true;
         state.userInfo = action.payload.user;
@@ -162,15 +179,18 @@ const userSlice = createSlice({
         state.isAdmin = action.payload.user?.role === "admin";
       })
       .addCase(registerUser.rejected, (state, action) => {
+        logInfo("❌ Kayıt", `Kayıt başarısız: ${action.payload}`);
         state.isLoading = false;
         state.isError = true;
         state.errorMessage = action.payload || "Registration failed.";
       })
       // logoutUser
       .addCase(logoutUser.pending, (state) => {
+        logInfo("🔄 Çıkış", "Çıkış işlemi başlatıldı");
         state.isLoading = true;
       })
       .addCase(logoutUser.fulfilled, (state) => {
+        logInfo("✅ Çıkış", "Kullanıcı çıkış yaptı");
         state.isLoading = false;
         state.isSuccess = true;
         state.userInfo = null;
@@ -178,15 +198,29 @@ const userSlice = createSlice({
         state.isAdmin = false;
       })
       .addCase(logoutUser.rejected, (state, action) => {
+        logInfo("❌ Çıkış", `Çıkış başarısız: ${action.payload}`);
         state.isLoading = false;
         state.isError = true;
         state.errorMessage = action.payload || "Çıkış yapılamadı.";
       })
       // fetchUser
       .addCase(fetchUser.pending, (state) => {
+        logInfo("🔄 Kullanıcı", "Kullanıcı bilgisi getiriliyor");
         state.isLoading = true;
       })
       .addCase(fetchUser.fulfilled, (state, action) => {
+        if (action.payload.valid && action.payload.user) {
+          logInfo(
+            "✅ Kullanıcı",
+            `${
+              action.payload.user?.userName ||
+              action.payload.user?.email ||
+              "Kullanıcı"
+            } bilgisi alındı`
+          );
+        } else {
+          logInfo("✅ Kullanıcı", "Kullanıcı bilgisi alındı (oturum yok)");
+        }
         state.isLoading = false;
         state.isSuccess = true;
         state.isLoggedIn = action.payload.valid;
@@ -198,20 +232,32 @@ const userSlice = createSlice({
         }
       })
       .addCase(fetchUser.rejected, (state, action) => {
+        logInfo(
+          "❌ Kullanıcı",
+          `Kullanıcı bilgisi alınamadı: ${action.payload}`
+        );
         state.isLoading = false;
         state.isError = true;
         state.errorMessage = action.payload || "Kullanıcı bilgileri alınamadı.";
       })
       // updateUserProfile
       .addCase(updateUserProfile.pending, (state) => {
+        logInfo("🔄 Profil", "Profil güncelleme başlatıldı");
         state.isLoading = true;
       })
       .addCase(updateUserProfile.fulfilled, (state, action) => {
+        logInfo(
+          "✅ Profil",
+          `${
+            action.payload?.userName || action.payload?.email || "Kullanıcı"
+          } profili güncellendi`
+        );
         state.isLoading = false;
         state.isSuccess = true;
         state.userInfo = action.payload;
       })
       .addCase(updateUserProfile.rejected, (state, action) => {
+        logInfo("❌ Profil", `Profil güncelleme başarısız: ${action.payload}`);
         state.isLoading = false;
         state.isError = true;
         state.errorMessage = action.payload || "Profil güncellenemedi.";

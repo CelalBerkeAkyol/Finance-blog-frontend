@@ -38,7 +38,6 @@ import RegisterPage from "./pages/auth/RegisterPage";
 
 function App() {
   const dispatch = useDispatch();
-  const { userInfo, isLoggedIn } = useSelector((state) => state.user);
 
   useEffect(() => {
     dispatch(fetchUser());
@@ -55,6 +54,7 @@ function App() {
               <Route path="/" element={<HomePage />} />
 
               {/* Blog yazarları için */}
+
 
               <Route path="/plans" element={<PricePage />} />
               <Route path="/about-us" element={<AboutUsPage />} />

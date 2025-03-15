@@ -15,7 +15,10 @@ import {
   DropdownItem,
 } from "@nextui-org/react";
 import { useSelector, useDispatch } from "react-redux";
-import { fetchPosts } from "../../../../app/features/blogs/postsSlice";
+import {
+  fetchPosts,
+  clearState,
+} from "../../../../app/features/blogs/postsSlice";
 import TableCellContent from "./TableCellContent";
 import { capitalize } from "../../../../utils/capitalize";
 import { useNavigate } from "react-router-dom";
@@ -39,7 +42,9 @@ const statusOptions = [
 
 const BlogsTable = () => {
   const dispatch = useDispatch();
-  const { posts, status, error, total } = useSelector((state) => state.posts);
+  const { posts, status, error, total, isError, errorMessage } = useSelector(
+    (state) => state.posts
+  );
   const [filterValue, setFilterValue] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
   const [sortDescriptor, setSortDescriptor] = useState({
@@ -47,16 +52,39 @@ const BlogsTable = () => {
     direction: "descending",
   });
   const [page, setPage] = useState(1);
+  const [notification, setNotification] = useState({
+    show: false,
+    message: "",
+    type: "",
+  });
   const limit = 20;
   const navigate = useNavigate();
+
+  // Bildirim gösterme fonksiyonu
+  const showNotification = (message, type = "success") => {
+    setNotification({ show: true, message, type });
+    setTimeout(() => {
+      setNotification({ show: false, message: "", type: "" });
+      if (type === "error") {
+        dispatch(clearState());
+      }
+    }, 3000);
+  };
 
   useEffect(() => {
     console.info("BlogsTable: Postlar getiriliyor (sayfa:", page, ")");
     dispatch(fetchPosts({ page, limit }));
   }, [dispatch, page]);
 
+  // Hata mesajı varsa bildirim göster
+  useEffect(() => {
+    if (isError && errorMessage) {
+      showNotification(errorMessage, "error");
+    }
+  }, [isError, errorMessage]);
+
   const filteredBlogs = useMemo(() => {
-    let filtered = [...posts];
+    let filtered = Array.isArray(posts) ? [...posts] : [];
     if (filterValue) {
       filtered = filtered.filter((post) =>
         post.title.toLowerCase().includes(filterValue.toLowerCase())
@@ -69,6 +97,8 @@ const BlogsTable = () => {
   }, [posts, filterValue, statusFilter]);
 
   const sortedBlogs = useMemo(() => {
+    if (!filteredBlogs.length) return [];
+
     return [...filteredBlogs].sort((a, b) => {
       const aVal = a[sortDescriptor.column];
       const bVal = b[sortDescriptor.column];
@@ -99,8 +129,63 @@ const BlogsTable = () => {
     navigate("/dashboard/post/new");
   };
 
-  if (status === "loading") return <div>Yükleniyor...</div>;
-  if (status === "failed") return <div>Hata: {error}</div>;
+  const handleRefresh = () => {
+    dispatch(fetchPosts({ page, limit }));
+    showNotification("Postlar yenilendi.", "success");
+  };
+
+  // Veri yükleme durumunda veya hata durumunda içerik
+  const renderContent = () => {
+    if (status === "loading") {
+      return (
+        <div className="flex justify-center items-center py-8">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500"></div>
+          <span className="ml-2">Yükleniyor...</span>
+        </div>
+      );
+    }
+
+    return (
+      <div>
+        <Table
+          aria-label="Blogs Table"
+          sortDescriptor={sortDescriptor}
+          onSortChange={handleSortChange}
+          striped
+        >
+          <TableHeader columns={columns}>
+            {(column) => (
+              <TableColumn key={column.uid} allowsSorting>
+                {column.name}
+              </TableColumn>
+            )}
+          </TableHeader>
+          <TableBody emptyContent={"Görüntülenecek post bulunamadı."}>
+            {sortedBlogs.map((post, index) => (
+              <TableRow key={post._id || `row-${index}`}>
+                {columns.map((column) => (
+                  <TableCell
+                    key={`${post._id || `row-${index}`}-${column.uid}`}
+                  >
+                    <TableCellContent posts={post} columnKey={column.uid} />
+                  </TableCell>
+                ))}
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
+        <div className="flex justify-between align-center items-center mt-4">
+          <Pagination
+            total={Math.ceil((total || 0) / limit)}
+            initialPage={1}
+            page={page}
+            onChange={(p) => setPage(p)}
+            size="sm"
+          />
+        </div>
+      </div>
+    );
+  };
 
   return (
     <div className="p-12 w-full">
@@ -144,50 +229,37 @@ const BlogsTable = () => {
             color="default"
             variant="flat"
             size="sm"
+            onClick={handleRefresh}
+          >
+            Yenile
+          </Button>
+          <Button
+            color="primary"
+            variant="flat"
+            size="sm"
             onClick={handleNavigate}
           >
             Yeni ekle
           </Button>
         </div>
       </div>
-      <div>
-        <Table
-          aria-label="Blogs Table"
-          sortDescriptor={sortDescriptor}
-          onSortChange={handleSortChange}
-          striped
+
+      {renderContent()}
+
+      {/* Bildirim */}
+      {notification.show && (
+        <div
+          className={`fixed bottom-4 right-4 px-4 py-2 rounded shadow-lg z-50 ${
+            notification.type === "error"
+              ? "bg-red-500 text-white"
+              : notification.type === "warning"
+              ? "bg-yellow-500 text-white"
+              : "bg-green-500 text-white"
+          }`}
         >
-          <TableHeader columns={columns}>
-            {(column) => (
-              <TableColumn key={column.uid} allowsSorting>
-                {column.name}
-              </TableColumn>
-            )}
-          </TableHeader>
-          <TableBody>
-            {sortedBlogs.map((post, index) => (
-              <TableRow key={post._id || `row-${index}`}>
-                {columns.map((column) => (
-                  <TableCell
-                    key={`${post._id || `row-${index}`}-${column.uid}`}
-                  >
-                    <TableCellContent posts={post} columnKey={column.uid} />
-                  </TableCell>
-                ))}
-              </TableRow>
-            ))}
-          </TableBody>
-        </Table>
-        <div className="flex justify-between align-center items-center mt-4">
-          <Pagination
-            total={Math.ceil((total || 0) / limit)}
-            initialPage={1}
-            page={page}
-            onChange={(p) => setPage(p)}
-            size="sm"
-          />
+          {notification.message}
         </div>
-      </div>
+      )}
     </div>
   );
 };

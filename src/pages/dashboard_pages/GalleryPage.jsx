@@ -3,11 +3,13 @@ import { useDispatch, useSelector } from "react-redux";
 import {
   fetchImages,
   deleteImage,
+  clearImageErrors,
 } from "../../app/features/image/imageGallerySlice";
 import { Button } from "@nextui-org/react";
 import { Icon } from "@iconify/react";
 import ImageUploaderModal from "../../components/blog_components/image/ImageUploaderModal";
 import BlogSidebarComponent from "../../components/blog_components/blog_dashboard/BlogSidebarComponent";
+import ErrorBoundary from "../../components/Error/ErrorBoundary";
 
 function GalleryPage() {
   const dispatch = useDispatch();
@@ -16,13 +18,36 @@ function GalleryPage() {
   );
 
   const [selectedImageId, setSelectedImageId] = useState(null);
-  const [copyNotification, setCopyNotification] = useState(false);
+  const [notification, setNotification] = useState({
+    show: false,
+    message: "",
+    type: "",
+  });
   const [isUploaderOpen, setIsUploaderOpen] = useState(false);
 
   // İlk yükelemede 20 görseli çek
   useEffect(() => {
     dispatch(fetchImages({ page: 1, limit: 20 }));
   }, [dispatch]);
+
+  // Bildirim gösterme fonksiyonu
+  const showNotification = (message, type = "success") => {
+    setNotification({ show: true, message, type });
+    setTimeout(() => {
+      setNotification({ show: false, message: "", type: "" });
+    }, 3000);
+  };
+
+  // Hata mesajı varsa bildirim göster
+  useEffect(() => {
+    if (error) {
+      showNotification(error, "error");
+      // Hata mesajını gösterdikten sonra temizle
+      setTimeout(() => {
+        dispatch(clearImageErrors());
+      }, 3000);
+    }
+  }, [error, dispatch]);
 
   // Bir görseli seçme
   const handleSelectImage = (id) => {
@@ -32,38 +57,50 @@ function GalleryPage() {
   // Kopyalama
   const handleCopy = () => {
     if (!selectedImageId) {
-      alert("Lütfen bir görsel seçin.");
+      showNotification("Lütfen bir görsel seçin.", "warning");
       return;
     }
     const foundImage = images.find((img) => img._id === selectedImageId);
-    if (!foundImage) return;
+    if (!foundImage) {
+      showNotification("Seçilen görsel bulunamadı.", "error");
+      return;
+    }
 
     const markdownLink = `![Resim Açıklaması](${foundImage.url})`;
     navigator.clipboard
       .writeText(markdownLink)
       .then(() => {
-        setCopyNotification(true);
-        setTimeout(() => setCopyNotification(false), 2000);
+        showNotification("Görsel linki kopyalandı!");
       })
-      .catch((err) => console.error("Kopyalama hatası:", err));
+      .catch((err) => {
+        console.error("Kopyalama hatası:", err);
+        showNotification("Kopyalama sırasında bir hata oluştu.", "error");
+      });
   };
 
   // Silme
   const handleDelete = () => {
     if (!selectedImageId) {
-      alert("Lütfen silmek için bir görsel seçin.");
+      showNotification("Lütfen silmek için bir görsel seçin.", "warning");
       return;
     }
     if (!window.confirm("Bu görseli silmek istediğinize emin misiniz?")) return;
 
     dispatch(deleteImage(selectedImageId))
       .unwrap()
-      .then(() => {
+      .then((result) => {
         // Silme sonrası mevcut sayfadaki görselleri yenile
         dispatch(fetchImages({ page, limit: 20 }));
         setSelectedImageId(null);
+        showNotification("Görsel başarıyla silindi.");
       })
-      .catch((err) => console.error("Silme hatası:", err));
+      .catch((err) => {
+        console.error("Silme hatası:", err);
+        showNotification(
+          err.message || "Görsel silinirken bir hata oluştu.",
+          "error"
+        );
+      });
   };
 
   // Sayfalama
@@ -84,6 +121,7 @@ function GalleryPage() {
   const handleReload = () => {
     dispatch(fetchImages({ page: 1, limit: 20 }));
     setSelectedImageId(null);
+    showNotification("Görseller yenilendi.");
   };
 
   // "Görsel Ekle" butonu: modal aç
@@ -94,7 +132,6 @@ function GalleryPage() {
   return (
     <div className="flex min-h-screen">
       {/* Sidebar solda sabit */}
-
       <BlogSidebarComponent />
 
       {/* İçerik */}
@@ -124,30 +161,44 @@ function GalleryPage() {
         </div>
 
         {/* İçerik */}
-        {loading && <p>Yükleniyor...</p>}
-        {error && <p className="text-red-500">{error}</p>}
+        {loading && (
+          <div className="flex justify-center items-center py-4">
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500"></div>
+            <span className="ml-2">Yükleniyor...</span>
+          </div>
+        )}
 
         {/* Responsive Grid: Küçük ekran = 2 sütun, orta = 3, büyük = 4, daha büyük = 5 */}
         <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
-          {images.map((img) => {
-            const isSelected = selectedImageId === img._id;
-            return (
-              <div
-                key={img._id}
-                onClick={() => handleSelectImage(img._id)}
-                className={`cursor-pointer border p-1 ${
-                  isSelected ? "border-blue-500" : "border-gray-200"
-                }`}
-              >
-                <img
-                  src={img.url}
-                  alt={img.altText || "Görsel"}
-                  className="w-full h-36 object-cover"
-                  /* h-36 daha küçük görüntü */
-                />
-              </div>
-            );
-          })}
+          {Array.isArray(images) && images.length > 0 ? (
+            images.map((img) => {
+              const isSelected = selectedImageId === img._id;
+              return (
+                <div
+                  key={img._id}
+                  onClick={() => handleSelectImage(img._id)}
+                  className={`cursor-pointer border p-1 ${
+                    isSelected ? "border-blue-500" : "border-gray-200"
+                  }`}
+                >
+                  <img
+                    src={img.url}
+                    alt={img.altText || "Görsel"}
+                    className="w-full h-36 object-cover"
+                    onError={(e) => {
+                      e.target.onerror = null;
+                      e.target.src =
+                        "https://via.placeholder.com/150?text=Görsel+Yüklenemedi";
+                    }}
+                  />
+                </div>
+              );
+            })
+          ) : (
+            <div className="col-span-full text-center py-8">
+              <p className="text-gray-500">Görüntülenecek görsel bulunamadı.</p>
+            </div>
+          )}
         </div>
 
         {/* Sayfalama */}
@@ -173,20 +224,44 @@ function GalleryPage() {
           </Button>
         </div>
 
-        {/* Kopyalama bildirimi */}
-        {copyNotification && (
-          <div className="fixed bottom-4 right-4 bg-green-500 text-white px-4 py-2 rounded shadow-lg">
-            Görsel linki kopyalandı!
+        {/* Bildirim */}
+        {notification.show && (
+          <div
+            className={`fixed bottom-4 right-4 px-4 py-2 rounded shadow-lg ${
+              notification.type === "error"
+                ? "bg-red-500 text-white"
+                : notification.type === "warning"
+                ? "bg-yellow-500 text-white"
+                : "bg-green-500 text-white"
+            }`}
+          >
+            {notification.message}
           </div>
         )}
 
         {/* Yükleme Modalı */}
         {isUploaderOpen && (
-          <ImageUploaderModal onClose={() => setIsUploaderOpen(false)} />
+          <ImageUploaderModal
+            onClose={() => setIsUploaderOpen(false)}
+            onSuccess={() => {
+              setIsUploaderOpen(false);
+              showNotification("Görsel başarıyla yüklendi.");
+              dispatch(fetchImages({ page: 1, limit: 20 }));
+            }}
+          />
         )}
       </div>
     </div>
   );
 }
 
-export default GalleryPage;
+// Error Boundary ile sarmalayarak dışa aktarıyoruz
+function GalleryPageWithErrorBoundary() {
+  return (
+    <ErrorBoundary>
+      <GalleryPage />
+    </ErrorBoundary>
+  );
+}
+
+export default GalleryPageWithErrorBoundary;

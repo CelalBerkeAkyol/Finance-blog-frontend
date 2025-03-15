@@ -1,15 +1,8 @@
-// src/utils/logger.js
-const renderCounts = new Map();
+// src/utils/LogRender.js
+import { logRender as logRenderFn } from "./logger";
 
 export function logRender(componentName) {
-  if (!renderCounts.has(componentName)) {
-    renderCounts.set(componentName, 0);
-  }
-
-  const newCount = renderCounts.get(componentName) + 1;
-  renderCounts.set(componentName, newCount);
-
-  console.log(
-    `${componentName} render edildi. Toplam render sayısı: ${newCount}`
-  );
+  // Eski fonksiyonu yeni fonksiyona yönlendir
+  // enableLogging parametresini false olarak geçiyoruz, böylece varsayılan olarak log gösterilmeyecek
+  logRenderFn(componentName, false);
 }

@@ -13,26 +13,19 @@ const ProfilePage = () => {
   const [isReady, setIsReady] = useState(false);
 
   useEffect(() => {
-    console.log("ProfilePage mounted, userInfo:", userInfo);
-
     // Kullanıcı bilgisi yüklendiğinde
     if (!isLoading) {
       if (!isLoggedIn || !userInfo) {
-        console.error("User not logged in, redirecting to login");
         navigate("/login");
         return;
       }
 
       // Kullanıcı rolünü kontrol et
       if (userInfo.role !== "admin" && userInfo.role !== "author") {
-        console.error(
-          "User does not have admin or author role, redirecting to home"
-        );
         navigate("/");
         return;
       }
 
-      console.log("User is authenticated with role:", userInfo.role);
       setIsReady(true);
     }
   }, [userInfo, isLoggedIn, isLoading, navigate]);

@@ -2,6 +2,8 @@ import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import React, { useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { fetchUser } from "./app/features/user/userSlice"; // Adjust the path as necessary
+import { logRender } from "./utils/logger";
+import ErrorBoundary from "./components/Error/ErrorBoundary";
 
 import HomePage from "./pages/HomePage";
 import PricePage from "./pages/other_pages/PricePage";
@@ -33,7 +35,6 @@ import UsersPage from "./pages/dashboard_pages/UsersPage";
 
 import LoginPage from "./pages/auth/LoginPage";
 import RegisterPage from "./pages/auth/RegisterPage";
-import { logRender } from "./utils/LogRender";
 
 function App() {
   const dispatch = useDispatch();
@@ -41,110 +42,115 @@ function App() {
   useEffect(() => {
     dispatch(fetchUser());
   }, [dispatch]);
-  logRender("App");
+
+  logRender("App", false);
+
   return (
-    <div className="min-h-screen flex flex-col">
-      <Router>
-        <main className="flex-1">
-          <Routes>
-            <Route path="/" element={<HomePage />} />
+    <ErrorBoundary>
+      <div className="min-h-screen flex flex-col">
+        <Router>
+          <main className="flex-1">
+            <Routes>
+              <Route path="/" element={<HomePage />} />
 
-            {/* Blog yazarları için */}
+              {/* Blog yazarları için */}
 
-            <Route path="/plans" element={<PricePage />} />
-            <Route path="/about-us" element={<AboutUsPage />} />
-            <Route path="/disclaimer" element={<DisclaimerPage />} />
-            <Route path="/privacy-policy" element={<PrivacyPolicyPage />} />
-            <Route path="/login" element={<LoginPage />} />
-            <Route path="/register" element={<RegisterPage />} />
-            <Route
-              path="/profile"
-              element={
-                <ProtectedRoute requiredRoles={["admin", "author"]}>
-                  <ProfilePage />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/dashboard/home"
-              element={
-                <ProtectedRoute requiredRoles={["admin", "author"]}>
-                  <DashboardHomePage />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/dashboard/posts"
-              element={
-                <ProtectedRoute requiredRoles={["admin", "author"]}>
-                  <AllBlogPostsPage />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/dashboard/post/new"
-              element={
-                <ProtectedRoute requiredRoles={["admin", "author"]}>
-                  <NewPostPage />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/dashboard/post/edit/:id"
-              element={
-                <ProtectedRoute requiredRoles={["admin", "author"]}>
-                  <EditPostPage />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/dashboard/images"
-              element={
-                <ProtectedRoute requiredRoles={["admin", "author"]}>
-                  <ImagePage />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/dashboard/cheat-sheet"
-              element={
-                <ProtectedRoute requiredRoles={["admin", "author"]}>
-                  <CheatSheet />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/dashboard/gallery"
-              element={
-                <ProtectedRoute requiredRoles={["admin", "author"]}>
-                  <GalleryPage />
-                </ProtectedRoute>
-              }
-            />
-            <Route path="/blog/posts/" element={<BlogsPage />} />
-            <Route path="/blog/post/:id" element={<BlogPostPage />} />
-            <Route path="/blog/categories" element={<CategoriesPage />} />
-            <Route
-              path="/blog/category/:category"
-              element={<CategoryBasePostsPage />}
-            />
-            <Route
-              path="/dashboard/users"
-              element={
-                <ProtectedRoute requiredRoles={["admin"]}>
-                  <UsersPage />
-                </ProtectedRoute>
-              }
-            />
 
-            {/* 404 Sayfası */}
-            <Route path="*" element={<PageNotFound />} />
-            {/* Blog author sayfaları */}
-          </Routes>
-        </main>
-        <Footer />
-      </Router>
-    </div>
+              <Route path="/plans" element={<PricePage />} />
+              <Route path="/about-us" element={<AboutUsPage />} />
+              <Route path="/disclaimer" element={<DisclaimerPage />} />
+              <Route path="/privacy-policy" element={<PrivacyPolicyPage />} />
+              <Route path="/login" element={<LoginPage />} />
+              <Route path="/register" element={<RegisterPage />} />
+              <Route
+                path="/profile"
+                element={
+                  <ProtectedRoute allowedRoles={["admin", "author"]}>
+                    <ProfilePage />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/dashboard/home"
+                element={
+                  <ProtectedRoute allowedRoles={["admin", "author"]}>
+                    <DashboardHomePage />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/dashboard/posts"
+                element={
+                  <ProtectedRoute allowedRoles={["admin", "author"]}>
+                    <AllBlogPostsPage />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/dashboard/post/new"
+                element={
+                  <ProtectedRoute allowedRoles={["admin", "author"]}>
+                    <NewPostPage />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/dashboard/post/edit/:id"
+                element={
+                  <ProtectedRoute allowedRoles={["admin", "author"]}>
+                    <EditPostPage />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/dashboard/images"
+                element={
+                  <ProtectedRoute allowedRoles={["admin", "author"]}>
+                    <ImagePage />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/dashboard/cheat-sheet"
+                element={
+                  <ProtectedRoute allowedRoles={["admin", "author"]}>
+                    <CheatSheet />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/dashboard/gallery"
+                element={
+                  <ProtectedRoute allowedRoles={["admin", "author"]}>
+                    <GalleryPage />
+                  </ProtectedRoute>
+                }
+              />
+              <Route path="/blog/posts/" element={<BlogsPage />} />
+              <Route path="/blog/post/:id" element={<BlogPostPage />} />
+              <Route path="/blog/categories" element={<CategoriesPage />} />
+              <Route
+                path="/blog/category/:category"
+                element={<CategoryBasePostsPage />}
+              />
+              <Route
+                path="/dashboard/users"
+                element={
+                  <ProtectedRoute allowedRoles={["admin"]}>
+                    <UsersPage />
+                  </ProtectedRoute>
+                }
+              />
+
+              {/* 404 Sayfası */}
+              <Route path="*" element={<PageNotFound />} />
+              {/* Blog author sayfaları */}
+            </Routes>
+          </main>
+          <Footer />
+        </Router>
+      </div>
+    </ErrorBoundary>
   );
 }
 

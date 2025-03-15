@@ -1,77 +1,111 @@
 import React, { useEffect, useState } from "react";
-import { Navigate, useLocation } from "react-router-dom";
+import { Navigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { fetchUser } from "../app/features/user/userSlice";
-import { Spinner } from "@nextui-org/react";
+import { logDebug, logError } from "../utils/logger";
 
-function ProtectedRoute({ children, requiredRoles = [] }) {
+/**
+ * Korumalı route bileşeni
+ * @param {Object} props
+ * @param {React.ReactNode} props.children - Route içeriği
+ * @param {Array<string>} [props.allowedRoles] - İzin verilen roller ['admin', 'author'] gibi. Belirtilmezse sadece giriş kontrolü yapılır.
+ * @param {string} [props.redirectPath='/login'] - Erişim reddedildiğinde yönlendirilecek sayfa
+ * @returns {React.ReactNode}
+ */
+function ProtectedRoute({
+  children,
+  allowedRoles = [],
+  redirectPath = "/login",
+}) {
   const dispatch = useDispatch();
-  const { userInfo, isLoading } = useSelector((state) => state.user);
-  const [isValid, setIsValid] = useState(null);
-  const location = useLocation();
+  const { userInfo, isLoading, isLoggedIn, isAdmin, isAuthor } = useSelector(
+    (state) => state.user
+  );
+  const [hasPermission, setHasPermission] = useState(null);
+
+  // Kullanıcının rollerini kontrol et
+  const checkUserRoles = () => {
+    // Eğer rol kontrolü yapılmayacaksa (allowedRoles boşsa), sadece giriş kontrolü yeterli
+    if (!allowedRoles || allowedRoles.length === 0) {
+      setHasPermission(true);
+      return;
+    }
+
+    // Kullanıcının rollerini kontrol et
+    const hasRole = allowedRoles.some((role) => {
+      if (role === "admin") return isAdmin;
+      if (role === "author") return isAuthor;
+      return false;
+    });
+
+    setHasPermission(hasRole);
+  };
 
   useEffect(() => {
-    const verifyToken = async () => {
-      if (userInfo) {
-        // Kullanıcı hali hazırda varsa, rol kontrolü yap
-        if (requiredRoles.length > 0) {
-          // Belirli roller gerekiyorsa, kullanıcının rolünü kontrol et
-          const hasRequiredRole = requiredRoles.includes(userInfo.role);
-          setIsValid(hasRequiredRole);
+    // Kullanıcı bilgisi yoksa veya giriş yapılmamışsa, kullanıcı bilgisini getir
+    if (!userInfo || !isLoggedIn) {
+      dispatch(fetchUser())
+        .then(() => {
+          logDebug("ProtectedRoute", "Kullanıcı bilgisi güncellendi");
+        })
+        .catch((error) => {
+          logError("ProtectedRoute", "Kullanıcı bilgisi alınamadı", error);
+        });
+    }
+  }, [dispatch, userInfo, isLoggedIn]);
 
-          if (!hasRequiredRole) {
-            console.warn(
-              `Yetkisiz erişim girişimi: ${location.pathname} - Kullanıcı: ${userInfo.userName}, Rol: ${userInfo.role}`
-            );
-          }
-        } else {
-          // Herhangi bir rol gerekli değilse, sadece giriş yapmış olması yeterli
-          setIsValid(true);
-        }
-        console.log("Protected Route: ", userInfo);
-        return;
-      }
+  // Kullanıcı bilgileri değiştiğinde rol kontrolü yap
+  useEffect(() => {
+    if (isLoggedIn) {
+      checkUserRoles();
+    } else {
+      setHasPermission(false);
+    }
+  }, [isLoggedIn, isAdmin, isAuthor, allowedRoles]);
 
-      try {
-        const result = await dispatch(fetchUser()).unwrap();
-
-        // Token doğrulandıktan sonra rol kontrolü yap
-        if (requiredRoles.length > 0 && result.user) {
-          const hasRequiredRole = requiredRoles.includes(result.user.role);
-          setIsValid(hasRequiredRole);
-
-          if (!hasRequiredRole) {
-            console.warn(
-              `Yetkisiz erişim girişimi: ${location.pathname} - Kullanıcı: ${result.user.userName}, Rol: ${result.user.role}`
-            );
-          }
-        } else {
-          setIsValid(result.valid);
-        }
-      } catch (error) {
-        console.error("Doğrulama hatası:", error);
-        setIsValid(false);
-      }
-    };
-
-    verifyToken();
-  }, [dispatch, userInfo, requiredRoles, location.pathname]);
-
-  if (isValid === null) {
+  // Yükleme durumunda bekle
+  if (isLoading || hasPermission === null) {
     return (
       <div className="flex justify-center items-center h-screen">
-        <Spinner size="lg" label="Yetki kontrol ediliyor..." />
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500"></div>
+        <span className="ml-3">Yükleniyor...</span>
       </div>
     );
   }
 
-  // Kullanıcı giriş yapmış ama gerekli role sahip değilse ana sayfaya yönlendir
-  if (isValid === false && userInfo) {
-    return <Navigate to="/" replace />;
+  // Giriş yapılmamışsa login sayfasına yönlendir
+  if (!isLoggedIn) {
+    return <Navigate to={redirectPath} />;
   }
 
-  // Kullanıcı giriş yapmamışsa login sayfasına yönlendir
-  return isValid ? children : <Navigate to="/login" replace />;
+  // Rol kontrolü başarısızsa erişim reddedildi sayfasına yönlendir
+  if (!hasPermission) {
+    return (
+      <div className="flex flex-col items-center justify-center h-screen">
+        <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative max-w-md">
+          <strong className="font-bold">Erişim Reddedildi!</strong>
+          <p className="block sm:inline">
+            {" "}
+            Bu sayfaya erişim yetkiniz bulunmamaktadır.
+          </p>
+          <p className="mt-2">
+            Bu sayfaya erişmek için gerekli yetkilere sahip değilsiniz.
+          </p>
+          <div className="mt-4 flex justify-end">
+            <button
+              onClick={() => window.history.back()}
+              className="bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded"
+            >
+              Geri Dön
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // Tüm kontroller başarılıysa içeriği göster
+  return children;
 }
 
 export default ProtectedRoute;

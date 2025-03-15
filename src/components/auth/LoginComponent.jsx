@@ -16,20 +16,17 @@ export default function LoginComponent() {
 
   useEffect(() => {
     if (isSuccess) {
-      console.info("Login Component: Giriş başarılı, yönlendiriliyor.");
       navigate("/");
     }
-    if (isError) {
-      console.error("Login Component: Giriş hatası:", errorMessage);
-      // Örneğin, toast mesajı eklenebilir.
-    }
+  }, [isSuccess, navigate]);
+
+  useEffect(() => {
     return () => {
       dispatch(clearState());
     };
-  }, [isSuccess, isError, errorMessage]);
+  }, [dispatch]);
 
   const toggleVisibility = () => {
-    console.info("Login Component: Şifre görünürlüğü değiştiriliyor.");
     setIsVisible(!isVisible);
   };
 
@@ -40,7 +37,6 @@ export default function LoginComponent() {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    console.info("Login Component: Giriş formu gönderiliyor.", formData);
     dispatch(loginUser(formData));
   };
 

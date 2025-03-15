@@ -5,13 +5,19 @@ import { useDispatch } from "react-redux";
 import { fetchImages } from "../../../app/features/image/imageGallerySlice";
 import { Button } from "@nextui-org/react";
 
-const ImageUploaderModal = ({ onClose }) => {
+const ImageUploaderModal = ({ onClose, onSuccess }) => {
   const dispatch = useDispatch();
 
   // Upload başarılı olursa gallery'deki görselleri yenile ve modalı kapat.
   const handleUploadSuccess = () => {
-    dispatch(fetchImages(1));
-    onClose();
+    dispatch(fetchImages({ page: 1, limit: 20 }));
+
+    // onSuccess prop'u varsa çağır
+    if (onSuccess && typeof onSuccess === "function") {
+      onSuccess();
+    } else {
+      onClose();
+    }
   };
 
   return (

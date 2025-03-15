@@ -27,6 +27,7 @@ import {
   useDisclosure,
 } from "@nextui-org/react";
 import { Icon } from "@iconify/react";
+import { logInfo, logError } from "../../../../utils/logger";
 
 const ProfileComponent = () => {
   const dispatch = useDispatch();
@@ -76,20 +77,21 @@ const ProfileComponent = () => {
   const handleStartEdit = async () => {
     // Kullanıcı bilgileri hazır değilse, önce bilgileri getir
     if (!isUserDataReady) {
-      console.log("Kullanıcı bilgileri hazır değil, bilgiler getiriliyor...");
+      // Redux slice'da zaten loglanacak, burada tekrar loglamaya gerek yok
       try {
         await dispatch(fetchUser());
         // Bilgiler geldikten sonra düzenleme modunu başlat
         setEditMode(true);
         onOpen();
       } catch (error) {
-        console.error("Kullanıcı bilgileri getirilemedi:", error);
+        // Hata durumu Redux slice'da zaten loglanacak
         alert(
           "Kullanıcı bilgileri getirilemedi. Lütfen sayfayı yenileyip tekrar deneyin."
         );
       }
     } else {
-      // Kullanıcı bilgileri hazırsa, düzenleme modunu başlat
+      // Component'e özgü durum değişikliği, loglanabilir
+      logInfo("👤 Profil", "Düzenleme modu başlatıldı");
       setEditMode(true);
       onOpen();
     }
@@ -104,39 +106,44 @@ const ProfileComponent = () => {
       // Kullanıcı ID'si kontrolü
       const userId = userInfo._id || userInfo.id;
 
-      console.log("Kullanıcı bilgileri:", userInfo); // Hata ayıklama için
-
       if (!userId) {
-        setSaveError(
-          "Kullanıcı ID'si bulunamadı. Lütfen sayfayı yenileyip tekrar deneyin."
-        );
+        const errorMsg =
+          "Kullanıcı ID'si bulunamadı. Lütfen sayfayı yenileyip tekrar deneyin.";
+        // Bu component'e özgü bir kontrol, loglanabilir
+        logError("👤 Profil", errorMsg);
+        setSaveError(errorMsg);
         return;
       }
 
       // Redux action'ını kullanarak profil güncelleme
+      // Bu işlem ve sonucu Redux slice'da zaten loglanacak
       const resultAction = await dispatch(
         updateUserProfile({ userId, userData: formData })
       );
 
       if (updateUserProfile.fulfilled.match(resultAction)) {
-        console.info(
-          "Kullanıcı profili başarıyla güncellendi:",
-          resultAction.payload
-        );
+        // Redux slice'da zaten loglanacak, burada tekrar loglamaya gerek yok
 
         // Kullanıcı bilgilerini yeniden getir
         await dispatch(fetchUser());
 
+        // Component'e özgü durum değişikliği, loglanabilir
+        logInfo("👤 Profil", "Düzenleme modu kapatıldı");
         setEditMode(false);
         onClose();
       } else if (updateUserProfile.rejected.match(resultAction)) {
-        console.error("Profil güncelleme hatası:", resultAction.payload);
+        // Hata durumu Redux slice'da zaten loglanacak
         setSaveError(
           resultAction.payload || "Profil güncellenirken bir hata oluştu"
         );
       }
     } catch (err) {
-      console.error("Kullanıcı profili güncelleme hatası:", err);
+      // Beklenmeyen hata, component seviyesinde loglanabilir
+      logError(
+        "👤 Profil",
+        "Profil güncelleme işleminde beklenmeyen hata",
+        err
+      );
       setSaveError("Profil güncellenirken bir hata oluştu");
     } finally {
       setSaveLoading(false);
@@ -167,7 +174,6 @@ const ProfileComponent = () => {
   // Component mount olduğunda form verilerini başlat
   useEffect(() => {
     if (userInfo) {
-      console.log("Redux'tan gelen userInfo:", userInfo); // Kullanıcı bilgilerini konsola yazdır
       initializeFormData(userInfo);
     }
   }, [userInfo]);

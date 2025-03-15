@@ -1,31 +1,21 @@
 // src/app/features/user/userSlice.js
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import axios from "../../../api"; // Axios yapılandırmanızı kullanın
+import { logInfo } from "../../../utils/logger";
 
 // Kullanıcı giriş yapma thunk'ı
 export const loginUser = createAsyncThunk(
   "user/loginUser",
   async ({ email, password }, thunkAPI) => {
     try {
-      console.info("loginUser: Giriş isteği gönderiliyor...", {
-        email,
-        password,
-      });
       const response = await axios.post(
         "/auth/login",
         { email, password },
         { withCredentials: true }
       );
-      console.info(
-        "loginUser: Giriş başarılı! Backend'den gelen veri:",
-        response.data
-      );
       return response.data;
     } catch (error) {
-      console.error("loginUser hata:", error.response?.data || error.message);
-      return thunkAPI.rejectWithValue(
-        error.response?.data?.error || "Giriş başarısız."
-      );
+      return thunkAPI.rejectWithValue(error.message || "Giriş başarısız.");
     }
   }
 );
@@ -35,15 +25,10 @@ export const logoutUser = createAsyncThunk(
   "user/logoutUser",
   async (_, thunkAPI) => {
     try {
-      console.info("logoutUser: Çıkış işlemi başlatılıyor...");
-      // Port 5000'e istek yapılıyorsa, axios yapılandırmanızda baseURL varsa otomatik kullanılır.
       await axios.post("/auth/logout", {}, { withCredentials: true });
-
-      console.info("logoutUser: Çıkış başarılı!");
       return true;
     } catch (error) {
-      console.error("logoutUser hata:", error.response?.data || error.message);
-      return thunkAPI.rejectWithValue("Çıkış yapılamadı.");
+      return thunkAPI.rejectWithValue(error.message || "Çıkış yapılamadı.");
     }
   }
 );
@@ -53,8 +38,6 @@ export const fetchUser = createAsyncThunk(
   "user/fetchUser",
   async (_, thunkAPI) => {
     try {
-      console.info("fetchUser: Kullanıcı bilgisi getiriliyor...");
-
       // Token doğrulama
       const tokenResponse = await axios.post(
         "/auth/verify-token",
@@ -62,84 +45,53 @@ export const fetchUser = createAsyncThunk(
         { withCredentials: true }
       );
 
-      const { valid, user } = tokenResponse.data;
-      if (!valid) {
-        console.warn("fetchUser: Token geçersiz!");
+      if (!tokenResponse.data.success) {
         throw new Error("Token geçersiz.");
       }
 
-      // Eğer token geçerliyse ve kullanıcı ID'si varsa, güncel bilgileri getir
-      if (user && (user._id || user.id)) {
-        const userId = user._id || user.id;
-        console.info(
-          "fetchUser: Kullanıcı ID'si ile güncel bilgiler getiriliyor:",
-          userId
-        );
+      const userData = tokenResponse.data.data;
+      if (!userData || !userData.user) {
+        throw new Error("Kullanıcı bilgisi bulunamadı.");
+      }
+
+      // Eğer kullanıcı ID'si varsa, güncel bilgileri getir
+      if (userData.user.id || userData.user._id) {
+        const userId = userData.user.id || userData.user._id;
 
         try {
           const userResponse = await axios.get(`/user/${userId}`, {
             withCredentials: true,
           });
-          if (userResponse.data && userResponse.data.data) {
-            console.info(
-              "fetchUser: Kullanıcı bilgisi başarıyla alındı (ID ile):",
-              userResponse.data.data
-            );
-            return { valid, user: userResponse.data.data };
+          if (userResponse.data.success && userResponse.data.data) {
+            return { valid: true, user: userResponse.data.data };
           }
         } catch (userError) {
-          console.warn(
-            "fetchUser: ID ile kullanıcı bilgisi getirilemedi, token bilgisi kullanılıyor:",
-            userError
-          );
           // Hata durumunda token'dan gelen bilgileri kullan
         }
       }
 
-      console.info(
-        "fetchUser: Kullanıcı bilgisi başarıyla alındı (token ile):",
-        user
-      );
-      return { valid, user };
+      return { valid: true, user: userData.user };
     } catch (error) {
-      console.error(
-        "fetchUser hata:",
-        error.response?.data?.error || error.message
-      );
       return thunkAPI.rejectWithValue(
-        error.response?.data?.error || "Kullanıcı bilgileri alınamadı."
+        error.message || "Kullanıcı bilgileri alınamadı."
       );
     }
   }
 );
+
 // user register thunk
 export const registerUser = createAsyncThunk(
   "user/registerUser",
   async ({ userName, email, password }, thunkAPI) => {
     try {
-      console.info("registerUser: Registration request is being sent...", {
-        userName,
-        email,
-        password,
-      });
       const response = await axios.post(
         "/auth/register",
         { userName, email, password },
         { withCredentials: true }
       );
-      console.info(
-        "registerUser: Registration successful! Data from backend:",
-        response.data
-      );
       return response.data;
     } catch (error) {
-      console.error(
-        "registerUser error:",
-        error.response?.data || error.message
-      );
-      return thunkAPI.rejectWithValue(
-        error.response?.data?.error || "Registration failed."
-      );
+      return thunkAPI.rejectWithValue(error.message || "Registration failed.");
     }
   }
 );
@@ -149,28 +101,13 @@ export const updateUserProfile = createAsyncThunk(
   "user/updateUserProfile",
   async ({ userId, userData }, thunkAPI) => {
     try {
-      console.info(
-        "updateUserProfile: Profil güncelleme isteği gönderiliyor...",
-        {
-          userId,
-          userData,
-        }
-      );
       const response = await axios.put(`/user/${userId}`, userData, {
         withCredentials: true,
       });
-      console.info(
-        "updateUserProfile: Güncelleme başarılı! Backend'den gelen veri:",
-        response.data
-      );
-      return response.data.data;
+      return response.data;
     } catch (error) {
-      console.error(
-        "updateUserProfile hata:",
-        error.response?.data || error.message
-      );
       return thunkAPI.rejectWithValue(
-        error.response?.data?.message || "Profil güncellenemedi."
+        error.message || "Profil güncellenemedi."
       );
     }
   }
@@ -182,6 +119,7 @@ const userSlice = createSlice({
     userInfo: null,
     isLoggedIn: false,
     isAdmin: false,
+    isAuthor: false,
     isLoading: false,
     isSuccess: false,
     isError: false,
@@ -189,7 +127,27 @@ const userSlice = createSlice({
   },
   reducers: {
     clearState: (state) => {
-      console.info("userSlice: State temizleniyor...");
+      // Sadece başarı veya hata durumunda log yazalım, her render'da değil
+      if (state.isSuccess || state.isError) {
+        logInfo(
+          "🧹 State",
+          "Geçici durumlar temizleniyor (kullanıcı bilgileri korunuyor)"
+        );
+      }
+      // Sadece geçici durumları temizle, kullanıcı bilgilerini koru
+      state.isLoading = false;
+      state.isSuccess = false;
+      state.isError = false;
+      state.errorMessage = "";
+      // userInfo, isLoggedIn, isAdmin ve isAuthor değerlerini koruyoruz
+    },
+    // Tam temizleme için yeni bir reducer ekleyelim (logout için)
+    clearUserState: (state) => {
+      logInfo("🧹 State", "Kullanıcı state tamamen temizleniyor");
+      state.userInfo = null;
+      state.isLoggedIn = false;
+      state.isAdmin = false;
+      state.isAuthor = false;
       state.isLoading = false;
       state.isSuccess = false;
       state.isError = false;
@@ -200,95 +158,119 @@ const userSlice = createSlice({
     builder
       // loginUser
       .addCase(loginUser.pending, (state) => {
-        console.info("loginUser: Giriş işlemi devam ediyor...");
+        logInfo("🔄 Giriş", "Giriş işlemi başlatıldı");
         state.isLoading = true;
       })
       .addCase(loginUser.fulfilled, (state, action) => {
-        console.info(
-          "loginUser: Giriş başarılı. Güncellenen state:",
-          action.payload
-        );
+        // API yanıtı: {success, message, data: {user}}
+        if (action.payload.success && action.payload.data?.user) {
+          const user = action.payload.data.user;
+          const userName = user.userName || user.email || "Kullanıcı";
+
+          logInfo("✅ Giriş", `${userName} kullanıcısı giriş yaptı`);
+
+          state.userInfo = user;
+          state.isAdmin = user.role === "admin";
+          state.isAuthor = user.role === "author" || user.role === "admin";
+          state.isLoggedIn = true;
+        } else {
+          logInfo("⚠️ Giriş", "Giriş başarılı ancak kullanıcı bilgisi eksik");
+          state.isLoggedIn = false;
+        }
+
         state.isLoading = false;
         state.isSuccess = true;
-        state.isLoggedIn = true;
-        state.userInfo = action.payload.user;
-        // Eğer role bilgisi admin kontrolü için kullanılacaksa:
-        state.isAdmin = action.payload.user?.role === "admin";
       })
       .addCase(loginUser.rejected, (state, action) => {
-        console.error("loginUser: Giriş başarısız!", action.payload);
+        logInfo("❌ Giriş", `Giriş başarısız: ${action.payload}`);
         state.isLoading = false;
         state.isError = true;
         state.errorMessage = action.payload || "Giriş başarısız.";
       })
       // register
       .addCase(registerUser.pending, (state) => {
-        console.info("registerUser: Registration is in progress...");
+        logInfo("🔄 Kayıt", "Kayıt işlemi başlatıldı");
         state.isLoading = true;
       })
       .addCase(registerUser.fulfilled, (state, action) => {
-        console.info(
-          "registerUser: Registration successful. Updated state:",
-          action.payload
-        );
+        // API yanıtı: {success, message, data: {user}}
+        if (action.payload.success && action.payload.data?.user) {
+          const user = action.payload.data.user;
+          const userName = user.userName || user.email || "Kullanıcı";
+
+          logInfo("✅ Kayıt", `${userName} kullanıcısı kaydedildi`);
+
+          state.userInfo = user;
+          state.isAdmin = user.role === "admin";
+          state.isAuthor = user.role === "author" || user.role === "admin";
+          state.isLoggedIn = true;
+        } else {
+          logInfo("⚠️ Kayıt", "Kayıt başarılı ancak kullanıcı bilgisi eksik");
+          state.isLoggedIn = false;
+        }
+
         state.isLoading = false;
         state.isSuccess = true;
-        state.userInfo = action.payload.user;
-        state.isLoggedIn = true;
-        state.isAdmin = action.payload.user?.role === "admin";
       })
       .addCase(registerUser.rejected, (state, action) => {
-        console.error("registerUser: Registration failed!", action.payload);
+        logInfo("❌ Kayıt", `Kayıt başarısız: ${action.payload}`);
         state.isLoading = false;
         state.isError = true;
         state.errorMessage = action.payload || "Registration failed.";
       })
       // logoutUser
       .addCase(logoutUser.pending, (state) => {
-        console.info("logoutUser: Çıkış işlemi devam ediyor...");
+        logInfo("🔄 Çıkış", "Çıkış işlemi başlatıldı");
         state.isLoading = true;
       })
       .addCase(logoutUser.fulfilled, (state) => {
-        console.info("logoutUser: Çıkış başarılı, state sıfırlanıyor.");
+        logInfo("✅ Çıkış", "Kullanıcı çıkış yaptı");
         state.isLoading = false;
         state.isSuccess = true;
         state.userInfo = null;
         state.isLoggedIn = false;
         state.isAdmin = false;
+        state.isAuthor = false;
       })
       .addCase(logoutUser.rejected, (state, action) => {
-        console.error("logoutUser: Çıkış başarısız!", action.payload);
+        logInfo("❌ Çıkış", `Çıkış başarısız: ${action.payload}`);
         state.isLoading = false;
         state.isError = true;
         state.errorMessage = action.payload || "Çıkış yapılamadı.";
       })
       // fetchUser
       .addCase(fetchUser.pending, (state) => {
-        console.info(
-          "fetchUser: Kullanıcı bilgisi getirme işlemi devam ediyor..."
-        );
+        logInfo("🔄 Kullanıcı", "Kullanıcı bilgisi getiriliyor");
         state.isLoading = true;
       })
       .addCase(fetchUser.fulfilled, (state, action) => {
-        console.info(
-          "fetchUser: Kullanıcı bilgisi başarıyla alındı.",
-          action.payload
-        );
+        // fetchUser özel bir durum, kendi yapısı var
+        const isValid = action.payload.valid !== false;
+
+        if (isValid && action.payload.user) {
+          const user = action.payload.user;
+          const userName = user.userName || user.email || "Kullanıcı";
+
+          logInfo("✅ Kullanıcı", `${userName} bilgisi alındı`);
+
+          state.userInfo = user;
+          state.isAdmin = user.role === "admin";
+          state.isAuthor = user.role === "author" || user.role === "admin";
+          state.isLoggedIn = true;
+        } else {
+          logInfo("✅ Kullanıcı", "Kullanıcı bilgisi alındı (oturum yok)");
+          state.isLoggedIn = false;
+          state.isAdmin = false;
+          state.isAuthor = false;
+        }
+
         state.isLoading = false;
         state.isSuccess = true;
-        state.isLoggedIn = action.payload.valid;
-        state.userInfo = action.payload.user;
-        if (action.payload.user?.role) {
-          state.isAdmin = action.payload.user.role === "admin";
-        } else {
-          console.warn("fetchUser: role bilgisi eksik!");
-          state.isAdmin = false;
-        }
       })
       .addCase(fetchUser.rejected, (state, action) => {
-        console.error(
-          "fetchUser: Kullanıcı bilgisi getirme başarısız!",
-          action.payload
+        logInfo(
+          "❌ Kullanıcı",
+          `Kullanıcı bilgisi alınamadı: ${action.payload}`
         );
         state.isLoading = false;
         state.isError = true;
@@ -296,25 +278,28 @@ const userSlice = createSlice({
       })
       // updateUserProfile
       .addCase(updateUserProfile.pending, (state) => {
-        console.info(
-          "updateUserProfile: Profil güncelleme işlemi devam ediyor..."
-        );
+        logInfo("🔄 Profil", "Profil güncelleme başlatıldı");
         state.isLoading = true;
       })
       .addCase(updateUserProfile.fulfilled, (state, action) => {
-        console.info(
-          "updateUserProfile: Profil güncelleme başarılı. Güncellenen state:",
-          action.payload
-        );
+        // API yanıtı: {success, message, data}
+        if (action.payload.success && action.payload.data) {
+          const user = action.payload.data;
+          const userName = user.userName || user.email || "Kullanıcı";
+
+          logInfo("✅ Profil", `${userName} profili güncellendi`);
+          state.userInfo = user;
+          state.isAdmin = user.role === "admin";
+          state.isAuthor = user.role === "author" || user.role === "admin";
+        } else {
+          logInfo("⚠️ Profil", "Profil güncelleme başarılı ancak veri eksik");
+        }
+
         state.isLoading = false;
         state.isSuccess = true;
-        state.userInfo = action.payload;
       })
       .addCase(updateUserProfile.rejected, (state, action) => {
-        console.error(
-          "updateUserProfile: Profil güncelleme başarısız!",
-          action.payload
-        );
+        logInfo("❌ Profil", `Profil güncelleme başarısız: ${action.payload}`);
         state.isLoading = false;
         state.isError = true;
         state.errorMessage = action.payload || "Profil güncellenemedi.";
@@ -322,5 +307,5 @@ const userSlice = createSlice({
   },
 });
 
-export const { clearState } = userSlice.actions;
+export const { clearState, clearUserState } = userSlice.actions;
 export default userSlice.reducer;

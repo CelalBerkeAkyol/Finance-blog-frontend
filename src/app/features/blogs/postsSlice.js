@@ -171,22 +171,39 @@ const postsSlice = createSlice({
         state.errorMessage = "";
       })
       .addCase(fetchPosts.fulfilled, (state, action) => {
-        logInfo(
-          "✅ Postlar",
-          `${action.payload.data.posts?.length || 0} post başarıyla getirildi`
-        );
+        logInfo("✅ Postlar", `Postlar başarıyla getirildi`);
         state.isLoading = false;
         state.isSuccess = true;
-        // Yeni response yapısına göre posts'u al
-        state.posts = action.payload.data.posts;
-        state.pagination = action.payload.data.pagination || {
-          next: null,
-          total: 0,
-          count: 0,
-        };
-        // total, count vs. isterseniz
-        state.count = action.payload.data.count || 0;
-        state.total = action.payload.data.total || 0;
+
+        // Güvenli bir şekilde response yapısını kontrol et
+        if (action.payload && action.payload.data) {
+          // Yeni response yapısına göre posts'u al
+          state.posts = action.payload.data.posts || [];
+          state.pagination = action.payload.data.pagination || {
+            next: null,
+            total: 0,
+            count: 0,
+          };
+          // total, count vs. isterseniz
+          state.count = action.payload.data.count || 0;
+          state.total = action.payload.data.total || 0;
+
+          logInfo(
+            "✅ Postlar",
+            `${state.posts.length} post başarıyla getirildi`
+          );
+        } else {
+          // API yanıtı beklenen formatta değilse
+          state.posts = [];
+          state.pagination = { next: null, total: 0, count: 0 };
+          state.count = 0;
+          state.total = 0;
+
+          logInfo(
+            "⚠️ Postlar",
+            "API yanıtı beklenen formatta değil, boş dizi kullanılıyor"
+          );
+        }
       })
       .addCase(fetchPosts.rejected, (state, action) => {
         logInfo("❌ Postlar", `Postlar getirilemedi: ${action.payload}`);

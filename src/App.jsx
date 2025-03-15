@@ -2,6 +2,7 @@ import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import React, { useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { fetchUser } from "./app/features/user/userSlice"; // Adjust the path as necessary
+import { logRender } from "./utils/logger";
 
 import HomePage from "./pages/HomePage";
 import PricePage from "./pages/other_pages/PricePage";
@@ -33,7 +34,6 @@ import UsersPage from "./pages/dashboard_pages/UsersPage";
 
 import LoginPage from "./pages/auth/LoginPage";
 import RegisterPage from "./pages/auth/RegisterPage";
-import { logRender } from "./utils/LogRender";
 
 function App() {
   const dispatch = useDispatch();
@@ -42,7 +42,9 @@ function App() {
   useEffect(() => {
     dispatch(fetchUser());
   }, [dispatch]);
-  logRender("App");
+
+  logRender("App", false);
+
   return (
     <div className="min-h-screen flex flex-col">
       <Router>

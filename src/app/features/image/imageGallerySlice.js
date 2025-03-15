@@ -7,12 +7,12 @@ export const fetchImages = createAsyncThunk(
   "imageGallery/fetchImages",
   async ({ page = 1, limit = 9 }, thunkAPI) => {
     try {
-      // API isteğinde page ve limit’i kullan
+      // API isteğinde page ve limit'i kullan
       const response = await api.get(`/images?page=${page}&limit=${limit}`);
       return response.data; // { images, page, totalPages, ... }
     } catch (error) {
       return thunkAPI.rejectWithValue(
-        error.response?.data?.error ?? error.message
+        error.message || "Görseller yüklenemedi."
       );
     }
   }
@@ -25,9 +25,7 @@ export const deleteImage = createAsyncThunk(
       const response = await api.delete(`/images/${imageId}`);
       return response.data; // { message, image }
     } catch (error) {
-      return thunkAPI.rejectWithValue(
-        error.response?.data?.error ?? error.message
-      );
+      return thunkAPI.rejectWithValue(error.message || "Görsel silinemedi.");
     }
   }
 );

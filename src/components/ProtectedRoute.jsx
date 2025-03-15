@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import { Navigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { fetchUser } from "../app/features/user/userSlice";
+import { logDebug, logError } from "../utils/logger";
 
 function ProtectedRoute({ children }) {
   const dispatch = useDispatch();
@@ -12,14 +13,14 @@ function ProtectedRoute({ children }) {
     const verifyToken = async () => {
       if (userInfo) {
         setIsValid(true); // Kullanıcı hali hazırda varsa, direkt geç
-        console.log("Protected Route: ", userInfo);
+        logDebug("ProtectedRoute", "Kullanıcı bilgisi mevcut", userInfo);
         return;
       }
       try {
         await dispatch(fetchUser()).unwrap();
         setIsValid(true);
       } catch (error) {
-        console.error("Doğrulama hatası:", error);
+        logError("ProtectedRoute", "Doğrulama hatası", error);
         setIsValid(false);
       }
     };

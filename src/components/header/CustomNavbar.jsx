@@ -13,6 +13,7 @@ import {
 } from "@nextui-org/react";
 import SearchModal from "../modals/SearchModal";
 import { useSelector } from "react-redux";
+import { logRender } from "../../utils/logger";
 
 import LogoutComponent from "../auth/LogoutComponent";
 
@@ -21,9 +22,8 @@ export default function CustomNavbar() {
 
   // Her render olduğunda sayaç artar ve konsola yazılır
   renderCount.current += 1;
-  console.log(
-    `BannerComponent render edildi. Toplam render sayısı: ${renderCount.current}`
-  );
+  logRender("CustomNavbar", false); // false parametresi ile loglama kapatılabilir
+
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const navigate = useNavigate();
 

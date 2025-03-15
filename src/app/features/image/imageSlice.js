@@ -6,7 +6,7 @@ export const uploadImages = createAsyncThunk(
   "image/uploadImages",
   async (formData, thunkAPI) => {
     try {
-      // /images/multiple => back-end’de çoklu yükleme rotası
+      // /images/multiple => back-end'de çoklu yükleme rotası
       const response = await api.post("/images/multiple", formData, {
         headers: {
           "Content-Type": "multipart/form-data",
@@ -15,7 +15,7 @@ export const uploadImages = createAsyncThunk(
       return response.data; // { message, images: [...] }
     } catch (error) {
       return thunkAPI.rejectWithValue(
-        error.response?.data?.error ?? error.message
+        error.message || "Görsel yükleme başarısız."
       );
     }
   }

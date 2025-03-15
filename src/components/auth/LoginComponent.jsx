@@ -16,12 +16,7 @@ export default function LoginComponent() {
 
   useEffect(() => {
     if (isSuccess) {
-      console.info("Login Component: Giriş başarılı, yönlendiriliyor.");
       navigate("/");
-    }
-    if (isError) {
-      console.error("Login Component: Giriş hatası:", errorMessage);
-      // Örneğin, toast mesajı eklenebilir.
     }
     return () => {
       dispatch(clearState());
@@ -29,7 +24,6 @@ export default function LoginComponent() {
   }, [isSuccess, isError, errorMessage]);
 
   const toggleVisibility = () => {
-    console.info("Login Component: Şifre görünürlüğü değiştiriliyor.");
     setIsVisible(!isVisible);
   };
 
@@ -40,7 +34,6 @@ export default function LoginComponent() {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    console.info("Login Component: Giriş formu gönderiliyor.", formData);
     dispatch(loginUser(formData));
   };
 
@@ -88,13 +81,7 @@ export default function LoginComponent() {
             onChange={handleChange}
             required
           />
-          {isError && (
-            <p className="text-red-500 text-sm">
-              {typeof errorMessage === "object"
-                ? errorMessage.details?.[0] || "An error occurred"
-                : errorMessage}
-            </p>
-          )}
+          {isError && <p className="text-red-500 text-sm">{errorMessage}</p>}
           <div className="flex items-center justify-between px-1 py-2">
             <Checkbox name="remember" size="sm">
               Remember me

@@ -3,7 +3,7 @@ import React, { useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { fetchUser } from "./app/features/user/userSlice"; // Adjust the path as necessary
 import { logRender } from "./utils/logger";
-import ErrorBoundary from "./components/ErrorBoundary";
+import ErrorBoundary from "./components/Error/ErrorBoundary";
 
 import HomePage from "./pages/HomePage";
 import PricePage from "./pages/other_pages/PricePage";

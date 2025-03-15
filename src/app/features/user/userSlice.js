@@ -119,6 +119,7 @@ const userSlice = createSlice({
     userInfo: null,
     isLoggedIn: false,
     isAdmin: false,
+    isAuthor: false,
     isLoading: false,
     isSuccess: false,
     isError: false,
@@ -138,7 +139,7 @@ const userSlice = createSlice({
       state.isSuccess = false;
       state.isError = false;
       state.errorMessage = "";
-      // userInfo, isLoggedIn ve isAdmin değerlerini koruyoruz
+      // userInfo, isLoggedIn, isAdmin ve isAuthor değerlerini koruyoruz
     },
     // Tam temizleme için yeni bir reducer ekleyelim (logout için)
     clearUserState: (state) => {
@@ -146,6 +147,7 @@ const userSlice = createSlice({
       state.userInfo = null;
       state.isLoggedIn = false;
       state.isAdmin = false;
+      state.isAuthor = false;
       state.isLoading = false;
       state.isSuccess = false;
       state.isError = false;
@@ -169,6 +171,7 @@ const userSlice = createSlice({
 
           state.userInfo = user;
           state.isAdmin = user.role === "admin";
+          state.isAuthor = user.role === "author" || user.role === "admin";
           state.isLoggedIn = true;
         } else {
           logInfo("⚠️ Giriş", "Giriş başarılı ancak kullanıcı bilgisi eksik");
@@ -199,6 +202,7 @@ const userSlice = createSlice({
 
           state.userInfo = user;
           state.isAdmin = user.role === "admin";
+          state.isAuthor = user.role === "author" || user.role === "admin";
           state.isLoggedIn = true;
         } else {
           logInfo("⚠️ Kayıt", "Kayıt başarılı ancak kullanıcı bilgisi eksik");
@@ -226,6 +230,7 @@ const userSlice = createSlice({
         state.userInfo = null;
         state.isLoggedIn = false;
         state.isAdmin = false;
+        state.isAuthor = false;
       })
       .addCase(logoutUser.rejected, (state, action) => {
         logInfo("❌ Çıkış", `Çıkış başarısız: ${action.payload}`);
@@ -250,11 +255,13 @@ const userSlice = createSlice({
 
           state.userInfo = user;
           state.isAdmin = user.role === "admin";
+          state.isAuthor = user.role === "author" || user.role === "admin";
           state.isLoggedIn = true;
         } else {
           logInfo("✅ Kullanıcı", "Kullanıcı bilgisi alındı (oturum yok)");
           state.isLoggedIn = false;
           state.isAdmin = false;
+          state.isAuthor = false;
         }
 
         state.isLoading = false;
@@ -282,6 +289,8 @@ const userSlice = createSlice({
 
           logInfo("✅ Profil", `${userName} profili güncellendi`);
           state.userInfo = user;
+          state.isAdmin = user.role === "admin";
+          state.isAuthor = user.role === "author" || user.role === "admin";
         } else {
           logInfo("⚠️ Profil", "Profil güncelleme başarılı ancak veri eksik");
         }

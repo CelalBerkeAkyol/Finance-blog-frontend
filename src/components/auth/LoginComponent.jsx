@@ -8,18 +8,19 @@ import { useNavigate } from "react-router-dom";
 export default function LoginComponent() {
   const dispatch = useDispatch();
   const navigate = useNavigate();
-  const { isLoading, isError, isSuccess, errorMessage } = useSelector(
-    (state) => state.user
-  );
+  const { isLoading, isError, isSuccess, errorMessage, errorCode } =
+    useSelector((state) => state.user);
   const [isVisible, setIsVisible] = useState(false);
   const [formData, setFormData] = useState({ email: "", password: "" });
 
+  // Redirects to the home page when `isSuccess` becomes true.
   useEffect(() => {
     if (isSuccess) {
       navigate("/");
     }
   }, [isSuccess, navigate]);
 
+  // Clears temporary authentication state when the component unmounts.
   useEffect(() => {
     return () => {
       dispatch(clearState());
@@ -84,7 +85,12 @@ export default function LoginComponent() {
             onChange={handleChange}
             required
           />
-          {isError && <p className="text-red-500 text-sm">{errorMessage}</p>}
+          {isError &&
+            (errorCode === "USER_NOT_FOUND" ||
+              errorCode === "INVALID_PASSWORD" ||
+              errorCode === "SERVER_ERROR") && (
+              <p className="text-red-500 text-sm">{errorMessage}</p>
+            )}
           <div className="flex items-center justify-between px-1 py-2">
             <Checkbox name="remember" size="sm">
               Remember me

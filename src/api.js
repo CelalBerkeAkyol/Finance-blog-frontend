@@ -19,6 +19,7 @@ instance.interceptors.response.use(
       error.response?.data?.message ||
       error.message ||
       "Beklenmedik bir hata oluştu.";
+    const errCode = error.response?.data?.error?.code || "Error code not found";
 
     // Global logging - sadece geliştirme ortamında
     if (!import.meta.env.PROD) {
@@ -33,6 +34,7 @@ instance.interceptors.response.use(
 
     return Promise.reject({
       message: errMessage,
+      code: errCode,
       status: error.response?.status,
     });
   }

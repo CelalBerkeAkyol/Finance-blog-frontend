@@ -16,7 +16,10 @@ import {
 import { capitalize } from "../../../../utils/capitalize";
 import { useNavigate } from "react-router-dom";
 import { useDispatch } from "react-redux";
-import { deletePost } from "../../../../app/features/blogs/postsSlice";
+import {
+  removePost,
+  deletePost,
+} from "../../../../app/features/blogs/postsSlice";
 
 const statusColorMap = {
   yayında: "success",
@@ -32,14 +35,10 @@ const TableCellContent = ({ posts, columnKey }) => {
   const { isOpen, onOpen, onClose } = useDisclosure();
 
   const handleView = () => {
-    console.info(`TableCellContent: Post ${posts._id} görüntüleniyor.`);
     navigate(`/blog/post/${posts._id}`);
   };
 
   const handleEdit = () => {
-    console.info(
-      `TableCellContent: Post ${posts._id} düzenleme sayfasına yönlendiriliyor.`
-    );
     navigate(`/dashboard/post/edit/${posts._id}`);
   };
 
@@ -51,14 +50,16 @@ const TableCellContent = ({ posts, columnKey }) => {
     console.info(
       `TableCellContent: Post ${posts._id} silme işlemi başlatılıyor.`
     );
+
     dispatch(deletePost(posts._id))
       .unwrap()
       .then(() => {
+        dispatch(removePost(posts._id)); // API başarılı olursa Redux Store'dan kaldır
         onClose(); // Modal'ı kapat
       })
       .catch((error) => {
-        onClose(); // Modal'ı kapat
         console.error("TableCellContent: Silme işlemi hata verdi:", error);
+        onClose(); // Modal'ı kapat
         // Hata mesajı Redux store'da zaten kaydedilecek ve BlogsTable tarafından gösterilecek
       });
   };

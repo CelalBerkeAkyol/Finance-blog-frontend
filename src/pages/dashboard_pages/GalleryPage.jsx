@@ -31,6 +31,7 @@ function GalleryPage() {
   }, [dispatch]);
 
   // Bildirim gösterme fonksiyonu
+  // To do -> bunu component haline getir
   const showNotification = (message, type = "success") => {
     setNotification({ show: true, message, type });
     setTimeout(() => {
@@ -89,8 +90,6 @@ function GalleryPage() {
     dispatch(deleteImage(selectedImageId))
       .unwrap()
       .then((result) => {
-        // Silme sonrası mevcut sayfadaki görselleri yenile
-        dispatch(fetchImages({ page, limit: 20 }));
         setSelectedImageId(null);
         showNotification("Görsel başarıyla silindi.");
       })

@@ -44,7 +44,7 @@ const ProfileComponent = () => {
 
   // Kullanıcı bilgilerinin hazır olup olmadığını kontrol et
   useEffect(() => {
-    if (userInfo && (userInfo._id || userInfo.id)) {
+    if (userInfo && userInfo._id) {
       setIsUserDataReady(true);
     } else {
       setIsUserDataReady(false);
@@ -76,6 +76,7 @@ const ProfileComponent = () => {
   // Düzenleme modunu başlat
   const handleStartEdit = async () => {
     // Kullanıcı bilgileri hazır değilse, önce bilgileri getir
+
     if (!isUserDataReady) {
       // Redux slice'da zaten loglanacak, burada tekrar loglamaya gerek yok
       try {
@@ -104,7 +105,7 @@ const ProfileComponent = () => {
       setSaveError(null);
 
       // Kullanıcı ID'si kontrolü
-      const userId = userInfo._id || userInfo.id;
+      const userId = userInfo._id;
 
       if (!userId) {
         const errorMsg =

@@ -1,9 +1,32 @@
 // src/app/features/blogs/postsSlice.js
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
-import axios from "../../../api"; // kendi axios ayarınız
+import axios from "../../../api"; // Kendi axios ayarlarınız
 import { logInfo } from "../../../utils/logger";
 
-// Tüm postları sayfalı getirme
+/* =====================
+   Yardımcı Fonksiyonlar
+===================== */
+
+// Pending durumunda ortak ayarlar
+const handlePending = (state) => {
+  state.isLoading = true;
+  state.isError = false;
+  state.errorMessage = "";
+  state.errorCode = null;
+};
+
+// Rejected durumunda ortak ayarlar (defaultMessage: ilgili mesaj)
+const handleRejected = (state, action, defaultMessage) => {
+  state.isLoading = false;
+  state.isError = true;
+  state.errorMessage = action.payload?.message || defaultMessage;
+  state.errorCode = action.payload?.code || "UNKNOWN_ERROR";
+};
+
+/* =====================
+   Thunk İşlemleri
+===================== */
+
 export const fetchPosts = createAsyncThunk(
   "posts/fetchPosts",
   async ({ page = 1, limit = 20 }, thunkAPI) => {
@@ -11,29 +34,29 @@ export const fetchPosts = createAsyncThunk(
       const response = await axios.get("/posts", { params: { page, limit } });
       return response.data;
     } catch (error) {
-      return thunkAPI.rejectWithValue(
-        error.message || "Postları getirirken hata oluştu."
-      );
+      return thunkAPI.rejectWithValue({
+        message: error.message || "Postları getirirken hata oluştu.",
+        code: error.code || "UNKNOWN_ERROR",
+      });
     }
   }
 );
-// Tek bir postu ID'ye göre getiren thunk
+
 export const fetchPostById = createAsyncThunk(
   "posts/fetchPostById",
   async (postId, thunkAPI) => {
     try {
       const response = await axios.get(`/posts/one-post/${postId}`);
-      // Yeni response yapısına göre post verisini al
       return response.data.data;
     } catch (error) {
-      return thunkAPI.rejectWithValue(
-        error.message || "Tekil post getirilirken hata oluştu."
-      );
+      return thunkAPI.rejectWithValue({
+        message: error.message || "Tekil post getirilirken hata oluştu.",
+        code: error.code || "UNKNOWN_ERROR",
+      });
     }
   }
 );
 
-// Upvote thunk
 export const upvotePost = createAsyncThunk(
   "posts/upvotePost",
   async (postId, thunkAPI) => {
@@ -41,14 +64,14 @@ export const upvotePost = createAsyncThunk(
       const response = await axios.put(`/posts/${postId}/upvote`);
       return response.data.data;
     } catch (error) {
-      return thunkAPI.rejectWithValue(
-        error.message || "Upvote eklenirken hata oluştu."
-      );
+      return thunkAPI.rejectWithValue({
+        message: error.message || "Upvote eklenirken hata oluştu.",
+        code: error.code || "UNKNOWN_ERROR",
+      });
     }
   }
 );
 
-// Downvote thunk
 export const downvotePost = createAsyncThunk(
   "posts/downvotePost",
   async (postId, thunkAPI) => {
@@ -56,14 +79,14 @@ export const downvotePost = createAsyncThunk(
       const response = await axios.put(`/posts/${postId}/downvote`);
       return response.data.data;
     } catch (error) {
-      return thunkAPI.rejectWithValue(
-        error.message || "Downvote eklenirken hata oluştu."
-      );
+      return thunkAPI.rejectWithValue({
+        message: error.message || "Downvote eklenirken hata oluştu.",
+        code: error.code || "UNKNOWN_ERROR",
+      });
     }
   }
 );
 
-// Kategoriye göre postları getirme
 export const fetchPostsByCategory = createAsyncThunk(
   "posts/fetchPostsByCategory",
   async (category, thunkAPI) => {
@@ -71,14 +94,14 @@ export const fetchPostsByCategory = createAsyncThunk(
       const response = await axios.get(`/category/${category}`);
       return response.data.data;
     } catch (error) {
-      return thunkAPI.rejectWithValue(
-        error.message || "Postları getirirken hata oluştu."
-      );
+      return thunkAPI.rejectWithValue({
+        message: error.message || "Postları getirirken hata oluştu.",
+        code: error.code || "UNKNOWN_ERROR",
+      });
     }
   }
 );
 
-// Yeni post ekleme
 export const addNewPost = createAsyncThunk(
   "posts/addNewPost",
   async (postData, thunkAPI) => {
@@ -86,14 +109,14 @@ export const addNewPost = createAsyncThunk(
       const response = await axios.post("/posts", postData);
       return response.data.data;
     } catch (error) {
-      return thunkAPI.rejectWithValue(
-        error.message || "Post eklerken hata oluştu."
-      );
+      return thunkAPI.rejectWithValue({
+        message: error.message || "Post eklerken hata oluştu.",
+        code: error.code || "UNKNOWN_ERROR",
+      });
     }
   }
 );
 
-// Post güncelleme
 export const updatePost = createAsyncThunk(
   "posts/updatePost",
   async ({ id, postData }, thunkAPI) => {
@@ -101,14 +124,14 @@ export const updatePost = createAsyncThunk(
       const response = await axios.put(`/posts/${id}`, postData);
       return response.data.data;
     } catch (error) {
-      return thunkAPI.rejectWithValue(
-        error.message || "Post güncellerken hata oluştu."
-      );
+      return thunkAPI.rejectWithValue({
+        message: error.message || "Post güncellerken hata oluştu.",
+        code: error.code || "UNKNOWN_ERROR",
+      });
     }
   }
 );
 
-// Post silme
 export const deletePost = createAsyncThunk(
   "posts/deletePost",
   async (id, thunkAPI) => {
@@ -116,25 +139,32 @@ export const deletePost = createAsyncThunk(
       const response = await axios.delete(`/posts/${id}`);
       return response.data.data;
     } catch (error) {
-      return thunkAPI.rejectWithValue(
-        error.message || "Post silerken hata oluştu."
-      );
+      return thunkAPI.rejectWithValue({
+        message: error.message || "Post silerken hata oluştu.",
+        code: error.code || "UNKNOWN_ERROR",
+      });
     }
   }
 );
 
-// Post görüntülenme sayısını artırma
 export const incrementPostView = createAsyncThunk(
   "posts/incrementPostView",
-  async (postId, { rejectWithValue }) => {
+  async (postId, thunkAPI) => {
     try {
       const response = await axios.put(`/posts/${postId}/view`);
       return response.data.data;
     } catch (error) {
-      return rejectWithValue(error.message || "View artırırken hata oluştu.");
+      return thunkAPI.rejectWithValue({
+        message: error.message || "Görüntülenme artırılırken hata oluştu.",
+        code: error.code || "UNKNOWN_ERROR",
+      });
     }
   }
 );
+
+/* =====================
+   Slice Tanımı
+===================== */
 
 const postsSlice = createSlice({
   name: "posts",
@@ -144,9 +174,10 @@ const postsSlice = createSlice({
     isSuccess: false,
     isError: false,
     errorMessage: "",
-
-    // İsterseniz pagination, total vs. ek alanlar
+    errorCode: null,
     pagination: { next: null, total: 0, count: 0 },
+    count: 0,
+    total: 0,
   },
   reducers: {
     clearState: (state) => {
@@ -155,6 +186,7 @@ const postsSlice = createSlice({
       state.isSuccess = false;
       state.isError = false;
       state.errorMessage = "";
+      state.errorCode = null;
     },
     removePost: (state, action) => {
       logInfo("🗑️ Post", `Post siliniyor: ${action.payload}`);
@@ -164,73 +196,54 @@ const postsSlice = createSlice({
   extraReducers: (builder) => {
     builder
       // fetchPosts
-      .addCase(fetchPosts.pending, (state) => {
-        logInfo("🔄 Postlar", "Postlar getiriliyor");
-        state.isLoading = true;
-        state.isError = false;
-        state.errorMessage = "";
-      })
+      .addCase(fetchPosts.pending, handlePending)
       .addCase(fetchPosts.fulfilled, (state, action) => {
-        logInfo("✅ Postlar", `Postlar başarıyla getirildi`);
+        logInfo("✅ Postlar", "Postlar başarıyla getirildi");
         state.isLoading = false;
         state.isSuccess = true;
-
-        // Güvenli bir şekilde response yapısını kontrol et
         if (action.payload && action.payload.data) {
-          // Yeni response yapısına göre posts'u al
           state.posts = action.payload.data.posts || [];
           state.pagination = action.payload.data.pagination || {
             next: null,
             total: 0,
             count: 0,
           };
-          // total, count vs. isterseniz
           state.count = action.payload.data.count || 0;
           state.total = action.payload.data.total || 0;
-
           logInfo(
             "✅ Postlar",
             `${state.posts.length} post başarıyla getirildi`
           );
         } else {
-          // API yanıtı beklenen formatta değilse
           state.posts = [];
           state.pagination = { next: null, total: 0, count: 0 };
           state.count = 0;
           state.total = 0;
-
           logInfo(
             "⚠️ Postlar",
             "API yanıtı beklenen formatta değil, boş dizi kullanılıyor"
           );
         }
       })
-      .addCase(fetchPosts.rejected, (state, action) => {
-        logInfo("❌ Postlar", `Postlar getirilemedi: ${action.payload}`);
-        state.isLoading = false;
-        state.isError = true;
-        state.errorMessage =
-          action.payload || "Postları getirirken hata oluştu.";
-      })
-      // Fetch post by ıd
+      .addCase(fetchPosts.rejected, (state, action) =>
+        handleRejected(state, action, "Postları getirirken hata oluştu.")
+      )
+
+      // fetchPostById
       .addCase(fetchPostById.fulfilled, (state, action) => {
         if (!action.payload) {
           logInfo("❌ Post", "Post verisi bulunamadı");
           return;
         }
-
         const fetchedPost = action.payload;
-        // posts dizisinde aynı ID var mı?
         const index = state.posts.findIndex((p) => p._id === fetchedPost._id);
         if (index !== -1) {
-          // varsa güncelle
           logInfo(
             "✅ Post",
             `Post güncellendi: ${fetchedPost.title || fetchedPost._id}`
           );
           state.posts[index] = fetchedPost;
         } else {
-          // yoksa ekle
           logInfo(
             "✅ Post",
             `Yeni post eklendi: ${fetchedPost.title || fetchedPost._id}`
@@ -238,13 +251,11 @@ const postsSlice = createSlice({
           state.posts.push(fetchedPost);
         }
       })
-      .addCase(fetchPostById.rejected, (state, action) => {
-        logInfo("❌ Post", `Post getirilemedi: ${action.payload}`);
-        state.isError = true;
-        state.errorMessage = action.payload || "Post getirilirken hata oluştu.";
-      })
+      .addCase(fetchPostById.rejected, (state, action) =>
+        handleRejected(state, action, "Tekil post getirilirken hata oluştu.")
+      )
 
-      // Upvote işlemi sonrası güncellenmiş post objesini store'da güncelle
+      // upvotePost
       .addCase(upvotePost.fulfilled, (state, action) => {
         const updatedPost = action.payload;
         const index = state.posts.findIndex(
@@ -258,12 +269,11 @@ const postsSlice = createSlice({
           state.posts[index] = updatedPost;
         }
       })
-      .addCase(upvotePost.rejected, (state, action) => {
-        logInfo("❌ Upvote", `Upvote başarısız: ${action.payload}`);
-        state.isError = true;
-      })
+      .addCase(upvotePost.rejected, (state, action) =>
+        handleRejected(state, action, "Upvote eklenirken hata oluştu.")
+      )
 
-      // Downvote işlemi sonrası güncellenmiş post objesini store'da güncelle
+      // downvotePost
       .addCase(downvotePost.fulfilled, (state, action) => {
         const updatedPost = action.payload;
         const index = state.posts.findIndex(
@@ -277,18 +287,12 @@ const postsSlice = createSlice({
           state.posts[index] = updatedPost;
         }
       })
-      .addCase(downvotePost.rejected, (state, action) => {
-        logInfo("❌ Downvote", `Downvote başarısız: ${action.payload}`);
-        state.isError = true;
-      })
+      .addCase(downvotePost.rejected, (state, action) =>
+        handleRejected(state, action, "Downvote eklenirken hata oluştu.")
+      )
 
       // fetchPostsByCategory
-      .addCase(fetchPostsByCategory.pending, (state) => {
-        logInfo("🔄 Kategori", "Kategoriye göre postlar getiriliyor");
-        state.isLoading = true;
-        state.isError = false;
-        state.errorMessage = "";
-      })
+      .addCase(fetchPostsByCategory.pending, handlePending)
       .addCase(fetchPostsByCategory.fulfilled, (state, action) => {
         logInfo(
           "✅ Kategori",
@@ -297,25 +301,13 @@ const postsSlice = createSlice({
         state.isLoading = false;
         state.posts = action.payload;
       })
-      .addCase(fetchPostsByCategory.rejected, (state, action) => {
-        logInfo(
-          "❌ Kategori",
-          `Kategoriye göre postlar getirilemedi: ${action.payload}`
-        );
-        state.isLoading = false;
-        state.isError = true;
-        state.errorMessage = action.payload;
-      })
+      .addCase(fetchPostsByCategory.rejected, (state, action) =>
+        handleRejected(state, action, "Postları getirirken hata oluştu.")
+      )
 
       // addNewPost
-      .addCase(addNewPost.pending, (state) => {
-        logInfo("🔄 Yeni Post", "Post ekleniyor");
-        state.isLoading = true;
-        state.isError = false;
-        state.errorMessage = "";
-      })
+      .addCase(addNewPost.pending, handlePending)
       .addCase(addNewPost.fulfilled, (state, action) => {
-        // backend yanıtında { post: {...} } varsa
         const newPost = action.payload.post || action.payload;
         logInfo(
           "✅ Yeni Post",
@@ -325,20 +317,12 @@ const postsSlice = createSlice({
         state.isSuccess = true;
         state.posts.unshift(newPost);
       })
-      .addCase(addNewPost.rejected, (state, action) => {
-        logInfo("❌ Yeni Post", `Post eklenemedi: ${action.payload}`);
-        state.isLoading = false;
-        state.isError = true;
-        state.errorMessage = action.payload || "Post eklerken hata oluştu.";
-      })
+      .addCase(addNewPost.rejected, (state, action) =>
+        handleRejected(state, action, "Post eklerken hata oluştu.")
+      )
 
       // updatePost
-      .addCase(updatePost.pending, (state) => {
-        logInfo("🔄 Post Güncelleme", "Post güncelleniyor");
-        state.isLoading = true;
-        state.isError = false;
-        state.errorMessage = "";
-      })
+      .addCase(updatePost.pending, handlePending)
       .addCase(updatePost.fulfilled, (state, action) => {
         const updatedPost = action.payload.post || action.payload;
         logInfo(
@@ -354,32 +338,21 @@ const postsSlice = createSlice({
           state.posts[index] = updatedPost;
         }
       })
-      .addCase(updatePost.rejected, (state, action) => {
-        logInfo("❌ Post Güncelleme", `Post güncellenemedi: ${action.payload}`);
-        state.isLoading = false;
-        state.isError = true;
-        state.errorMessage = action.payload || "Post güncellerken hata oluştu.";
-      })
+      .addCase(updatePost.rejected, (state, action) =>
+        handleRejected(state, action, "Post güncellerken hata oluştu.")
+      )
 
       // deletePost
-      .addCase(deletePost.pending, (state) => {
-        logInfo("🔄 Post Silme", "Post siliniyor");
-        state.isLoading = true;
-        state.isError = false;
-        state.errorMessage = "";
-      })
+      .addCase(deletePost.pending, handlePending)
       .addCase(deletePost.fulfilled, (state, action) => {
         logInfo("✅ Post Silme", `Post silindi: ${action.payload}`);
         state.isLoading = false;
         state.isSuccess = true;
         state.posts = state.posts.filter((post) => post._id !== action.payload);
       })
-      .addCase(deletePost.rejected, (state, action) => {
-        logInfo("❌ Post Silme", `Post silinemedi: ${action.payload}`);
-        state.isLoading = false;
-        state.isError = true;
-        state.errorMessage = action.payload || "Post silerken hata oluştu.";
-      })
+      .addCase(deletePost.rejected, (state, action) =>
+        handleRejected(state, action, "Post silerken hata oluştu.")
+      )
 
       // incrementPostView
       .addCase(incrementPostView.fulfilled, (state, action) => {
@@ -393,15 +366,9 @@ const postsSlice = createSlice({
           state.posts[index] = updatedPost;
         }
       })
-      .addCase(incrementPostView.rejected, (state, action) => {
-        logInfo(
-          "❌ Görüntülenme",
-          `Görüntülenme sayısı artırılamadı: ${action.payload}`
-        );
-        state.isError = true;
-        state.errorMessage =
-          action.payload || "Görüntülenme sayısı artırılırken hata oluştu.";
-      });
+      .addCase(incrementPostView.rejected, (state, action) =>
+        handleRejected(state, action, "Görüntülenme artırılırken hata oluştu.")
+      );
   },
 });
 

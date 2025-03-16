@@ -1,76 +1,76 @@
+// src/components/blog_components/blog_dashboard/blog_post/EditPostComponent.jsx
 import React, { useState, useEffect } from "react";
+import { useDispatch, useSelector } from "react-redux";
 import { useParams, useNavigate } from "react-router-dom";
 import { Input, Textarea, Button, Card } from "@nextui-org/react";
-import api from "../../../../api";
+
 import CategorySelector from "../helpers/CategorySelector";
 import StatusSelector from "../helpers/StatusSelector";
 import ImageGalleryModal from "../../image/ImageGalleryModal";
 
+import {
+  fetchPostById,
+  updatePost,
+} from "../../../../app/features/blogs/postsSlice";
+
 const EditPostComponent = () => {
   const { id } = useParams();
+  const dispatch = useDispatch();
   const navigate = useNavigate();
+
+  // Redux state'den post verilerini ve durum bilgilerini çekiyoruz
+  const { posts, isLoading, isError, errorMessage } = useSelector(
+    (state) => state.posts
+  );
+
   const [postData, setPostData] = useState({
     title: "",
     content: "",
     category: "",
     status: "taslak",
   });
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
   const [isGalleryOpen, setIsGalleryOpen] = useState(false);
 
+  // Component yüklendiğinde ilgili postu redux üzerinden getiriyoruz
   useEffect(() => {
-    console.info(`EditPostComponent: ${id} ID'li post getiriliyor.`);
-    const fetchPost = async () => {
-      try {
-        const response = await api.get(`/posts/one-post/${id}`);
-        const post = response.data.post;
-        setPostData({
-          title: post.title || "",
-          content: post.content || "",
-          category: post.category || "kategori-yok",
-          status: post.status || "taslak",
-        });
-        console.info("EditPostComponent: Post başarıyla getirildi.");
-      } catch (err) {
-        console.error("EditPostComponent: Post yüklenirken hata oluştu:", err);
-        setError("Post yüklenirken hata oluştu.");
-      } finally {
-        setLoading(false);
-      }
-    };
+    dispatch(fetchPostById(id));
+  }, [dispatch, id]);
 
-    fetchPost();
-  }, [id]);
+  // Redux store'dan gelen posts dizisi içerisinde, ilgili post bulunduğunda yerel state'i güncelliyoruz
+  useEffect(() => {
+    const post = posts.find((p) => p._id === id);
+    if (post) {
+      setPostData({
+        title: post.title || "",
+        content: post.content || "",
+        category: post.category || "kategori-yok",
+        status: post.status || "taslak",
+      });
+      console.info(
+        `EditPostComponent: ${id} ID'li post redux üzerinden getirildi.`
+      );
+    }
+  }, [posts, id]);
 
   const handleChange = (e) => {
     setPostData({ ...postData, [e.target.name]: e.target.value });
   };
 
   const handleCategoryChange = (selectedCategory) => {
-    console.info("EditPostComponent: Kategori değiştirildi:", selectedCategory);
     setPostData({ ...postData, category: selectedCategory });
   };
 
   const handleStatusChange = (status) => {
-    console.info("EditPostComponent: Durum değiştirildi:", status);
     setPostData({ ...postData, status });
   };
 
   const handleUpdate = async () => {
-    console.info(
-      "EditPostComponent: Post güncelleme işlemi başlatılıyor.",
-      postData
-    );
     try {
-      await api.put(`/posts/${id}`, postData, {
-        headers: { "Content-Type": "application/json" },
-      });
-      console.info("EditPostComponent: Post güncellendi, yönlendiriliyor.");
+      // updatePost thunk'ını dispatch edip, sonucu unwrap ediyoruz
+      await dispatch(updatePost({ id, postData })).unwrap();
       navigate("/dashboard/posts");
-    } catch (error) {
-      console.error("EditPostComponent: Güncelleme hatası:", error);
-      setError("Güncelleme sırasında bir hata oluştu.");
+    } catch (err) {
+      console.error("EditPostComponent: Güncelleme hatası:", err);
     }
   };
 
@@ -78,10 +78,10 @@ const EditPostComponent = () => {
     <div className="flex items-center justify-center min-h-screen bg-gray-100 w-full">
       <Card className="w-full max-w-[80%] p-6 bg-white shadow-lg min-h-screen rounded-lg">
         <h1 className="text-2xl font-bold text-center mb-6">Postu Düzenle</h1>
-        {loading ? (
+        {isLoading ? (
           <p className="text-center">Yükleniyor...</p>
-        ) : error ? (
-          <p className="text-center text-red-500">{error}</p>
+        ) : isError ? (
+          <p className="text-center text-red-500">{errorMessage}</p>
         ) : (
           <>
             <Input
@@ -89,7 +89,7 @@ const EditPostComponent = () => {
               name="title"
               label="Başlık"
               fullWidth
-              value={postData.title || ""}
+              value={postData.title}
               onChange={handleChange}
               className="mb-4"
             />
@@ -99,13 +99,13 @@ const EditPostComponent = () => {
               fullWidth
               minRows={20}
               maxRows={25}
-              value={postData.content || ""}
+              value={postData.content}
               onChange={handleChange}
               className="mb-6"
             />
 
-            {/* En altta, kategori, durum ve butonları aynı satıra alıyoruz */}
-            <div className="flex items-center justify-evenly ">
+            {/* Kategori, durum ve butonların bulunduğu alan */}
+            <div className="flex items-center justify-evenly">
               <CategorySelector
                 selectedCategory={postData.category}
                 onChange={handleCategoryChange}

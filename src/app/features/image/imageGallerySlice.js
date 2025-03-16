@@ -3,6 +3,10 @@ import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import api from "../../../api";
 import { logInfo } from "../../../utils/logger";
 
+/* =====================
+   Thunk İşlemleri
+===================== */
+
 // Sayfalı görsel listeleme thunk'ı
 export const fetchImages = createAsyncThunk(
   "imageGallery/fetchImages",
@@ -19,18 +23,22 @@ export const fetchImages = createAsyncThunk(
   }
 );
 
-// Görsel silme işlemi
+// Görsel silme işlemi (API çağrısı)
 export const deleteImage = createAsyncThunk(
   "imageGallery/deleteImage",
   async (imageId, thunkAPI) => {
     try {
       const response = await api.delete(`/images/${imageId}`);
-      return response.data.data; // Backend'den gelen data.data yapısını kullan
+      return { success: true, imageId };
     } catch (error) {
       return thunkAPI.rejectWithValue(error.message || "Görsel silinemedi.");
     }
   }
 );
+
+/* =====================
+   Slice Tanımı
+===================== */
 
 const imageGallerySlice = createSlice({
   name: "imageGallery",
@@ -53,6 +61,10 @@ const imageGallerySlice = createSlice({
       state.page = 1;
       state.totalPages = 1;
       state.total = 0;
+    },
+    removeImage: (state, action) => {
+      // Redux store'dan ilgili görseli kaldır
+      state.images = state.images.filter((img) => img._id !== action.payload);
     },
   },
   extraReducers: (builder) => {
@@ -85,10 +97,11 @@ const imageGallerySlice = createSlice({
         logInfo("🔄 Görsel Silme", "Görsel siliniyor");
       })
       .addCase(deleteImage.fulfilled, (state, action) => {
-        // Silme başarıyla bittiğinde, ilgili görseli state'ten çıkarabiliriz
-        const deletedId = action.payload.image?._id;
-        logInfo("✅ Görsel Silme", `Görsel silindi: ${deletedId}`);
-        state.images = state.images.filter((img) => img._id !== deletedId);
+        // Silme başarılı olursa ilgili görseli Redux store'dan kaldır
+        logInfo("✅ Görsel Silme", `Görsel silindi: ${action.payload.imageId}`);
+        state.images = state.images.filter(
+          (img) => img._id !== action.payload.imageId
+        );
       })
       .addCase(deleteImage.rejected, (state, action) => {
         logInfo(
@@ -100,6 +113,6 @@ const imageGallerySlice = createSlice({
   },
 });
 
-export const { clearImageErrors, resetImageGallery } =
+export const { clearImageErrors, resetImageGallery, removeImage } =
   imageGallerySlice.actions;
 export default imageGallerySlice.reducer;

@@ -24,7 +24,8 @@ const EditPostComponent = () => {
     const fetchPost = async () => {
       try {
         const response = await api.get(`/posts/one-post/${id}`);
-        const post = response.data.post;
+        const post = response.data.data;
+        console.log(post);
         setPostData({
           title: post.title || "",
           content: post.content || "",

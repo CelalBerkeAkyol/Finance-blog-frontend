@@ -64,21 +64,12 @@ const handleLogoutFulfilled = (state) => {
 
 // FetchUser fulfilled: Kullanıcı bilgisi güncel bilgileri state'e aktarır.
 const handleFetchUserFulfilled = (state, action) => {
-  const isValid = action.payload.valid !== false;
-  if (isValid && action.payload.user) {
-    const user = action.payload.user;
-    const userName = user.userName || user.email || "Kullanıcı";
-    logInfo("✅ Kullanıcı", `${userName} bilgisi alındı`);
-    state.userInfo = user;
-    state.isAdmin = user.role === "admin";
-    state.isAuthor = user.role === "author" || user.role === "admin";
-    state.isLoggedIn = true;
-  } else {
-    logInfo("✅ Kullanıcı", "Kullanıcı bilgisi alındı (oturum yok)");
-    state.isLoggedIn = false;
-    state.isAdmin = false;
-    state.isAuthor = false;
-  }
+  const user = action.payload.user;
+  logInfo("✅ Kullanıcı", `${user.userName} bilgisi alındı`);
+  state.userInfo = user;
+  state.isAdmin = user.role === "admin";
+  state.isAuthor = user.role === "author";
+  state.isLoggedIn = true;
   state.isLoading = false;
   state.isSuccess = true;
 };

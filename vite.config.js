@@ -1,7 +1,17 @@
-import { defineConfig } from 'vite'
-import react from '@vitejs/plugin-react'
+import { defineConfig, loadEnv } from "vite";
+import react from "@vitejs/plugin-react";
 
-// https://vite.dev/config/
-export default defineConfig({
-  plugins: [react()],
-})
+export default defineConfig(({ mode }) => {
+  const env = loadEnv(mode, process.cwd());
+
+  return {
+    plugins: [react()],
+    define: {
+      "import.meta.env.DEV": env.NODE_ENV === "development",
+      "import.meta.env.PROD": env.NODE_ENV === "production",
+    },
+    server: {
+      port: 5173, // İsteğe bağlı, geliştirme için özel port
+    },
+  };
+});

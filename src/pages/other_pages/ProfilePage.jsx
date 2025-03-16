@@ -6,32 +6,10 @@ import { Spinner } from "@nextui-org/react";
 import BlogSidebarComponent from "../../components/blog_components/blog_dashboard/BlogSidebarComponent";
 
 const ProfilePage = () => {
-  const navigate = useNavigate();
-  const { userInfo, isLoggedIn, isLoading } = useSelector(
-    (state) => state.user
-  );
-  const [isReady, setIsReady] = useState(false);
-
-  useEffect(() => {
-    // Kullanıcı bilgisi yüklendiğinde
-    if (!isLoading) {
-      if (!isLoggedIn || !userInfo) {
-        navigate("/login");
-        return;
-      }
-
-      // Kullanıcı rolünü kontrol et
-      if (userInfo.role !== "admin" && userInfo.role !== "author") {
-        navigate("/");
-        return;
-      }
-
-      setIsReady(true);
-    }
-  }, [userInfo, isLoggedIn, isLoading, navigate]);
+  const { isLoading } = useSelector((state) => state.user);
 
   // Yükleme durumunda gösterilecek içerik
-  if (isLoading || !isReady) {
+  if (isLoading) {
     return (
       <div className="flex justify-center items-center h-screen">
         <Spinner size="lg" label="Profil yükleniyor..." />

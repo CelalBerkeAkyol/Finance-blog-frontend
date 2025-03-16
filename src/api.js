@@ -14,11 +14,11 @@ const instance = axios.create({
 instance.interceptors.response.use(
   (response) => response,
   (error) => {
+    console.log("Error from api", error);
     const errMessage =
-      error.response?.data?.error?.details?.[0] ||
-      error.response?.data?.message ||
-      error.message ||
-      "Beklenmedik bir hata oluştu.";
+      error.response.data.message ||
+      "Beklenmedik bir hata oluştu. ( hata messajı bulunamadı )";
+    const errCode = error.response?.data?.error?.code || "Error code not found";
 
     // Global logging - sadece geliştirme ortamında
     if (!import.meta.env.PROD) {
@@ -33,6 +33,7 @@ instance.interceptors.response.use(
 
     return Promise.reject({
       message: errMessage,
+      code: errCode,
       status: error.response?.status,
     });
   }

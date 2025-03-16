@@ -7,6 +7,7 @@ import { store } from "./app/store";
 import { Provider } from "react-redux";
 import { logRender } from "./utils/LogRender.js";
 
+window.store = store;
 // main.jsx yüklendiğinde log at
 logRender("Main");
 

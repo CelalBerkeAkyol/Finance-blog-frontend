@@ -1,9 +1,9 @@
 import React, { useEffect } from "react";
 import { useSelector, useDispatch } from "react-redux";
 import { fetchPosts } from "../../../app/features/blogs/postsSlice";
+import PostCardComponent from "./PostCardComponent";
 import BlogsSkeleton from "./BlogsSkeleton";
 import ServerErrorComponent from "../../uyarılar/ServerErrorComponent";
-import PostCardComponent from "./PostCardComponent";
 
 export default function BlogsComponent() {
   const dispatch = useDispatch();
@@ -16,7 +16,7 @@ export default function BlogsComponent() {
   }, [dispatch]);
 
   if (isLoading) {
-    return <div className="text-center mt-8">Yükleniyor...</div>;
+    return <BlogsSkeleton />;
   }
 
   if (isError) {

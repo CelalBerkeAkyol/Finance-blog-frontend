@@ -39,6 +39,7 @@ const EditPostComponent = () => {
     summary: false,
   });
   const [showErrors, setShowErrors] = useState(false);
+  const [charCount, setCharCount] = useState(0);
 
   // Component yüklendiğinde ilgili postu redux üzerinden getiriyoruz
   useEffect(() => {
@@ -56,13 +57,22 @@ const EditPostComponent = () => {
         status: post.status || "taslak",
         summary: post.summary || "",
       });
+      // İlk yüklemede karakter sayısını ayarla
+      setCharCount(post.summary?.length || 0);
     }
   }, [posts, id]);
 
   const handleChange = (e) => {
-    setPostData({ ...postData, [e.target.name]: e.target.value });
+    const { name, value } = e.target;
+    setPostData({ ...postData, [name]: value });
+
+    // Özet alanı için karakter sayısını güncelle
+    if (name === "summary") {
+      setCharCount(value.length);
+    }
+
     if (showErrors) {
-      setErrors((prev) => ({ ...prev, [e.target.name]: !e.target.value }));
+      setErrors((prev) => ({ ...prev, [name]: !value }));
     }
   };
 
@@ -142,22 +152,27 @@ const EditPostComponent = () => {
                 errors.title && showErrors ? "Başlık alanı zorunludur" : ""
               }
             />
-            <Input
-              type="text"
-              name="summary"
-              label="Özet (Maksimum 200 karakter)"
-              fullWidth
-              maxLength={200}
-              value={postData.summary}
-              onChange={handleChange}
-              className="mb-4"
-              placeholder="Yazınızın kısa bir özetini girin (maksimum 200 karakter)"
-              required
-              color={errors.summary && showErrors ? "danger" : "default"}
-              errorMessage={
-                errors.summary && showErrors ? "Özet alanı zorunludur" : ""
-              }
-            />
+            <div className="relative mb-4">
+              <Textarea
+                name="summary"
+                label="Özet (Maksimum 200 karakter)"
+                fullWidth
+                maxLength={200}
+                minRows={2}
+                maxRows={4}
+                value={postData.summary}
+                onChange={handleChange}
+                placeholder="Yazınızın kısa bir özetini girin (maksimum 200 karakter)"
+                required
+                color={errors.summary && showErrors ? "danger" : "default"}
+                errorMessage={
+                  errors.summary && showErrors ? "Özet alanı zorunludur" : ""
+                }
+              />
+              <div className="absolute bottom-2 right-2 text-sm text-gray-500">
+                {charCount}/200
+              </div>
+            </div>
             <Textarea
               name="content"
               label="İçerik"

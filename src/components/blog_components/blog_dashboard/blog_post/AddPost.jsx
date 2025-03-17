@@ -22,10 +22,17 @@ const AddPost = () => {
     summary: false,
   });
   const [showErrors, setShowErrors] = useState(false);
+  const [charCount, setCharCount] = useState(0);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData((prevData) => ({ ...prevData, [name]: value }));
+
+    // Özet alanı için karakter sayısını güncelle
+    if (name === "summary") {
+      setCharCount(value.length);
+    }
+
     if (showErrors) {
       setErrors((prev) => ({ ...prev, [name]: !value }));
     }
@@ -87,20 +94,27 @@ const AddPost = () => {
             errors.title && showErrors ? "Başlık alanı zorunludur" : ""
           }
         />
-        <Textarea
-          clearable
-          label="Özet (Maksimum 200 karakter)"
-          name="summary"
-          maxLength={200}
-          value={formData.summary}
-          onChange={handleChange}
-          placeholder="Yazınızın kısa bir özetini girin (maksimum 200 karakter)"
-          required
-          color={errors.summary && showErrors ? "danger" : "default"}
-          errorMessage={
-            errors.summary && showErrors ? "Özet alanı zorunludur" : ""
-          }
-        />
+        <div className="relative">
+          <Textarea
+            clearable
+            label="Özet (Maksimum 200 karakter)"
+            name="summary"
+            maxLength={200}
+            minRows={2}
+            maxRows={4}
+            value={formData.summary}
+            onChange={handleChange}
+            placeholder="Yazınızın kısa bir özetini girin (maksimum 200 karakter)"
+            required
+            color={errors.summary && showErrors ? "danger" : "default"}
+            errorMessage={
+              errors.summary && showErrors ? "Özet alanı zorunludur" : ""
+            }
+          />
+          <div className="absolute bottom-2 right-2 text-sm text-gray-500">
+            {charCount}/200
+          </div>
+        </div>
         <Textarea
           clearable
           label="İçerik"

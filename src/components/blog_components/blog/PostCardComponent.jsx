@@ -47,7 +47,7 @@ const PostCardComponent = ({ post }) => {
           </Link>
         </h3>
         <div className="mt-2 text-gray-700 markdown-body text-sm line-clamp-3">
-          {truncateText(post.content)}
+          {post.summary || truncateText(post.content)}
         </div>
       </div>
       <div className="relative mt-4 flex items-center gap-x-4">

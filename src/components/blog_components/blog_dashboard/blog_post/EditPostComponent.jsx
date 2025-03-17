@@ -28,6 +28,7 @@ const EditPostComponent = () => {
     content: "",
     category: "",
     status: "taslak",
+    summary: "",
   });
   const [isGalleryOpen, setIsGalleryOpen] = useState(false);
 
@@ -45,6 +46,7 @@ const EditPostComponent = () => {
         content: post.content || "",
         category: post.category || "kategori-yok",
         status: post.status || "taslak",
+        summary: post.summary || "",
       });
       console.info(
         `EditPostComponent: ${id} ID'li post redux üzerinden getirildi.`
@@ -92,6 +94,17 @@ const EditPostComponent = () => {
               value={postData.title}
               onChange={handleChange}
               className="mb-4"
+            />
+            <Input
+              type="text"
+              name="summary"
+              label="Özet (Maksimum 200 karakter)"
+              fullWidth
+              maxLength={200}
+              value={postData.summary}
+              onChange={handleChange}
+              className="mb-4"
+              placeholder="Yazınızın kısa bir özetini girin (maksimum 200 karakter)"
             />
             <Textarea
               name="content"

@@ -12,6 +12,7 @@ const AddPost = () => {
     title: "",
     content: "",
     category: "",
+    summary: "",
   });
   const [isGalleryOpen, setIsGalleryOpen] = useState(false);
 
@@ -27,7 +28,7 @@ const AddPost = () => {
       .then((result) => {
         if (result.meta.requestStatus === "fulfilled") {
           console.info("AddPost: Post başarıyla eklendi.");
-          setFormData({ title: "", content: "", category: "" });
+          setFormData({ title: "", content: "", category: "", summary: "" });
         } else {
           console.error(
             "AddPost: Post eklenirken hata oluştu:",
@@ -54,6 +55,15 @@ const AddPost = () => {
           value={formData.title}
           onChange={handleChange}
           required
+        />
+        <Textarea
+          clearable
+          label="Özet (Maksimum 200 karakter)"
+          name="summary"
+          maxLength={200}
+          value={formData.summary}
+          onChange={handleChange}
+          placeholder="Yazınızın kısa bir özetini girin (maksimum 200 karakter)"
         />
         <Textarea
           clearable

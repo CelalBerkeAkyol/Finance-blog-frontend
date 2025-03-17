@@ -28,11 +28,11 @@ const PostCardComponent = ({ post }) => {
 
   return (
     <article
-      className="flex max-w-xl flex-col items-start bg-gray-50 shadow-lg mx-4 p-8
+      className="flex max-w-xl flex-col items-start bg-gray-50 shadow-lg mx-3 p-6
                  rounded-lg transition-transform transform hover:scale-105 hover:shadow-xl
                   overflow-y-auto"
     >
-      <div className="flex items-center gap-x-4 text-xs">
+      <div className="flex items-center gap-x-4 text-xs py-1">
         <Link to={`/blog/category/${post.category}`}>
           <span className="relative z-10 rounded-full bg-zinc-200 px-3 py-1.5 hover:bg-zinc-300">
             {slugToReadable(post.category) || "Kategori yok"}
@@ -49,7 +49,7 @@ const PostCardComponent = ({ post }) => {
         </time>
       </div>
 
-      <div className="group relative flex-grow">
+      <div className="group relative flex-grow py-1">
         <h3 className="mt-3 text-lg font-semibold text-gray-900 group-hover:text-gray-600">
           <Link to={`/blog/post/${post._id}`} onClick={handleView}>
             <span className="absolute inset-0" />
@@ -61,7 +61,7 @@ const PostCardComponent = ({ post }) => {
         </div>
       </div>
 
-      <div className="relative mt-4 flex items-center gap-x-4">
+      <div className="relative mt-4 flex items-center gap-x-4 py-2">
         <img
           alt=""
           src={

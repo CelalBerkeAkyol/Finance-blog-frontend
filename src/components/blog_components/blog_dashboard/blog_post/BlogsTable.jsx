@@ -73,8 +73,8 @@ const BlogsTable = () => {
 
   // Postları getirme
   useEffect(() => {
-    dispatch(fetchPosts({ page, limit: rowsPerPage }));
-  }, [dispatch, page, rowsPerPage]);
+    dispatch(fetchPosts({ page, limit }));
+  }, [dispatch, page, limit]);
 
   // Hata mesajı varsa bildirim göster
   useEffect(() => {

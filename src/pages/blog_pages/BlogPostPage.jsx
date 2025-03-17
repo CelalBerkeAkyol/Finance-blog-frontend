@@ -15,9 +15,7 @@ import TableSkeleton from "../../components/blog_components/blog/TableSkeleton";
 function BlogPostPage() {
   const { id } = useParams();
   const dispatch = useDispatch();
-  const { posts, isLoading, errorMessage } = useSelector(
-    (state) => state.posts
-  );
+  const { posts, isLoading } = useSelector((state) => state.posts);
   const post = posts.find((p) => p._id === id);
 
   // Local state flag to ensure the view is incremented only once
@@ -53,8 +51,6 @@ function BlogPostPage() {
         <div className="md:w-[70%] w-full margin-auto px-4">
           {isLoading ? (
             <BlogPostSkeleton />
-          ) : errorMessage ? (
-            <div className="text-red-600">{errorMessage}</div>
           ) : post ? (
             <BlogPostComponent post={post} />
           ) : null}

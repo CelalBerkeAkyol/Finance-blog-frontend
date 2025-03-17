@@ -21,12 +21,13 @@ instance.interceptors.response.use(
     const errCode = error.response?.data?.error?.code || "Error code not found";
 
     // Global logging - sadece geliştirme ortamında
+    //Burada dönen hatalar sadece api hatalarını yakalamaya yarar
     if (!import.meta.env.PROD) {
       logError(
         "API",
-        `[${error.response?.status}] ${error.config.method.toUpperCase()} ${
+        `[${error.response?.status}]  ${error.config.method.toUpperCase()} ${
           error.config.url
-        }`,
+        } --> ${error.response?.data?.error?.code} -->`,
         errMessage
       );
     }

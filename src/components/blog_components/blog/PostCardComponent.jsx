@@ -1,7 +1,5 @@
 import React from "react";
 import { Link } from "react-router-dom";
-import ReactMarkdown from "react-markdown";
-import remarkGfm from "remark-gfm";
 
 // Kategori isimlerini okunabilir hale getirmek için kullanılıyor
 function slugToReadable(slug) {
@@ -49,9 +47,7 @@ const PostCardComponent = ({ post }) => {
           </Link>
         </h3>
         <div className="mt-2 text-gray-700 markdown-body text-sm line-clamp-3">
-          <ReactMarkdown remarkPlugins={[remarkGfm]}>
-            {truncateText(post.content)}
-          </ReactMarkdown>
+          {truncateText(post.content)}
         </div>
       </div>
       <div className="relative mt-4 flex items-center gap-x-4">

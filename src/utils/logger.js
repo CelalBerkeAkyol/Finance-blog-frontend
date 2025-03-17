@@ -14,6 +14,7 @@ const LOG_LEVELS = {
   info: 1,
   warning: 2,
   error: 3,
+  success: 4, // Başarı log seviyesi
 };
 
 // Mevcut log seviyesi
@@ -46,7 +47,6 @@ export function logRender(componentName, forceLogging = false) {
   const newCount = renderCounts.get(componentName) + 1;
   renderCounts.set(componentName, newCount);
 
-  // Sadece geliştirme ortamında ve loglama aktifse veya forceLogging true ise logla
   if (shouldLog("debug") || forceLogging) {
     console.log(
       `%c${componentName} render edildi. Toplam render sayısı: ${newCount}`,
@@ -57,93 +57,69 @@ export function logRender(componentName, forceLogging = false) {
 
 /**
  * Bilgi mesajı loglar
- * @param {string} module - Modül adı
- * @param {string} message - Mesaj
- * @param {any} data - Opsiyonel veri
  */
 export function logInfo(module, message, data = null) {
   if (shouldLog("info")) {
-    if (data) {
-      console.info(
-        `%c[INFO] ${module}: ${message}`,
-        "color: #3b82f6; font-weight: bold;",
-        data
-      );
-    } else {
-      console.info(
-        `%c[INFO] ${module}: ${message}`,
-        "color: #3b82f6; font-weight: bold;"
-      );
-    }
+    console.info(
+      `%c[INFO] ${module}: ${message}`,
+      "color: #3b82f6; font-weight: bold;",
+      data || ""
+    );
   }
 }
 
 /**
  * Hata mesajı loglar
- * @param {string} module - Modül adı
- * @param {string} message - Mesaj
- * @param {any} error - Hata nesnesi
  */
 export function logError(module, message, error = null) {
   if (shouldLog("error")) {
-    if (error) {
-      console.error(
-        `%c[ERROR] ${module}: ${message}`,
-        "color: #ef4444; font-weight: bold;",
-        error
-      );
-    } else {
-      console.error(
-        `%c[ERROR] ${module}: ${message}`,
-        "color: #ef4444; font-weight: bold;"
-      );
-    }
+    console.error(
+      `%c[ERROR] ${module}: ${message}`,
+      "color: #ef4444; font-weight: bold;",
+      error || ""
+    );
   }
 }
 
 /**
  * Uyarı mesajı loglar
- * @param {string} module - Modül adı
- * @param {string} message - Mesaj
- * @param {any} data - Opsiyonel veri
  */
 export function logWarning(module, message, data = null) {
   if (shouldLog("warning")) {
-    if (data) {
-      console.warn(
-        `%c[WARNING] ${module}: ${message}`,
-        "color: #f59e0b; font-weight: bold;",
-        data
-      );
-    } else {
-      console.warn(
-        `%c[WARNING] ${module}: ${message}`,
-        "color: #f59e0b; font-weight: bold;"
-      );
-    }
+    console.warn(
+      `%c[WARNING] ${module}: ${message}`,
+      "color: #f59e0b; font-weight: bold;",
+      data || ""
+    );
   }
 }
 
 /**
  * Debug mesajı loglar
- * @param {string} module - Modül adı
- * @param {string} message - Mesaj
- * @param {any} data - Opsiyonel veri
  */
 export function logDebug(module, message, data = null) {
   if (shouldLog("debug")) {
-    if (data) {
-      console.debug(
-        `%c[DEBUG] ${module}: ${message}`,
-        "color: #8b5cf6; font-weight: bold;",
-        data
-      );
-    } else {
-      console.debug(
-        `%c[DEBUG] ${module}: ${message}`,
-        "color: #8b5cf6; font-weight: bold;"
-      );
-    }
+    console.debug(
+      `%c[DEBUG] ${module}: ${message}`,
+      "color: #8b5cf6; font-weight: bold;",
+      data || ""
+    );
+  }
+}
+
+/**
+ * **Başarı mesajı loglar**
+ * @param {string} module - Modül adı
+ * @param {string} message - Başarı mesajı
+ * @param {any} data - Opsiyonel veri
+ */
+export function logSuccess(module, message, data = null) {
+  if (shouldLog("success")) {
+    console.log(
+      `%c[SUCCESS] ${module}: ${message}`,
+      "color: #10B981; font-weight: bold;",
+      data || ""
+    );
   }
 }
 
@@ -154,4 +130,5 @@ export default {
   logError,
   logWarning,
   logDebug,
+  logSuccess, // Yeni başarı log fonksiyonunu ekledik
 };

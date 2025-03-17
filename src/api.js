@@ -1,6 +1,6 @@
 // src/api.js
 import axios from "axios";
-import { logError } from "./utils/logger";
+import { logError, logSuccess } from "./utils/logger";
 
 // Ortam değişkenlerinden API URL'sini al
 const API_URL = import.meta.env.VITE_API_URL || "http://localhost:3000/blog";
@@ -10,24 +10,34 @@ const instance = axios.create({
   withCredentials: true, // Cookie gönderimi için gerekli
 });
 
-// Response interceptor - merkezi hata yönetimi
+// Response interceptor - merkezi hata yönetimi ve başarılı cevapları loglama
 instance.interceptors.response.use(
-  (response) => response,
+  (response) => {
+    // API başarılı bir yanıt döndürdüğünde logla (sadece geliştirme ortamında)
+    if (!import.meta.env.PROD) {
+      logSuccess(
+        "API Response",
+        `[${response.status}] ${response.config.method.toUpperCase()} ${
+          response.config.url
+        }`,
+        response.data
+      );
+    }
+    return response; // Cevabı döndür
+  },
   (error) => {
-    console.log("Error from api", error);
     const errMessage =
-      error.response.data.message ||
-      "Beklenmedik bir hata oluştu. ( hata messajı bulunamadı )";
+      error.response?.data?.message ||
+      "Beklenmedik bir hata oluştu. (hata mesajı bulunamadı)";
     const errCode = error.response?.data?.error?.code || "Error code not found";
 
     // Global logging - sadece geliştirme ortamında
-    //Burada dönen hatalar sadece api hatalarını yakalamaya yarar
     if (!import.meta.env.PROD) {
       logError(
         "API",
         `[${error.response?.status}]  ${error.config.method.toUpperCase()} ${
           error.config.url
-        } --> ${error.response?.data?.error?.code} -->`,
+        } --> ${errCode} -->`,
         errMessage
       );
     }

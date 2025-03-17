@@ -1,6 +1,6 @@
 import React from "react";
 
-export default function CategorySelector({ selectedCategory, onChange }) {
+const CategorySelector = ({ selectedCategory, onChange, isInvalid }) => {
   const categories = [
     "mikro-ekonomi",
     "makro-ekonomi",
@@ -13,7 +13,6 @@ export default function CategorySelector({ selectedCategory, onChange }) {
   ];
 
   const handleChange = (e) => {
-    console.info("CategorySelector: Seçilen kategori:", e.target.value);
     onChange(e.target.value);
   };
 
@@ -44,4 +43,6 @@ export default function CategorySelector({ selectedCategory, onChange }) {
       </select>
     </div>
   );
-}
+};
+
+export default CategorySelector;

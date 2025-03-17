@@ -43,24 +43,19 @@ const TableCellContent = ({ posts, columnKey }) => {
   };
 
   const handleDelete = () => {
-    onOpen(); // Silme onayı için modal'ı aç
+    onOpen();
   };
 
   const confirmDelete = () => {
-    console.info(
-      `TableCellContent: Post ${posts._id} silme işlemi başlatılıyor.`
-    );
-
     dispatch(deletePost(posts._id))
       .unwrap()
       .then(() => {
-        dispatch(removePost(posts._id)); // API başarılı olursa Redux Store'dan kaldır
-        onClose(); // Modal'ı kapat
+        dispatch(removePost(posts._id));
+        onClose();
       })
-      .catch((error) => {
+      .catch(() => {
         console.error("TableCellContent: Silme işlemi hata verdi:", error);
-        onClose(); // Modal'ı kapat
-        // Hata mesajı Redux store'da zaten kaydedilecek ve BlogsTable tarafından gösterilecek
+        onClose();
       });
   };
 

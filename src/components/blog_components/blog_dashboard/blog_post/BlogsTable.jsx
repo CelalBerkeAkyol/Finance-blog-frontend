@@ -71,10 +71,10 @@ const BlogsTable = () => {
     }, 3000);
   };
 
+  // Postları getirme
   useEffect(() => {
-    console.info("BlogsTable: Postlar getiriliyor (sayfa:", page, ")");
     dispatch(fetchPosts({ page, limit }));
-  }, [dispatch, page]);
+  }, [dispatch, page, limit]);
 
   // Hata mesajı varsa bildirim göster
   useEffect(() => {
@@ -109,7 +109,6 @@ const BlogsTable = () => {
   }, [filteredBlogs, sortDescriptor]);
 
   const handleSortChange = (descriptor) => {
-    console.info("BlogsTable: Sıralama değişti.", descriptor);
     setSortDescriptor(descriptor);
   };
 
@@ -124,9 +123,8 @@ const BlogsTable = () => {
     setPage(1);
   };
 
-  const handleNavigate = () => {
-    console.info("BlogsTable: Yeni post ekleme sayfasına yönlendiriliyor.");
-    navigate("/dashboard/post/new");
+  const handleAddPostClick = () => {
+    navigate("/dashboard/new-post");
   };
 
   const handleRefresh = () => {
@@ -237,7 +235,7 @@ const BlogsTable = () => {
             color="primary"
             variant="flat"
             size="sm"
-            onClick={handleNavigate}
+            onClick={handleAddPostClick}
           >
             Yeni ekle
           </Button>

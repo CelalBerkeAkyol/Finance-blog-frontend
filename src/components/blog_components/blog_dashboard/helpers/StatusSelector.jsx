@@ -3,6 +3,10 @@ import React from "react";
 const statusOptions = ["yayında", "düzenleniyor", "arşivlenmiş", "taslak"];
 
 const StatusSelector = ({ value, onChange }) => {
+  const handleStatusChange = (e) => {
+    onChange(e.target.value);
+  };
+
   return (
     <div className="mb-4">
       <label className="block text-sm font-medium text-gray-700">
@@ -10,10 +14,7 @@ const StatusSelector = ({ value, onChange }) => {
       </label>
       <select
         value={value}
-        onChange={(e) => {
-          console.info("StatusSelector: Durum seçildi:", e.target.value);
-          onChange(e.target.value);
-        }}
+        onChange={handleStatusChange}
         className="w-full p-2 border rounded-md"
       >
         {statusOptions.map((status) => (

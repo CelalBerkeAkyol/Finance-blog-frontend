@@ -56,9 +56,6 @@ const EditPostComponent = () => {
         status: post.status || "taslak",
         summary: post.summary || "",
       });
-      console.info(
-        `EditPostComponent: ${id} ID'li post redux üzerinden getirildi.`
-      );
     }
   }, [posts, id]);
 

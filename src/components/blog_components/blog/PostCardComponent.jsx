@@ -18,7 +18,7 @@ function truncateText(text, maxLength = 100) {
 
 const PostCardComponent = ({ post }) => {
   const handleView = () => {
-    console.info(`PostCardComponent: Post ${post._id} görüntüleniyor.`);
+    // Post görüntüleme işlemleri
   };
 
   return (

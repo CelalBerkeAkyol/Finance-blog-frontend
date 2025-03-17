@@ -45,30 +45,17 @@ const AddPost = () => {
     setErrors(newErrors);
     setShowErrors(true);
 
-    if (Object.values(newErrors).some((error) => error)) {
-      console.error("AddPost: Tüm alanlar doldurulmalıdır.");
-      return;
-    }
-
-    console.info("AddPost: Yeni post ekleme işlemi başlatılıyor.", formData);
     dispatch(addNewPost(formData))
       .then((result) => {
         if (result.meta.requestStatus === "fulfilled") {
-          console.info("AddPost: Post başarıyla eklendi.");
           setFormData({ title: "", content: "", category: "", summary: "" });
           setShowErrors(false);
-        } else {
-          console.error(
-            "AddPost: Post eklenirken hata oluştu:",
-            result.payload
-          );
         }
       })
       .catch((error) => console.error("AddPost: Hata oluştu:", error));
   };
 
   const handleCategoryChange = (selectedCategory) => {
-    console.info("AddPost: Kategori değiştirildi:", selectedCategory);
     setFormData((prevData) => ({ ...prevData, category: selectedCategory }));
     if (showErrors) {
       setErrors((prev) => ({ ...prev, category: !selectedCategory }));

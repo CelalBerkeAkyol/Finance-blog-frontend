@@ -42,6 +42,9 @@ const selectIsLoggedIn = (state) => state.user.isLoggedIn;
 const selectUserInfo = (state) => state.user.userInfo;
 const selectIsAdmin = (state) => state.user.isAdmin;
 
+// Tüm metinler için ortak stil
+const navTextStyle = { fontSize: "15px" };
+
 function CustomNavbar() {
   const renderCount = useRef(0);
 
@@ -108,7 +111,8 @@ function CustomNavbar() {
             <NavbarItem key={index} className="h-full flex items-center">
               <button
                 onClick={() => handleNavigate(item.path)}
-                className="hover:text-primary text-sm xl:text-base px-2"
+                className="hover:text-primary px-2"
+                style={navTextStyle}
               >
                 {item.name}
               </button>
@@ -119,10 +123,11 @@ function CustomNavbar() {
             <DropdownTrigger color="secondary">
               <Button
                 variant="flat"
-                className="text-gray-900 text-sm hover:text-secondary h-full"
+                className="text-gray-900 hover:text-secondary h-full"
                 endContent={
                   <Icon icon="material-symbols:arrow-drop-down" width="20" />
                 }
+                style={navTextStyle}
               >
                 Ekonomi & Finans
               </Button>
@@ -132,8 +137,9 @@ function CustomNavbar() {
                 <DropdownItem
                   key={index}
                   onClick={() => handleNavigate(item.path)}
+                  textValue={item.name}
                 >
-                  {item.name}
+                  <span style={navTextStyle}>{item.name}</span>
                 </DropdownItem>
               ))}
             </DropdownMenu>
@@ -147,12 +153,14 @@ function CustomNavbar() {
               variant="bordered"
               color="secondary"
               radius="lg"
-              startContent={<Icon icon="material-symbols:search" width="14" />}
+              startContent={<Icon icon="material-symbols:search" width="16" />}
               size="sm"
               onClick={handleSearchOpen}
               className="min-w-0 px-2 sm:px-3"
             >
-              <span className="hidden sm:block">Ara</span>
+              <span className="hidden sm:block" style={navTextStyle}>
+                Ara
+              </span>
             </Button>
           </NavbarItem>
 
@@ -167,9 +175,11 @@ function CustomNavbar() {
                     size="sm"
                     startContent={<Icon icon="ic:round-person" width="16" />}
                     onClick={() => navigate("/profile")}
-                    className="text-xs xl:text-sm min-w-0 px-2"
+                    className="min-w-0 px-2"
                   >
-                    <span className="hidden xl:block">{userName}</span>
+                    <span className="hidden xl:block" style={navTextStyle}>
+                      {userName}
+                    </span>
                   </Button>
                 </NavbarItem>
               )}
@@ -184,7 +194,8 @@ function CustomNavbar() {
               <NavbarItem className="hidden lg:flex">
                 <button
                   onClick={() => handleNavigate("/login")}
-                  className="text-[14px] px-2 hover:text-primary"
+                  className="px-3 py-1 hover:text-primary"
+                  style={navTextStyle}
                 >
                   Login
                 </button>
@@ -193,7 +204,8 @@ function CustomNavbar() {
               <NavbarItem className="hidden lg:flex">
                 <button
                   onClick={() => handleNavigate("/register")}
-                  className="text-[14px] px-2 hover:text-primary"
+                  className="px-3 py-1 hover:text-primary"
+                  style={navTextStyle}
                 >
                   Register
                 </button>
@@ -210,6 +222,7 @@ function CustomNavbar() {
                 <button
                   onClick={() => handleNavigate(item.path)}
                   className="w-full text-left py-2 hover:text-primary"
+                  style={navTextStyle}
                 >
                   {item.name}
                 </button>
@@ -218,13 +231,16 @@ function CustomNavbar() {
 
             <NavbarMenuItem>
               <div className="py-2">
-                <p className="font-semibold mb-2">Ekonomi & Finans</p>
+                <p className="font-semibold mb-2" style={navTextStyle}>
+                  Ekonomi & Finans
+                </p>
                 <div className="flex flex-col gap-1 pl-2">
                   {categories.map((item, index) => (
                     <button
                       key={index}
                       onClick={() => handleNavigate(item.path)}
                       className="w-full text-left py-1 hover:text-primary"
+                      style={navTextStyle}
                     >
                       {item.name}
                     </button>
@@ -240,6 +256,7 @@ function CustomNavbar() {
                     <button
                       onClick={() => handleNavigate("/profile")}
                       className="w-full text-left py-2 hover:text-primary"
+                      style={navTextStyle}
                     >
                       Profil ({userName})
                     </button>
@@ -255,6 +272,7 @@ function CustomNavbar() {
                   <button
                     onClick={() => handleNavigate("/login")}
                     className="w-full text-left py-2 hover:text-primary"
+                    style={navTextStyle}
                   >
                     Login
                   </button>
@@ -263,6 +281,7 @@ function CustomNavbar() {
                   <button
                     onClick={() => handleNavigate("/register")}
                     className="w-full text-left py-2 hover:text-primary"
+                    style={navTextStyle}
                   >
                     Register
                   </button>

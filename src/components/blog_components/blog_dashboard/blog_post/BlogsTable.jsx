@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useEffect, useMemo, useState, useRef } from "react";
 import {
   Table,
   TableHeader,
@@ -26,6 +26,7 @@ import { useFeedback } from "../../../../context/FeedbackContext";
 
 const columns = [
   { name: "Başlık", uid: "title" },
+  { name: "Yazar", uid: "author" },
   { name: "Kategori", uid: "category" },
   { name: "Durum", uid: "status" },
   { name: "Görüntülenme", uid: "views" },
@@ -57,6 +58,7 @@ const BlogsTable = () => {
   const [page, setPage] = useState(1);
   const limit = 20;
   const navigate = useNavigate();
+  const errorShownRef = useRef(false);
 
   // Postları getirme
   useEffect(() => {
@@ -65,10 +67,12 @@ const BlogsTable = () => {
 
   // Hata mesajı varsa bildirim göster
   useEffect(() => {
-    if (isError && errorMessage) {
+    if (isError && errorMessage && !errorShownRef.current) {
       showError(errorMessage);
+      errorShownRef.current = true;
       setTimeout(() => {
         dispatch(clearState());
+        errorShownRef.current = false;
       }, 3000);
     }
   }, [isError, errorMessage, showError, dispatch]);
@@ -139,7 +143,7 @@ const BlogsTable = () => {
           aria-label="Blogs Table"
           sortDescriptor={sortDescriptor}
           onSortChange={handleSortChange}
-          striped
+          isStriped
         >
           <TableHeader columns={columns}>
             {(column) => (

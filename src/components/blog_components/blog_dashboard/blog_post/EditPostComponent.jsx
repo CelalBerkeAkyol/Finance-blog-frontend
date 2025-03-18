@@ -1,5 +1,5 @@
 // src/components/blog_components/blog_dashboard/blog_post/EditPostComponent.jsx
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useParams, useNavigate } from "react-router-dom";
 import { Input, Textarea, Button, Card } from "@nextui-org/react";
@@ -12,6 +12,7 @@ import { useFeedback } from "../../../../context/FeedbackContext";
 import {
   fetchPostById,
   updatePost,
+  clearState,
 } from "../../../../app/features/blogs/postsSlice";
 
 const EditPostComponent = () => {
@@ -19,6 +20,7 @@ const EditPostComponent = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const { showAlert, success, error: showError } = useFeedback();
+  const errorShownRef = useRef(false);
 
   // Redux state'den post verilerini ve durum bilgilerini çekiyoruz
   const { posts, isLoading, isError, errorMessage } = useSelector(
@@ -46,6 +48,11 @@ const EditPostComponent = () => {
   // Component yüklendiğinde ilgili postu redux üzerinden getiriyoruz
   useEffect(() => {
     dispatch(fetchPostById(id));
+
+    // Component unmount olduğunda state'i temizle
+    return () => {
+      dispatch(clearState());
+    };
   }, [dispatch, id]);
 
   // Redux store'dan gelen posts dizisi içerisinde, ilgili post bulunduğunda yerel state'i güncelliyoruz
@@ -64,12 +71,19 @@ const EditPostComponent = () => {
     }
   }, [posts, id]);
 
-  // Hata mesajı varsa alert göster
+  // Hata mesajı varsa alert göster - refRef kullanarak sonsuz döngüyü engelliyoruz
   useEffect(() => {
-    if (isError && errorMessage) {
+    if (isError && errorMessage && !errorShownRef.current) {
       showError(errorMessage);
+      errorShownRef.current = true;
+
+      // 3 saniye sonra hata durumunu temizle
+      setTimeout(() => {
+        dispatch(clearState());
+        errorShownRef.current = false;
+      }, 3000);
     }
-  }, [isError, errorMessage, showError]);
+  }, [isError, errorMessage, showError, dispatch]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -112,15 +126,6 @@ const EditPostComponent = () => {
     setErrors(newErrors);
     setShowErrors(true);
 
-    if (Object.values(newErrors).some((error) => error)) {
-      showAlert({
-        title: "Hata",
-        message: "Lütfen tüm alanları doldurun.",
-        type: "error",
-      });
-      return;
-    }
-
     try {
       // updatePost thunk'ını dispatch edip, sonucu unwrap ediyoruz
       await dispatch(updatePost({ id, postData })).unwrap();
@@ -128,7 +133,19 @@ const EditPostComponent = () => {
       navigate("/dashboard/posts");
     } catch (err) {
       console.error("EditPostComponent: Güncelleme hatası:", err);
-      showError(err?.message || "Post güncellenirken bir hata oluştu.");
+      // Yetki hatası özel durumu
+      if (err?.code === "OWNER_OR_ADMIN_REQUIRED") {
+        showAlert({
+          title: "Yetki Hatası",
+          message: "Bu içeriği sadece içerik sahibi veya admin düzenleyebilir.",
+          type: "error",
+        });
+        setTimeout(() => {
+          navigate("/dashboard/posts");
+        }, 2000);
+      } else {
+        showError(err?.message || "Post güncellenirken bir hata oluştu.");
+      }
     }
   };
 

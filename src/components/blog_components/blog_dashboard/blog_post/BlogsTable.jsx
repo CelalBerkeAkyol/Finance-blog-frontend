@@ -22,6 +22,7 @@ import {
 import TableCellContent from "./TableCellContent";
 import { capitalize } from "../../../../utils/capitalize";
 import { useNavigate } from "react-router-dom";
+import { useFeedback } from "../../../../context/FeedbackContext";
 
 const columns = [
   { name: "Başlık", uid: "title" },
@@ -45,6 +46,8 @@ const BlogsTable = () => {
   const { posts, status, error, total, isError, errorMessage } = useSelector(
     (state) => state.posts
   );
+  const { success, error: showError } = useFeedback();
+  // filtreleme işlemleri
   const [filterValue, setFilterValue] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
   const [sortDescriptor, setSortDescriptor] = useState({
@@ -52,24 +55,8 @@ const BlogsTable = () => {
     direction: "descending",
   });
   const [page, setPage] = useState(1);
-  const [notification, setNotification] = useState({
-    show: false,
-    message: "",
-    type: "",
-  });
   const limit = 20;
   const navigate = useNavigate();
-
-  // Bildirim gösterme fonksiyonu
-  const showNotification = (message, type = "success") => {
-    setNotification({ show: true, message, type });
-    setTimeout(() => {
-      setNotification({ show: false, message: "", type: "" });
-      if (type === "error") {
-        dispatch(clearState());
-      }
-    }, 3000);
-  };
 
   // Postları getirme
   useEffect(() => {
@@ -79,9 +66,12 @@ const BlogsTable = () => {
   // Hata mesajı varsa bildirim göster
   useEffect(() => {
     if (isError && errorMessage) {
-      showNotification(errorMessage, "error");
+      showError(errorMessage);
+      setTimeout(() => {
+        dispatch(clearState());
+      }, 3000);
     }
-  }, [isError, errorMessage]);
+  }, [isError, errorMessage, showError, dispatch]);
 
   const filteredBlogs = useMemo(() => {
     let filtered = Array.isArray(posts) ? [...posts] : [];
@@ -129,7 +119,7 @@ const BlogsTable = () => {
 
   const handleRefresh = () => {
     dispatch(fetchPosts({ page, limit }));
-    showNotification("Postlar yenilendi.", "success");
+    success("Postlar yenilendi.");
   };
 
   // Veri yükleme durumunda veya hata durumunda içerik
@@ -243,21 +233,6 @@ const BlogsTable = () => {
       </div>
 
       {renderContent()}
-
-      {/* Bildirim */}
-      {notification.show && (
-        <div
-          className={`fixed bottom-4 right-4 px-4 py-2 rounded shadow-lg z-50 ${
-            notification.type === "error"
-              ? "bg-red-500 text-white"
-              : notification.type === "warning"
-              ? "bg-yellow-500 text-white"
-              : "bg-green-500 text-white"
-          }`}
-        >
-          {notification.message}
-        </div>
-      )}
     </div>
   );
 };

@@ -20,6 +20,7 @@ import {
   removePost,
   deletePost,
 } from "../../../../app/features/blogs/postsSlice";
+import { useFeedback } from "../../../../context/FeedbackContext";
 
 const statusColorMap = {
   yayında: "success",
@@ -33,6 +34,7 @@ const TableCellContent = ({ posts, columnKey }) => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const { isOpen, onOpen, onClose } = useDisclosure();
+  const { success, error: showError } = useFeedback();
 
   const handleView = () => {
     navigate(`/blog/post/${posts._id}`);
@@ -51,10 +53,12 @@ const TableCellContent = ({ posts, columnKey }) => {
       .unwrap()
       .then(() => {
         dispatch(removePost(posts._id));
+        success(`"${posts.title}" başlıklı post başarıyla silindi.`);
         onClose();
       })
-      .catch(() => {
-        console.error("TableCellContent: Silme işlemi hata verdi:", error);
+      .catch((err) => {
+        console.error("TableCellContent: Silme işlemi hata verdi:", err);
+        showError(err?.message || "Post silinirken bir hata oluştu.");
         onClose();
       });
   };

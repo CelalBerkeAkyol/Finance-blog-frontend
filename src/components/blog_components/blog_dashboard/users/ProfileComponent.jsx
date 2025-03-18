@@ -1,24 +1,12 @@
-import React, { useState, useEffect } from "react";
-import axios from "../../../../api";
+import React, { useState, useEffect, useRef } from "react";
 import { useSelector, useDispatch } from "react-redux";
 import {
   updateUserProfile,
   fetchUser,
 } from "../../../../app/features/user/userSlice";
 import {
-  Card,
-  CardHeader,
-  CardBody,
-  CardFooter,
-  Avatar,
-  Button,
-  Divider,
-  Input,
-  Textarea,
   Spinner,
-  Tabs,
-  Tab,
-  Link,
+  Button,
   Modal,
   ModalContent,
   ModalHeader,
@@ -26,19 +14,28 @@ import {
   ModalFooter,
   useDisclosure,
 } from "@nextui-org/react";
-import { Icon } from "@iconify/react";
 import { logInfo, logError } from "../../../../utils/logger";
 import { useFeedback } from "../../../../context/FeedbackContext";
 
+// Modüler bileşenleri import ediyoruz
+import {
+  ProfileImageUploader,
+  ProfileEditForm,
+  ProfileSummaryCard,
+  uploadProfileImage,
+  validateImageFile,
+  createImagePreview,
+} from "./profile-components/ProfileComponents";
+
+// Ana bileşen
 const ProfileComponent = () => {
   const dispatch = useDispatch();
   const { userInfo, isLoading, isError, errorMessage } = useSelector(
     (state) => state.user
   );
+  const { success, error: showError } = useFeedback();
 
-  // Feedback context'i kullan
-  const { success, error: showError, info } = useFeedback();
-
+  // State tanımlamaları
   const [editMode, setEditMode] = useState(false);
   const [formData, setFormData] = useState({});
   const [saveLoading, setSaveLoading] = useState(false);
@@ -46,32 +43,36 @@ const ProfileComponent = () => {
   const { isOpen, onOpen, onClose } = useDisclosure();
   const [isUserDataReady, setIsUserDataReady] = useState(false);
 
-  // Hata durumunda bildirim göster
-  useEffect(() => {
-    if (isError && errorMessage) {
-      showError(errorMessage);
-    }
-  }, [isError, errorMessage, showError]);
+  // Profil resmi state'leri
+  const [selectedImage, setSelectedImage] = useState(null);
+  const [imagePreview, setImagePreview] = useState(null);
+  const [uploadingImage, setUploadingImage] = useState(false);
+  const fileInputRef = useRef(null);
 
-  // saveError durumunda bildirim göster
+  // Hata durumlarını izle
   useEffect(() => {
-    if (saveError) {
-      showError(saveError);
-    }
-  }, [saveError, showError]);
+    if (isError && errorMessage) showError(errorMessage);
+    if (saveError) showError(saveError);
+  }, [isError, errorMessage, saveError, showError]);
 
-  // Kullanıcı bilgilerinin hazır olup olmadığını kontrol et
+  // Kullanıcı verilerini kontrol et
   useEffect(() => {
     if (userInfo && userInfo._id) {
       setIsUserDataReady(true);
     } else {
       setIsUserDataReady(false);
-      // Kullanıcı bilgileri eksikse, yeniden getir
       dispatch(fetchUser());
     }
   }, [userInfo, dispatch]);
 
   // Form verilerini başlat
+  useEffect(() => {
+    if (userInfo) {
+      initializeFormData(userInfo);
+    }
+  }, [userInfo]);
+
+  // Form verilerini başlatma fonksiyonu
   const initializeFormData = (userData) => {
     if (!userData) return;
 
@@ -89,76 +90,93 @@ const ProfileComponent = () => {
       },
       profileImage: userData.profileImage || "",
     });
+
+    setImagePreview(userData.profileImage || null);
+    setSelectedImage(null);
+  };
+
+  // Resim seçme işleyicisi
+  const handleImageChange = (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    if (validateImageFile(file, showError)) {
+      setSelectedImage(file);
+      createImagePreview(file, setImagePreview);
+    }
   };
 
   // Düzenleme modunu başlat
   const handleStartEdit = async () => {
-    // Kullanıcı bilgileri hazır değilse, önce bilgileri getir
-
     if (!isUserDataReady) {
-      // Redux slice'da zaten loglanacak, burada tekrar loglamaya gerek yok
       try {
         await dispatch(fetchUser());
-        // Bilgiler geldikten sonra düzenleme modunu başlat
         setEditMode(true);
         onOpen();
       } catch (error) {
-        // Hata durumu Redux slice'da zaten loglanacak
         showError(
           "Kullanıcı bilgileri getirilemedi. Lütfen sayfayı yenileyip tekrar deneyin."
         );
       }
     } else {
-      // Component'e özgü durum değişikliği, loglanabilir
       logInfo("👤 Profil", "Düzenleme modu başlatıldı");
       setEditMode(true);
       onOpen();
     }
   };
 
-  // Profil güncelleme
+  // Profil güncelleme işlevi
   const handleUpdateProfile = async () => {
     try {
       setSaveLoading(true);
       setSaveError(null);
 
-      // Kullanıcı ID'si kontrolü
       const userId = userInfo._id;
-
       if (!userId) {
         const errorMsg =
           "Kullanıcı ID'si bulunamadı. Lütfen sayfayı yenileyip tekrar deneyin.";
-        // Bu component'e özgü bir kontrol, loglanabilir
         logError("👤 Profil", errorMsg);
         setSaveError(errorMsg);
         return;
       }
 
-      // Redux action'ını kullanarak profil güncelleme
-      // Bu işlem ve sonucu Redux slice'da zaten loglanacak
+      // Yeni resim yükleme
+      let profileImageUrl = formData.profileImage;
+      if (selectedImage) {
+        const uploadedImageUrl = await uploadProfileImage(
+          selectedImage,
+          setUploadingImage,
+          showError
+        );
+        if (uploadedImageUrl) {
+          profileImageUrl = uploadedImageUrl;
+        }
+      }
+
+      // Güncellenmiş form verisi
+      const updatedFormData = {
+        ...formData,
+        profileImage: profileImageUrl,
+      };
+
+      // Redux eylemini gönder
       const resultAction = await dispatch(
-        updateUserProfile({ userId, userData: formData })
+        updateUserProfile({ userId, userData: updatedFormData })
       );
 
       if (updateUserProfile.fulfilled.match(resultAction)) {
-        // Redux slice'da zaten loglanacak, burada tekrar loglamaya gerek yok
-
-        // Kullanıcı bilgilerini yeniden getir
         await dispatch(fetchUser());
-
-        // Component'e özgü durum değişikliği, loglanabilir
         logInfo("👤 Profil", "Düzenleme modu kapatıldı");
         setEditMode(false);
         onClose();
         success("Profil bilgileriniz başarıyla güncellendi");
+        setSelectedImage(null);
       } else if (updateUserProfile.rejected.match(resultAction)) {
-        // Hata durumu Redux slice'da zaten loglanacak
         setSaveError(
           resultAction.payload || "Profil güncellenirken bir hata oluştu"
         );
       }
     } catch (err) {
-      // Beklenmeyen hata, component seviyesinde loglanabilir
       logError(
         "👤 Profil",
         "Profil güncelleme işleminde beklenmeyen hata",
@@ -170,7 +188,7 @@ const ProfileComponent = () => {
     }
   };
 
-  // Form değişikliklerini izle
+  // Form değişikliklerini izleme
   const handleChange = (e) => {
     const { name, value } = e.target;
 
@@ -191,14 +209,26 @@ const ProfileComponent = () => {
     }
   };
 
-  // Component mount olduğunda form verilerini başlat
-  useEffect(() => {
-    if (userInfo) {
-      initializeFormData(userInfo);
-    }
-  }, [userInfo]);
+  // Dosya girişini tetikle
+  const handleImageButtonClick = () => {
+    fileInputRef.current.click();
+  };
 
-  // Yükleme durumunda gösterilecek içerik
+  // Seçilen resmi kaldır
+  const handleRemoveImage = () => {
+    setSelectedImage(null);
+    setImagePreview(userInfo.profileImage || null);
+    setFormData({
+      ...formData,
+      profileImage: userInfo.profileImage || "",
+    });
+
+    if (fileInputRef.current) {
+      fileInputRef.current.value = "";
+    }
+  };
+
+  // Yükleme görünümü
   if (isLoading) {
     return (
       <div className="flex justify-center items-center h-64">
@@ -207,7 +237,7 @@ const ProfileComponent = () => {
     );
   }
 
-  // Hata durumunda gösterilecek içerik
+  // Hata görünümü
   if (isError) {
     return (
       <div className="flex flex-col justify-center items-center h-64 text-danger gap-4">
@@ -219,7 +249,7 @@ const ProfileComponent = () => {
     );
   }
 
-  // Kullanıcı bulunamadığında gösterilecek içerik
+  // Kullanıcı bulunamadı görünümü
   if (!userInfo) {
     return (
       <div className="flex flex-col justify-center items-center h-64 gap-4">
@@ -233,161 +263,7 @@ const ProfileComponent = () => {
 
   return (
     <div className="w-full max-w-4xl mx-auto">
-      <Card className="mb-6">
-        <CardHeader className="justify-between">
-          <div className="flex gap-4">
-            <Avatar
-              src={userInfo.profileImage}
-              size="lg"
-              isBordered
-              color={userInfo.role === "admin" ? "danger" : "primary"}
-            />
-            <div className="flex flex-col gap-1 items-start justify-center">
-              <h4 className="text-lg font-semibold">
-                {userInfo.fullName || userInfo.userName || userInfo.username}
-              </h4>
-              <p className="text-small text-default-500">
-                {userInfo.occupation || userInfo.role}
-              </p>
-            </div>
-          </div>
-          <Button
-            color="primary"
-            variant="flat"
-            onClick={handleStartEdit}
-            startContent={<Icon icon="mdi:pencil" />}
-          >
-            Profili Düzenle
-          </Button>
-        </CardHeader>
-        <Divider />
-        <CardBody>
-          <Tabs aria-label="Profil Bilgileri">
-            <Tab key="about" title="Hakkında">
-              <div className="space-y-4 p-4">
-                <div>
-                  <h5 className="text-sm font-semibold text-default-500">
-                    Biyografi
-                  </h5>
-                  <p className="mt-1">
-                    {userInfo.bio || "Henüz bir biyografi eklenmemiş."}
-                  </p>
-                </div>
-                <div>
-                  <h5 className="text-sm font-semibold text-default-500">
-                    Meslek
-                  </h5>
-                  <p className="mt-1">
-                    {userInfo.occupation || "Belirtilmemiş"}
-                  </p>
-                </div>
-                <div>
-                  <h5 className="text-sm font-semibold text-default-500">
-                    Web Sitesi
-                  </h5>
-                  {userInfo.website ? (
-                    <Link
-                      href={userInfo.website}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="mt-1"
-                    >
-                      {userInfo.website}
-                    </Link>
-                  ) : (
-                    <p className="mt-1">Belirtilmemiş</p>
-                  )}
-                </div>
-              </div>
-            </Tab>
-            <Tab key="contact" title="İletişim">
-              <div className="space-y-4 p-4">
-                <div>
-                  <h5 className="text-sm font-semibold text-default-500">
-                    E-posta
-                  </h5>
-                  <p className="mt-1">{userInfo.email}</p>
-                </div>
-                <div>
-                  <h5 className="text-sm font-semibold text-default-500">
-                    Sosyal Medya
-                  </h5>
-                  <div className="flex gap-4 mt-2">
-                    {userInfo.socialLinks?.twitter && (
-                      <Link
-                        href={userInfo.socialLinks.twitter}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                      >
-                        <Icon icon="mdi:twitter" width={24} />
-                      </Link>
-                    )}
-                    {userInfo.socialLinks?.linkedin && (
-                      <Link
-                        href={userInfo.socialLinks.linkedin}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                      >
-                        <Icon icon="mdi:linkedin" width={24} />
-                      </Link>
-                    )}
-                    {userInfo.socialLinks?.github && (
-                      <Link
-                        href={userInfo.socialLinks.github}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                      >
-                        <Icon icon="mdi:github" width={24} />
-                      </Link>
-                    )}
-                    {!userInfo.socialLinks?.twitter &&
-                      !userInfo.socialLinks?.linkedin &&
-                      !userInfo.socialLinks?.github && (
-                        <p>Sosyal medya hesapları belirtilmemiş</p>
-                      )}
-                  </div>
-                </div>
-              </div>
-            </Tab>
-            <Tab key="account" title="Hesap">
-              <div className="space-y-4 p-4">
-                <div>
-                  <h5 className="text-sm font-semibold text-default-500">
-                    Kullanıcı Adı
-                  </h5>
-                  <p className="mt-1">
-                    {userInfo.userName || userInfo.username}
-                  </p>
-                </div>
-                <div>
-                  <h5 className="text-sm font-semibold text-default-500">
-                    Rol
-                  </h5>
-                  <p className="mt-1">{userInfo.role}</p>
-                </div>
-                <div>
-                  <h5 className="text-sm font-semibold text-default-500">
-                    Hesap Durumu
-                  </h5>
-                  <p className="mt-1">
-                    {userInfo.isVerified ? "Doğrulanmış" : "Doğrulanmamış"}
-                  </p>
-                </div>
-                <div>
-                  <h5 className="text-sm font-semibold text-default-500">
-                    Kayıt Tarihi
-                  </h5>
-                  <p className="mt-1">
-                    {userInfo.createdAt
-                      ? new Date(userInfo.createdAt).toLocaleDateString("tr-TR")
-                      : "Belirtilmemiş"}
-                  </p>
-                </div>
-              </div>
-            </Tab>
-          </Tabs>
-        </CardBody>
-      </Card>
+      <ProfileSummaryCard userInfo={userInfo} onEditClick={handleStartEdit} />
 
       {/* Profil Düzenleme Modalı */}
       <Modal isOpen={isOpen && editMode} onClose={onClose} size="2xl">
@@ -398,82 +274,22 @@ const ProfileComponent = () => {
                 Profil Düzenle
               </ModalHeader>
               <ModalBody>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <Input
-                    label="Kullanıcı Adı"
-                    name="userName"
-                    value={formData.userName}
-                    onChange={handleChange}
-                    variant="bordered"
-                    isDisabled // Kullanıcı adı değiştirilemez
-                  />
-                  <Input
-                    label="Tam Ad"
-                    name="fullName"
-                    value={formData.fullName}
-                    onChange={handleChange}
-                    variant="bordered"
-                  />
-                  <Input
-                    label="E-posta"
-                    name="email"
-                    value={formData.email}
-                    onChange={handleChange}
-                    variant="bordered"
-                    isDisabled // E-posta değiştirilemez
-                  />
-                  <Input
-                    label="Meslek"
-                    name="occupation"
-                    value={formData.occupation}
-                    onChange={handleChange}
-                    variant="bordered"
-                  />
-                  <Input
-                    label="Web Sitesi"
-                    name="website"
-                    value={formData.website}
-                    onChange={handleChange}
-                    variant="bordered"
-                  />
-                  <Input
-                    label="Profil Resmi URL"
-                    name="profileImage"
-                    value={formData.profileImage}
-                    onChange={handleChange}
-                    variant="bordered"
-                  />
-                  <Input
-                    label="Twitter"
-                    name="socialLinks.twitter"
-                    value={formData.socialLinks?.twitter}
-                    onChange={handleChange}
-                    variant="bordered"
-                  />
-                  <Input
-                    label="LinkedIn"
-                    name="socialLinks.linkedin"
-                    value={formData.socialLinks?.linkedin}
-                    onChange={handleChange}
-                    variant="bordered"
-                  />
-                  <Input
-                    label="GitHub"
-                    name="socialLinks.github"
-                    value={formData.socialLinks?.github}
-                    onChange={handleChange}
-                    variant="bordered"
-                  />
-                  <Textarea
-                    label="Biyografi"
-                    name="bio"
-                    value={formData.bio}
-                    onChange={handleChange}
-                    variant="bordered"
-                    className="col-span-1 md:col-span-2"
-                    maxLength={500}
-                  />
-                </div>
+                <ProfileImageUploader
+                  imagePreview={imagePreview}
+                  selectedImage={selectedImage}
+                  uploadingImage={uploadingImage}
+                  fileInputRef={fileInputRef}
+                  userInfo={userInfo}
+                  onImageChange={handleImageChange}
+                  onImageClick={handleImageButtonClick}
+                  onImageRemove={handleRemoveImage}
+                />
+
+                <ProfileEditForm
+                  formData={formData}
+                  handleChange={handleChange}
+                />
+
                 {saveError && <p className="text-danger mt-4">{saveError}</p>}
               </ModalBody>
               <ModalFooter>
@@ -483,7 +299,7 @@ const ProfileComponent = () => {
                 <Button
                   color="primary"
                   onPress={handleUpdateProfile}
-                  isLoading={saveLoading}
+                  isLoading={saveLoading || uploadingImage}
                 >
                   Kaydet
                 </Button>

@@ -118,7 +118,7 @@ const BlogsTable = () => {
   };
 
   const handleAddPostClick = () => {
-    navigate("/dashboard/new-post");
+    navigate("/dashboard/post/new");
   };
 
   const handleRefresh = () => {

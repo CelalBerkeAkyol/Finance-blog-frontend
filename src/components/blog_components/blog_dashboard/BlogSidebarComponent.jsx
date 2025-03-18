@@ -1,9 +1,13 @@
 import React from "react";
 import { Icon } from "@iconify/react";
-
 import { Link } from "react-router-dom";
+import { useSelector } from "react-redux";
+import LogoutComponent from "../../auth/LogoutComponent";
+import { Avatar } from "@nextui-org/react";
 
 const BlogSidebarComponent = () => {
+  const { isAdmin, userInfo } = useSelector((state) => state.user);
+
   return (
     <div className="w-1/6 h-screen flex flex-col border-r-1 border-r-content justify-between overflow-y-auto text-sm">
       {/* Logo */}
@@ -74,20 +78,44 @@ const BlogSidebarComponent = () => {
               CheatSheet
             </Link>
           </li>
-          <li>
-            <Link
-              to="/dashboard/users"
-              className="flex items-center p-2 rounded-lg hover:bg-content3"
-            >
-              <Icon
-                icon="mdi:account-group-outline"
-                className="h-4 w-4 mr-2 "
-              />
-              Users
-            </Link>
-          </li>
+          {isAdmin && (
+            <li>
+              <Link
+                to="/dashboard/users"
+                className="flex items-center p-2 rounded-lg hover:bg-content3"
+              >
+                <Icon
+                  icon="mdi:account-group-outline"
+                  className="h-4 w-4 mr-2 "
+                />
+                Users
+              </Link>
+            </li>
+          )}
         </ul>
       </nav>
+
+      {/* User Actions Section */}
+      <div className="p-4 border-t border-content">
+        <div className="flex flex-col gap-2">
+          <Link
+            to="/profile"
+            className="flex items-center p-2 rounded-lg hover:bg-content3 w-full"
+          >
+            <Avatar
+              src={userInfo?.profileImage}
+              fallback={<Icon icon="mdi:account" className="h-4 w-4" />}
+              className="mr-2"
+              size="sm"
+            />
+            {userInfo.userName}
+          </Link>
+          <div className="flex items-center p-2 rounded-lg hover:bg-content3 w-full">
+            <Icon icon="mdi:logout" className="h-4 w-4 mr-2" />
+            <LogoutComponent sidebar={true} />
+          </div>
+        </div>
+      </div>
     </div>
   );
 };

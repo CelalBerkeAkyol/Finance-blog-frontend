@@ -43,7 +43,7 @@ export default function LoginComponent() {
 
   return (
     <div className="flex h-full justify-center my-14">
-      <div className="flex w-full max-w-sm flex-col gap-4 rounded-large bg-content1 px-8 pb-10 pt-6 shadow-small">
+      <div className="flex w-full max-w-sm flex-col gap-4 rounded-large bg-gray-50 px-8 pb-10 pt-6 shadow-small">
         <p className="pb-2 text-xl font-medium">Log In</p>
         <form className="flex flex-col gap-3" onSubmit={handleSubmit}>
           <Input
@@ -99,7 +99,11 @@ export default function LoginComponent() {
               Forgot password?
             </Link>
           </div>
-          <Button color="primary" type="submit" isDisabled={isLoading}>
+          <Button
+            className="bg-primary-600 text-white hover:bg-primary-700"
+            type="submit"
+            isDisabled={isLoading}
+          >
             {isLoading ? "Loading..." : "Log In"}
           </Button>
         </form>

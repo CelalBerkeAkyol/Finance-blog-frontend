@@ -1,41 +1,40 @@
 // src/components/LogoutButton.jsx
 import React from "react";
-import { useDispatch } from "react-redux";
-import { useNavigate } from "react-router-dom";
-import { logoutUser, clearState } from "../../app/features/user/userSlice";
-import { Button } from "@nextui-org/react";
 import { Icon } from "@iconify/react";
+import { useDispatch } from "react-redux";
+import { logoutUser, clearState } from "../../app/features/user/userSlice";
+import { useFeedback } from "../../context/FeedbackContext";
 
-const LogoutComponent = ({ sidebar = false }) => {
+// Navbar ile aynı metin boyutu için stil
+const navTextStyle = { fontSize: "15px" };
+
+export default function LogoutComponent({ sidebar = false }) {
   const dispatch = useDispatch();
-  const navigate = useNavigate();
+  const { success, error: showError } = useFeedback();
 
   const handleLogout = async () => {
     try {
       await dispatch(logoutUser()).unwrap();
       dispatch(clearState()); // Ekstra temizlik (opsiyonel)
-      navigate("/login");
+      success("Başarıyla çıkış yapıldı");
     } catch (error) {
-      console.error("Logout failed:", error);
+      showError(error?.message || "Çıkış yapılırken bir hata oluştu");
     }
   };
-  // sidebarda sadece logout yazısı gözükmesi için böyle bir çözüm bulduk
-  if (sidebar) {
-    return (
-      <span className="flex-1 cursor-pointer" onClick={handleLogout}>
-        Logout
-      </span>
-    );
-  }
 
+  // Sidebar için farklı bir tasarım, normal durum için farklı
   return (
-    <Button
-      variant="bordered"
-      size="sm"
-      startContent={<Icon icon="ic:round-logout" width="20" />}
+    <button
       onClick={handleLogout}
-    />
+      className={`flex items-center gap-2 ${
+        sidebar
+          ? "w-full text-left py-2 hover:text-primary"
+          : "hover:text-primary px-2 py-1"
+      }`}
+      style={navTextStyle}
+    >
+      {!sidebar && <Icon icon="solar:logout-3-bold-duotone" width="16" />}
+      Logout
+    </button>
   );
-};
-
-export default LogoutComponent;
+}

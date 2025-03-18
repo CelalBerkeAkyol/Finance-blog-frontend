@@ -73,7 +73,7 @@ export default function RegisterComponent() {
 
   return (
     <div className="flex h-full w-full items-center justify-center py-8">
-      <div className="flex w-full max-w-sm flex-col gap-4 rounded-large">
+      <div className="flex w-full max-w-sm flex-col gap-4 rounded-large bg-gray-50 p-8 shadow-small">
         <div className="flex flex-col items-center pb-6">
           <p className="text-xl font-medium">Welcome</p>
           <p className="text-small text-default-500">
@@ -155,7 +155,10 @@ export default function RegisterComponent() {
             </Link>
           </Checkbox>
 
-          <Button color="primary" type="submit">
+          <Button
+            className="bg-primary-600 text-white hover:bg-primary-700"
+            type="submit"
+          >
             Sign Up
           </Button>
         </form>

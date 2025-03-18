@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import axios from "../../../../api";
 import { useSelector, useDispatch } from "react-redux";
 import {
@@ -25,6 +25,7 @@ import {
   ModalBody,
   ModalFooter,
   useDisclosure,
+  Image,
 } from "@nextui-org/react";
 import { Icon } from "@iconify/react";
 import { logInfo, logError } from "../../../../utils/logger";
@@ -45,6 +46,12 @@ const ProfileComponent = () => {
   const [saveError, setSaveError] = useState(null);
   const { isOpen, onOpen, onClose } = useDisclosure();
   const [isUserDataReady, setIsUserDataReady] = useState(false);
+
+  // Profile image upload state
+  const [selectedImage, setSelectedImage] = useState(null);
+  const [imagePreview, setImagePreview] = useState(null);
+  const [uploadingImage, setUploadingImage] = useState(false);
+  const fileInputRef = useRef(null);
 
   // Hata durumunda bildirim göster
   useEffect(() => {
@@ -89,6 +96,78 @@ const ProfileComponent = () => {
       },
       profileImage: userData.profileImage || "",
     });
+
+    // Reset image preview when initializing form data
+    setImagePreview(userData.profileImage || null);
+    setSelectedImage(null);
+  };
+
+  // Handle file selection
+  const handleImageChange = (e) => {
+    const file = e.target.files[0];
+
+    if (!file) return;
+
+    // Validate file type
+    const validTypes = ["image/jpeg", "image/png", "image/webp"];
+    if (!validTypes.includes(file.type)) {
+      showError("Lütfen geçerli bir resim dosyası seçin (JPEG, PNG, WEBP)");
+      return;
+    }
+
+    // Validate file size (5MB max)
+    const maxSize = 5 * 1024 * 1024; // 5MB in bytes
+    if (file.size > maxSize) {
+      showError("Resim dosyası 5MB'dan küçük olmalıdır");
+      return;
+    }
+
+    setSelectedImage(file);
+
+    // Create preview URL
+    const reader = new FileReader();
+    reader.onloadend = () => {
+      setImagePreview(reader.result);
+    };
+    reader.readAsDataURL(file);
+  };
+
+  // Upload image to server
+  const uploadProfileImage = async () => {
+    if (!selectedImage) return null;
+
+    try {
+      setUploadingImage(true);
+
+      const formData = new FormData();
+      formData.append("image", selectedImage);
+
+      const response = await axios.post("/images/multiple", formData, {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+        withCredentials: true,
+      });
+
+      if (
+        response.data.success &&
+        response.data.data &&
+        response.data.data.length > 0
+      ) {
+        // Return the URL of the uploaded image
+        return response.data.data[0].url;
+      } else {
+        throw new Error("Resim yükleme başarısız");
+      }
+    } catch (err) {
+      showError(
+        "Profil resmi yüklenirken bir hata oluştu: " +
+          (err.message || "Bilinmeyen hata")
+      );
+      return null;
+    } finally {
+      setUploadingImage(false);
+    }
   };
 
   // Düzenleme modunu başlat
@@ -134,10 +213,26 @@ const ProfileComponent = () => {
         return;
       }
 
+      // If a new image was selected, upload it first
+      let profileImageUrl = formData.profileImage;
+
+      if (selectedImage) {
+        const uploadedImageUrl = await uploadProfileImage();
+        if (uploadedImageUrl) {
+          profileImageUrl = uploadedImageUrl;
+        }
+      }
+
+      // Update the form data with the new profile image URL
+      const updatedFormData = {
+        ...formData,
+        profileImage: profileImageUrl,
+      };
+
       // Redux action'ını kullanarak profil güncelleme
       // Bu işlem ve sonucu Redux slice'da zaten loglanacak
       const resultAction = await dispatch(
-        updateUserProfile({ userId, userData: formData })
+        updateUserProfile({ userId, userData: updatedFormData })
       );
 
       if (updateUserProfile.fulfilled.match(resultAction)) {
@@ -151,6 +246,9 @@ const ProfileComponent = () => {
         setEditMode(false);
         onClose();
         success("Profil bilgileriniz başarıyla güncellendi");
+
+        // Reset image states
+        setSelectedImage(null);
       } else if (updateUserProfile.rejected.match(resultAction)) {
         // Hata durumu Redux slice'da zaten loglanacak
         setSaveError(
@@ -188,6 +286,26 @@ const ProfileComponent = () => {
         ...formData,
         [name]: value,
       });
+    }
+  };
+
+  // Trigger file input click
+  const handleImageButtonClick = () => {
+    fileInputRef.current.click();
+  };
+
+  // Remove selected image and reset to current profile image
+  const handleRemoveImage = () => {
+    setSelectedImage(null);
+    setImagePreview(userInfo.profileImage || null);
+    setFormData({
+      ...formData,
+      profileImage: userInfo.profileImage || "",
+    });
+
+    // Clear the file input
+    if (fileInputRef.current) {
+      fileInputRef.current.value = "";
     }
   };
 
@@ -398,6 +516,65 @@ const ProfileComponent = () => {
                 Profil Düzenle
               </ModalHeader>
               <ModalBody>
+                {/* Profile Image Upload Section */}
+                <div className="flex flex-col items-center gap-4 mb-6 p-4 border border-dashed rounded-xl">
+                  <div className="flex justify-center">
+                    {imagePreview ? (
+                      <Avatar
+                        src={imagePreview}
+                        size="xl"
+                        isBordered
+                        color={userInfo.role === "admin" ? "danger" : "primary"}
+                        className="w-32 h-32"
+                      />
+                    ) : (
+                      <div className="w-32 h-32 rounded-full bg-gray-200 flex items-center justify-center">
+                        <Icon
+                          icon="mdi:account"
+                          className="w-16 h-16 text-gray-400"
+                        />
+                      </div>
+                    )}
+                  </div>
+
+                  <input
+                    type="file"
+                    ref={fileInputRef}
+                    accept="image/jpeg,image/png,image/webp"
+                    onChange={handleImageChange}
+                    className="hidden"
+                  />
+
+                  <div className="flex gap-2">
+                    <Button
+                      color="primary"
+                      onClick={handleImageButtonClick}
+                      startContent={<Icon icon="mdi:camera" />}
+                      isLoading={uploadingImage}
+                      isDisabled={uploadingImage}
+                    >
+                      {selectedImage ? "Resmi Değiştir" : "Resim Seç"}
+                    </Button>
+
+                    {selectedImage && (
+                      <Button
+                        color="danger"
+                        variant="light"
+                        onClick={handleRemoveImage}
+                        startContent={<Icon icon="mdi:close" />}
+                        isDisabled={uploadingImage}
+                      >
+                        Kaldır
+                      </Button>
+                    )}
+                  </div>
+
+                  <p className="text-xs text-gray-500">
+                    Desteklenen formatlar: JPEG, PNG, WEBP. Maksimum dosya
+                    boyutu: 5MB
+                  </p>
+                </div>
+
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <Input
                     label="Kullanıcı Adı"
@@ -433,13 +610,6 @@ const ProfileComponent = () => {
                     label="Web Sitesi"
                     name="website"
                     value={formData.website}
-                    onChange={handleChange}
-                    variant="bordered"
-                  />
-                  <Input
-                    label="Profil Resmi URL"
-                    name="profileImage"
-                    value={formData.profileImage}
                     onChange={handleChange}
                     variant="bordered"
                   />
@@ -483,7 +653,7 @@ const ProfileComponent = () => {
                 <Button
                   color="primary"
                   onPress={handleUpdateProfile}
-                  isLoading={saveLoading}
+                  isLoading={saveLoading || uploadingImage}
                 >
                   Kaydet
                 </Button>

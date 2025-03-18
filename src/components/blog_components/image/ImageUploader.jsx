@@ -3,13 +3,15 @@ import React, { useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 // Çoklu dosya yükleme için hazırladığınız yeni action
 import { uploadImages } from "../../../app/features/image/imageSlice";
+import { useFeedback } from "../../../context/FeedbackContext";
 
-const ImageUploader = () => {
+const ImageUploader = ({ onUploadSuccess }) => {
   // Tek bir file yerine dizi (array) tutalım
   const [files, setFiles] = useState([]);
   const [altText, setAltText] = useState(""); // İsterseniz boş geçilebilir
   const dispatch = useDispatch();
   const { loading, error, success } = useSelector((state) => state.imageUpload);
+  const { showAlert, success: showSuccess, error: showError } = useFeedback();
 
   // Birden fazla dosya seçimini yönetmek
   const handleFileChange = (e) => {
@@ -21,7 +23,11 @@ const ImageUploader = () => {
   const handleSubmit = (e) => {
     e.preventDefault();
     if (!files || files.length === 0) {
-      alert("Lütfen en az bir görsel seçin.");
+      showAlert({
+        title: "Uyarı",
+        message: "Lütfen en az bir görsel seçin.",
+        type: "warning",
+      });
       return;
     }
 
@@ -35,7 +41,20 @@ const ImageUploader = () => {
     });
 
     // Artık tekli yerine çoklu yükleme action'ını çağırıyoruz
-    dispatch(uploadImages(formData));
+    dispatch(uploadImages(formData))
+      .unwrap()
+      .then(() => {
+        showSuccess("Görseller başarıyla yüklendi!");
+        setFiles([]);
+        setAltText("");
+        // Varsa, başarı callback'ini çağır
+        if (onUploadSuccess && typeof onUploadSuccess === "function") {
+          onUploadSuccess();
+        }
+      })
+      .catch((err) => {
+        showError(err?.message || "Görsel yükleme sırasında bir hata oluştu.");
+      });
   };
 
   return (
@@ -74,10 +93,6 @@ const ImageUploader = () => {
         >
           {loading ? "Yükleniyor..." : "Yükle"}
         </button>
-        {error && <p className="mt-2 text-red-500">{error}</p>}
-        {success && (
-          <p className="mt-2 text-green-500">Görseller başarıyla yüklendi!</p>
-        )}
       </form>
     </div>
   );

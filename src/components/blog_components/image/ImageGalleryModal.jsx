@@ -7,17 +7,17 @@ import {
 } from "../../../app/features/image/imageGallerySlice";
 import { Button } from "@nextui-org/react";
 import { Icon } from "@iconify/react";
-
+import { useFeedback } from "../../../context/FeedbackContext";
 import ImageUploaderModal from "./ImageUploaderModal";
 
-const ImageGalleryModal = ({ isOpen, onClose }) => {
+const ImageGalleryModal = ({ isOpen, onClose, onSelectImage }) => {
   const dispatch = useDispatch();
+  const { success, error: showError, warning } = useFeedback();
   const { images, loading, error, page, totalPages } = useSelector(
     (state) => state.imageGallery
   );
 
   const [selectedImageId, setSelectedImageId] = useState(null);
-  const [copyNotification, setCopyNotification] = useState(false);
   const [isUploaderOpen, setIsUploaderOpen] = useState(false);
 
   useEffect(() => {
@@ -32,7 +32,7 @@ const ImageGalleryModal = ({ isOpen, onClose }) => {
 
   const handleCopy = () => {
     if (!selectedImageId) {
-      alert("Lütfen önce bir görsel seçin.");
+      warning("Lütfen önce bir görsel seçin.");
       return;
     }
     const foundImage = images.find((img) => img._id === selectedImageId);
@@ -42,15 +42,17 @@ const ImageGalleryModal = ({ isOpen, onClose }) => {
     navigator.clipboard
       .writeText(markdownLink)
       .then(() => {
-        setCopyNotification(true);
-        setTimeout(() => setCopyNotification(false), 2000);
+        success("Görsel linki markdown formatında kopyalandı!");
       })
-      .catch((err) => console.error("Kopyalama hatası:", err));
+      .catch((err) => {
+        console.error("Kopyalama hatası:", err);
+        showError("Görsel linki kopyalanırken bir hata oluştu.");
+      });
   };
 
   const handleDelete = () => {
     if (!selectedImageId) {
-      alert("Lütfen silmek için bir görsel seçin.");
+      warning("Lütfen silmek için bir görsel seçin.");
       return;
     }
     if (!window.confirm("Bu görseli silmek istediğinize emin misiniz?")) {
@@ -61,8 +63,12 @@ const ImageGalleryModal = ({ isOpen, onClose }) => {
       .then(() => {
         dispatch(fetchImages({ page, limit: 15 }));
         setSelectedImageId(null);
+        success("Görsel başarıyla silindi!");
       })
-      .catch((err) => console.error("Silme hatası:", err));
+      .catch((err) => {
+        console.error("Silme hatası:", err);
+        showError("Görsel silinirken bir hata oluştu.");
+      });
   };
 
   const handleNextPage = () => {
@@ -82,6 +88,23 @@ const ImageGalleryModal = ({ isOpen, onClose }) => {
   const handleReload = () => {
     dispatch(fetchImages({ page: 1, limit: 15 }));
     setSelectedImageId(null);
+    success("Görseller yenilendi!");
+  };
+
+  const handleUseImage = () => {
+    if (!selectedImageId) {
+      warning("Lütfen önce bir görsel seçin.");
+      return;
+    }
+
+    const foundImage = images.find((img) => img._id === selectedImageId);
+    if (!foundImage) return;
+
+    if (onSelectImage && typeof onSelectImage === "function") {
+      onSelectImage(foundImage.url);
+      success("Görsel başarıyla seçildi!");
+      onClose();
+    }
   };
 
   if (!isOpen) return null;
@@ -157,7 +180,7 @@ const ImageGalleryModal = ({ isOpen, onClose }) => {
 
           {/* Alt kısım: Butonlar ve Sayfalama */}
           <div className="mt-6 flex flex-col items-center space-y-4">
-            {/* Kopyala / Sil Butonları */}
+            {/* Kopyala / Sil / Kullan Butonları */}
             <div className="flex gap-2">
               <Button
                 variant="flat"
@@ -167,6 +190,16 @@ const ImageGalleryModal = ({ isOpen, onClose }) => {
               >
                 Kopyala
               </Button>
+              {onSelectImage && (
+                <Button
+                  variant="flat"
+                  color="primary"
+                  radius="md"
+                  onPress={handleUseImage}
+                >
+                  Kullan
+                </Button>
+              )}
               <Button
                 variant="flat"
                 color="danger"
@@ -202,19 +235,19 @@ const ImageGalleryModal = ({ isOpen, onClose }) => {
               </Button>
             </div>
           </div>
-
-          {/* Kopyalama bildirimi */}
-          {copyNotification && (
-            <div className="fixed bottom-4 right-4 bg-green-500 text-white px-4 py-2 rounded shadow-lg transition-opacity duration-300">
-              Görsel linki markdown formatında kopyalandı!
-            </div>
-          )}
         </div>
       </div>
 
       {/* Görsel yükleme modalı */}
       {isUploaderOpen && (
-        <ImageUploaderModal onClose={() => setIsUploaderOpen(false)} />
+        <ImageUploaderModal
+          onClose={() => setIsUploaderOpen(false)}
+          onSuccess={() => {
+            setIsUploaderOpen(false);
+            success("Görsel başarıyla yüklendi!");
+            dispatch(fetchImages({ page: 1, limit: 15 }));
+          }}
+        />
       )}
     </>
   );

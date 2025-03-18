@@ -26,6 +26,7 @@ import { useFeedback } from "../../../../context/FeedbackContext";
 
 const columns = [
   { name: "Başlık", uid: "title" },
+  { name: "Yazar", uid: "author" },
   { name: "Kategori", uid: "category" },
   { name: "Durum", uid: "status" },
   { name: "Görüntülenme", uid: "views" },
@@ -142,7 +143,7 @@ const BlogsTable = () => {
           aria-label="Blogs Table"
           sortDescriptor={sortDescriptor}
           onSortChange={handleSortChange}
-          striped
+          isStriped
         >
           <TableHeader columns={columns}>
             {(column) => (

@@ -75,6 +75,8 @@ const TableCellContent = ({ posts, columnKey }) => {
   switch (columnKey) {
     case "title":
       return <span>{cellValue}</span>;
+    case "author":
+      return <span>{posts.author?.userName}</span>;
     case "status":
       return (
         <Chip

@@ -11,17 +11,21 @@ import ErrorComponent from "./error/ErrorComponent";
  * @param {React.ReactNode} props.children - Route içeriği
  * @param {Array<string>} [props.allowedRoles] - İzin verilen roller ['admin', 'author'] gibi. Belirtilmezse sadece giriş kontrolü yapılır.
  * @param {string} [props.redirectPath='/login'] - Erişim reddedildiğinde yönlendirilecek sayfa
+ * @param {number} [props.redirectDelay=5000] - Yönlendirme gecikmesi (ms)
  * @returns {React.ReactNode}
  */
 function ProtectedRoute({
   children,
   allowedRoles = [],
   redirectPath = "/login",
+  redirectDelay = 5000,
 }) {
   const dispatch = useDispatch();
   const { userInfo, isLoading, isLoggedIn, isAdmin, isAuthor, errorCode } =
     useSelector((state) => state.user);
   const [hasPermission, setHasPermission] = useState(null);
+  const [shouldRedirect, setShouldRedirect] = useState(false);
+  const [countdown, setCountdown] = useState(redirectDelay / 1000);
 
   // Kullanıcının rollerini kontrol et
   const checkUserRoles = () => {
@@ -63,6 +67,28 @@ function ProtectedRoute({
     }
   }, [isLoggedIn, isAdmin, isAuthor, allowedRoles]);
 
+  // Giriş yapılmamışsa geri sayım başlat
+  useEffect(() => {
+    let timer;
+
+    if (!isLoading && !isLoggedIn && !shouldRedirect) {
+      timer = setInterval(() => {
+        setCountdown((prev) => {
+          if (prev <= 1) {
+            clearInterval(timer);
+            setShouldRedirect(true);
+            return 0;
+          }
+          return prev - 1;
+        });
+      }, 1000);
+    }
+
+    return () => {
+      if (timer) clearInterval(timer);
+    };
+  }, [isLoading, isLoggedIn, shouldRedirect]);
+
   // Yükleme durumunda bekle
   if (isLoading || hasPermission === null) {
     return (
@@ -73,9 +99,24 @@ function ProtectedRoute({
     );
   }
 
-  // Giriş yapılmamışsa login sayfasına yönlendir
-  if (!isLoggedIn) {
+  // Yönlendirme başlatıldıysa yönlendir
+  if (shouldRedirect) {
     return <Navigate to={redirectPath} />;
+  }
+
+  // Giriş yapılmamışsa hata bileşeni göster
+  if (!isLoggedIn) {
+    return (
+      <div className="h-screen flex items-center justify-center">
+        <ErrorComponent
+          code={errorCode}
+          message={`Bu sayfayı görüntülemek için giriş yapmanız gerekmektedir. ${countdown} saniye içinde giriş sayfasına yönlendirileceksiniz.`}
+          actionText="Şimdi Giriş Yap"
+          onAction={() => setShouldRedirect(true)}
+          color="warning"
+        />
+      </div>
+    );
   }
 
   // Rol kontrolü başarısızsa erişim reddedildi hata sayfasını göster

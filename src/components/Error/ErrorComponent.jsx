@@ -45,6 +45,9 @@ export default function ErrorComponent({
       case "SERVICE_UNAVAILABLE":
         title = "Servis Kullanılamıyor";
         break;
+      case "NO_TOKEN":
+        title = "Hesabınıza giriş yapmanız gerekiyor";
+        break;
       default:
         title = "Hata";
     }

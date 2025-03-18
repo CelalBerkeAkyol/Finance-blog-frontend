@@ -3,6 +3,7 @@ import { Navigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { fetchUser } from "../app/features/user/userSlice";
 import { logDebug, logError } from "../utils/logger";
+import ErrorComponent from "./uyarılar/ErrorComponent";
 
 /**
  * Korumalı route bileşeni
@@ -78,28 +79,19 @@ function ProtectedRoute({
     return <Navigate to={redirectPath} />;
   }
 
-  // Rol kontrolü başarısızsa erişim reddedildi sayfasına yönlendir
+  // Rol kontrolü başarısızsa erişim reddedildi hata sayfasını göster
   if (!hasPermission) {
+    const neededRoles = allowedRoles.join(", ");
     return (
-      <div className="flex flex-col items-center justify-center h-screen">
-        <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative max-w-md">
-          <strong className="font-bold">Erişim Reddedildi!</strong>
-          <p className="block sm:inline">
-            {" "}
-            Bu sayfaya erişim yetkiniz bulunmamaktadır.
-          </p>
-          <p className="mt-2">
-            Bu sayfaya erişmek için gerekli yetkilere sahip değilsiniz.
-          </p>
-          <div className="mt-4 flex justify-end">
-            <button
-              onClick={() => window.history.back()}
-              className="bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded"
-            >
-              Geri Dön
-            </button>
-          </div>
-        </div>
+      <div className="h-screen flex items-center justify-center">
+        <ErrorComponent
+          type="auth"
+          title="Erişim Reddedildi"
+          message={`Bu sayfaya erişmek için gerekli yetkilere sahip değilsiniz. Gereken roller: ${neededRoles}`}
+          actionText="Ana Sayfaya Dön"
+          onAction={() => (window.location.href = "/")}
+          color="warning"
+        />
       </div>
     );
   }

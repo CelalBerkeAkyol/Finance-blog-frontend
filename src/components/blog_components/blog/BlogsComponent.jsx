@@ -3,7 +3,7 @@ import { useSelector, useDispatch } from "react-redux";
 import { fetchPosts } from "../../../app/features/blogs/postsSlice";
 import PostCardComponent from "./PostCardComponent";
 import BlogsSkeleton from "./BlogsSkeleton";
-import ServerErrorComponent from "../../uyarılar/ServerErrorComponent";
+import ErrorComponent from "../../uyarılar/ErrorComponent";
 
 export default function BlogsComponent() {
   const dispatch = useDispatch();
@@ -20,7 +20,11 @@ export default function BlogsComponent() {
   }
 
   if (isError) {
-    return <div className="text-center mt-8 text-red-500">{errorMessage}</div>;
+    return (
+      <div className="w-full py-8">
+        <ErrorComponent message={errorMessage} type="server" />
+      </div>
+    );
   }
 
   if (posts.length === 0) {

@@ -18,30 +18,29 @@ const BlogSidebarComponent = () => {
 
   return (
     <div
-      className={`${sidebarClass} h-screen flex flex-col border-r-1 border-r-content justify-between overflow-y-auto text-sm transition-all duration-300 relative bg-white`}
+      className={`${sidebarClass} h-screen flex flex-col border-r border-gray-200 justify-between overflow-hidden text-sm transition-all duration-300 bg-white`}
     >
-      {/* Toggle Button - Sadece küçük ekranlarda görünür */}
-      <button
-        onClick={toggleSidebar}
-        className="absolute -right-3 top-4 bg-white rounded-full p-1 shadow-md border border-gray-200 z-10"
-      >
-        <Icon
-          icon={isOpen ? "mdi:chevron-left" : "mdi:chevron-right"}
-          className="h-4 w-4"
-        />
-      </button>
-
-      {/* Logo */}
-      <div className="p-4 text-center">
+      {/* Header & Toggle Button */}
+      <div className="p-4 flex justify-between items-center">
         {isOpen ? (
           <h1 className="text-xl font-bold">Fin AI</h1>
         ) : (
           <h1 className="text-lg font-bold">F</h1>
         )}
+
+        <button
+          onClick={toggleSidebar}
+          className="bg-white rounded-full p-1.5 shadow-lg border border-gray-300 flex items-center justify-center"
+        >
+          <Icon
+            icon={isOpen ? "mdi:chevron-left" : "mdi:chevron-right"}
+            className="h-5 w-5 text-primary"
+          />
+        </button>
       </div>
 
       {/* Menu */}
-      <nav className="flex-grow">
+      <nav className="flex-grow overflow-y-auto overflow-x-hidden scrollbar-thin scrollbar-thumb-gray-300">
         <ul className="space-y-2 px-2">
           <li>
             <Link
@@ -120,7 +119,7 @@ const BlogSidebarComponent = () => {
       {/* User Actions Section */}
       <div className="p-2 border-t border-content">
         <div className="flex flex-col gap-2">
-          <div className="flex items-center p-2 rounded-lg hover:bg-content3 w-full">
+          <div className="flex items-center p-2 rounded-lg hover:bg-content3 w-full overflow-hidden">
             {isOpen ? (
               <LogoutComponent />
             ) : (
@@ -129,7 +128,7 @@ const BlogSidebarComponent = () => {
           </div>
           <Link
             to="/profile"
-            className="flex items-center px-2 pb-2 rounded-lg hover:bg-content3 w-full"
+            className="flex items-center px-2 pb-2 rounded-lg hover:bg-content3 w-full overflow-hidden"
           >
             <Avatar
               src={userInfo?.profileImage}
@@ -137,7 +136,9 @@ const BlogSidebarComponent = () => {
               size="sm"
             />
             {isOpen && (
-              <span className="ml-2 truncate">{userInfo.userName}</span>
+              <span className="ml-2 truncate">
+                {userInfo?.userName || "Profil"}
+              </span>
             )}
           </Link>
         </div>

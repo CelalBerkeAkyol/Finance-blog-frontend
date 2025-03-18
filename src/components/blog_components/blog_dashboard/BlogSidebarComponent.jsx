@@ -1,9 +1,11 @@
 import React from "react";
 import { Icon } from "@iconify/react";
-
 import { Link } from "react-router-dom";
+import { useSelector } from "react-redux";
 
 const BlogSidebarComponent = () => {
+  const { isAdmin } = useSelector((state) => state.user);
+
   return (
     <div className="w-1/6 h-screen flex flex-col border-r-1 border-r-content justify-between overflow-y-auto text-sm">
       {/* Logo */}
@@ -74,18 +76,20 @@ const BlogSidebarComponent = () => {
               CheatSheet
             </Link>
           </li>
-          <li>
-            <Link
-              to="/dashboard/users"
-              className="flex items-center p-2 rounded-lg hover:bg-content3"
-            >
-              <Icon
-                icon="mdi:account-group-outline"
-                className="h-4 w-4 mr-2 "
-              />
-              Users
-            </Link>
-          </li>
+          {isAdmin && (
+            <li>
+              <Link
+                to="/dashboard/users"
+                className="flex items-center p-2 rounded-lg hover:bg-content3"
+              >
+                <Icon
+                  icon="mdi:account-group-outline"
+                  className="h-4 w-4 mr-2 "
+                />
+                Users
+              </Link>
+            </li>
+          )}
         </ul>
       </nav>
     </div>

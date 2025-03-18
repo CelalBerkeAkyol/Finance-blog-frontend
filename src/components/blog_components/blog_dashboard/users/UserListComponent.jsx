@@ -19,6 +19,7 @@ import useUsers from "../../../../hooks/useUsers";
 import DeleteUserModal from "../../../modals/DeleteUserModal";
 import ChangeRoleModal from "../../../modals/ChangeRoleModal";
 import axios from "../../../../api";
+import { useFeedback } from "../../../../context/FeedbackContext";
 
 const UserListComponent = () => {
   const {
@@ -33,6 +34,9 @@ const UserListComponent = () => {
     fetchUsers,
   } = useUsers();
 
+  // Feedback context'i kullan
+  const { success, error: showError, warning } = useFeedback();
+
   const [page, setPage] = useState(1);
 
   // Modal yönetimi
@@ -46,6 +50,27 @@ const UserListComponent = () => {
   const [selectedRole, setSelectedRole] = useState("");
   const [roleUpdateLoading, setRoleUpdateLoading] = useState(false);
   const [roleUpdateError, setRoleUpdateError] = useState(null);
+
+  // Hata durumunda bildirim göster
+  useEffect(() => {
+    if (error) {
+      showError(error);
+    }
+  }, [error, showError]);
+
+  // deleteError durumunda bildirim göster
+  useEffect(() => {
+    if (deleteError) {
+      showError(deleteError);
+    }
+  }, [deleteError, showError]);
+
+  // roleUpdateError durumunda bildirim göster
+  useEffect(() => {
+    if (roleUpdateError) {
+      showError(roleUpdateError);
+    }
+  }, [roleUpdateError, showError]);
 
   // Kullanıcıları ilk yükleme
   useEffect(() => {
@@ -82,10 +107,12 @@ const UserListComponent = () => {
       });
       setUsers(users.filter((u) => u._id !== selectedUser._id));
       onClose();
+      success(`${selectedUser.userName} kullanıcısı başarıyla silindi.`);
     } catch (err) {
-      setDeleteError(
-        err.response?.data?.message || "Kullanıcı silinirken bir hata oluştu"
-      );
+      const errorMessage =
+        err.response?.data?.message || "Kullanıcı silinirken bir hata oluştu";
+      setDeleteError(errorMessage);
+      showError(errorMessage);
     } finally {
       setDeleteLoading(false);
     }
@@ -114,13 +141,27 @@ const UserListComponent = () => {
         )
       );
       setRoleModalOpen(false);
-    } catch (err) {
-      setRoleUpdateError(
-        err.response?.data?.message ||
-          "Kullanıcı rolü güncellenirken bir hata oluştu"
+      success(
+        `${selectedUser.userName} kullanıcısının rolü "${selectedRole}" olarak güncellendi.`
       );
+    } catch (err) {
+      const errorMessage =
+        err.response?.data?.message ||
+        "Kullanıcı rolü güncellenirken bir hata oluştu";
+      setRoleUpdateError(errorMessage);
+      showError(errorMessage);
     } finally {
       setRoleUpdateLoading(false);
+    }
+  };
+
+  // Refresh users
+  const handleRefreshUsers = async () => {
+    try {
+      await fetchUsers();
+      success("Kullanıcı listesi başarıyla yenilendi.");
+    } catch (err) {
+      showError("Kullanıcı listesi yenilenirken bir hata oluştu.");
     }
   };
 
@@ -202,7 +243,7 @@ const UserListComponent = () => {
           <Button
             color="primary"
             startContent={<Icon icon="mdi:refresh" />}
-            onClick={fetchUsers}
+            onClick={handleRefreshUsers}
           >
             Yenile
           </Button>

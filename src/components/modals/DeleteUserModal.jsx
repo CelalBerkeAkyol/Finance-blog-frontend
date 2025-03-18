@@ -12,7 +12,6 @@ const DeleteUserModal = ({
   isOpen,
   onClose,
   selectedUser,
-  deleteError,
   handleDeleteUser,
   isLoading,
 }) => {
@@ -32,7 +31,6 @@ const DeleteUserModal = ({
                   alınamaz.
                 </p>
               )}
-              {deleteError && <p className="text-danger">{deleteError}</p>}
             </ModalBody>
             <ModalFooter>
               <Button variant="flat" onPress={onCloseModal}>

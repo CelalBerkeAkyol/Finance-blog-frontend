@@ -5,14 +5,14 @@ import { useParams } from "react-router-dom";
 import { fetchPostsByCategory } from "../../../app/features/blogs/postsSlice";
 import BlogsSkeleton from "./BlogsSkeleton";
 import PostCardComponent from "./PostCardComponent";
-import ServerErrorComponent from "../../uyarılar/ServerErrorComponent";
+import ErrorComponent from "../../error/ErrorComponent";
 
 export default function CategoryBasePosts() {
   const dispatch = useDispatch();
-  const { category } = useParams(); // URL’den kategori parametresi alınıyor
+  const { category } = useParams(); // URL'den kategori parametresi alınıyor
 
   // Redux'tan postları alın
-  const { posts, isLoading, isError, errorMessage } = useSelector(
+  const { posts, isLoading, isError, errorMessage, errorCode } = useSelector(
     (state) => state.posts
   );
 
@@ -26,7 +26,16 @@ export default function CategoryBasePosts() {
     return <BlogsSkeleton />;
   }
   if (isError) {
-    return <ServerErrorComponent message={errorMessage} />;
+    return (
+      <div className="w-full py-8">
+        <ErrorComponent
+          message={errorMessage}
+          code={errorCode}
+          actionText="Kategorilere Dön"
+          onAction={() => (window.location.href = "/blog/categories")}
+        />
+      </div>
+    );
   }
 
   function slugToReadable(slug) {

@@ -2,12 +2,25 @@
 import React, { useState } from "react";
 import { useDispatch } from "react-redux";
 import { addNewPost } from "../../../../app/features/blogs/postsSlice";
-import { Input, Textarea, Button } from "@nextui-org/react";
+import {
+  Input,
+  Textarea,
+  Button,
+  Modal,
+  ModalContent,
+  ModalHeader,
+  ModalBody,
+  ModalFooter,
+} from "@nextui-org/react";
 import CategorySelector from "../helpers/CategorySelector";
 import ImageGalleryModal from "../../image/ImageGalleryModal";
+import { useFeedback } from "../../../../context/FeedbackContext";
+import { useNavigate } from "react-router-dom";
 
 const AddPost = () => {
   const dispatch = useDispatch();
+  const navigate = useNavigate();
+  const { success, error: showError } = useFeedback();
   const [formData, setFormData] = useState({
     title: "",
     content: "",
@@ -23,6 +36,9 @@ const AddPost = () => {
   });
   const [showErrors, setShowErrors] = useState(false);
   const [charCount, setCharCount] = useState(0);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [showSuccessModal, setShowSuccessModal] = useState(false);
+  const [newPostId, setNewPostId] = useState(null);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -52,14 +68,40 @@ const AddPost = () => {
     setErrors(newErrors);
     setShowErrors(true);
 
+    // Eğer herhangi bir hata varsa, formu gönderme
+    if (Object.values(newErrors).some((error) => error)) {
+      showError("Lütfen tüm alanları doldurun.");
+      return;
+    }
+
+    setIsSubmitting(true);
+
     dispatch(addNewPost(formData))
       .then((result) => {
         if (result.meta.requestStatus === "fulfilled") {
+          success("Yazı başarıyla eklendi!");
+          // Yeni postun ID'sini al
+          const postId = result.payload?.id || result.payload?._id;
+          setNewPostId(postId);
+
+          // Form alanlarını temizle
           setFormData({ title: "", content: "", category: "", summary: "" });
           setShowErrors(false);
+          setCharCount(0);
+
+          // Başarı modalını göster
+          setShowSuccessModal(true);
+        } else {
+          showError("Yazı eklenirken bir hata oluştu.");
         }
       })
-      .catch((error) => console.error("AddPost: Hata oluştu:", error));
+      .catch((error) => {
+        console.error("AddPost: Hata oluştu:", error);
+        showError("Yazı eklenirken bir hata oluştu: " + error.message);
+      })
+      .finally(() => {
+        setIsSubmitting(false);
+      });
   };
 
   const handleCategoryChange = (selectedCategory) => {
@@ -69,18 +111,51 @@ const AddPost = () => {
     }
   };
 
+  const insertImageToContent = (imageUrl) => {
+    const markdownImage = `![Resim](${imageUrl})`;
+    const textArea = document.querySelector('textarea[name="content"]');
+
+    if (textArea) {
+      const start = textArea.selectionStart;
+      const end = textArea.selectionEnd;
+      const text = formData.content;
+      const newText =
+        text.substring(0, start) + markdownImage + text.substring(end);
+
+      setFormData((prevData) => ({ ...prevData, content: newText }));
+      success("Görsel içeriğe eklendi!");
+
+      // Textarea'ya odaklan ve imleci doğru pozisyona getir
+      setTimeout(() => {
+        textArea.focus();
+        textArea.setSelectionRange(
+          start + markdownImage.length,
+          start + markdownImage.length
+        );
+      }, 100);
+    } else {
+      // Seçili alan yoksa sona ekle
+      setFormData((prevData) => ({
+        ...prevData,
+        content: prevData.content
+          ? prevData.content + "\n\n" + markdownImage
+          : markdownImage,
+      }));
+      success("Görsel içeriğe eklendi!");
+    }
+  };
+
+  // Post görüntüleme sayfasına yönlendir
+  const viewPost = () => {
+    if (newPostId) {
+      navigate(`/blog/post/${newPostId}`);
+    }
+    setShowSuccessModal(false);
+  };
+
   return (
     <div className="p-8 mb-4 w-[80%] h-screen">
       <h2 className="text-xl font-bold mb-4">Yeni Post Ekle</h2>
-      {showErrors && Object.values(errors).some((error) => error) && (
-        <div
-          className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4"
-          role="alert"
-        >
-          <strong className="font-bold">Hata! </strong>
-          <span className="block sm:inline">Lütfen tüm alanları doldurun.</span>
-        </div>
-      )}
       <form onSubmit={handleSubmit} className="flex flex-col gap-4">
         <Input
           clearable
@@ -149,17 +224,51 @@ const AddPost = () => {
             <Button type="button" onClick={() => setIsGalleryOpen(true)}>
               Görseller
             </Button>
-            <Button type="submit" size="md" className="self-end">
-              Ekle
+            <Button
+              type="submit"
+              size="md"
+              className="self-end"
+              isLoading={isSubmitting}
+            >
+              {isSubmitting ? "Ekleniyor..." : "Ekle"}
             </Button>
           </div>
         </div>
       </form>
+
       {/* Modal'ı ekrana getiriyoruz */}
       <ImageGalleryModal
         isOpen={isGalleryOpen}
         onClose={() => setIsGalleryOpen(false)}
+        onSelectImage={insertImageToContent}
       />
+
+      {/* Başarı Modalı */}
+      <Modal
+        isOpen={showSuccessModal}
+        onClose={() => setShowSuccessModal(false)}
+      >
+        <ModalContent>
+          <ModalHeader className="flex flex-col gap-1">
+            Yazı Başarıyla Eklendi
+          </ModalHeader>
+          <ModalBody>
+            <p>Yazınız başarıyla eklendi. Şimdi ne yapmak istersiniz?</p>
+          </ModalBody>
+          <ModalFooter>
+            <Button
+              color="primary"
+              variant="light"
+              onPress={() => setShowSuccessModal(false)}
+            >
+              Kapat
+            </Button>
+            <Button color="primary" onPress={viewPost}>
+              Postu Görüntüle
+            </Button>
+          </ModalFooter>
+        </ModalContent>
+      </Modal>
     </div>
   );
 };

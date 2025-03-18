@@ -10,19 +10,16 @@ import { Icon } from "@iconify/react";
 import ImageUploaderModal from "../../components/blog_components/image/ImageUploaderModal";
 import BlogSidebarComponent from "../../components/blog_components/blog_dashboard/BlogSidebarComponent";
 import ErrorBoundary from "../../components/Error/ErrorBoundary";
+import { useFeedback } from "../../context/FeedbackContext";
 
 function GalleryPage() {
   const dispatch = useDispatch();
   const { images, loading, error, page, totalPages } = useSelector(
     (state) => state.imageGallery
   );
+  const { showToast, success, error: showError, warning } = useFeedback();
 
   const [selectedImageId, setSelectedImageId] = useState(null);
-  const [notification, setNotification] = useState({
-    show: false,
-    message: "",
-    type: "",
-  });
   const [isUploaderOpen, setIsUploaderOpen] = useState(false);
 
   // İlk yükelemede 20 görseli çek
@@ -30,25 +27,16 @@ function GalleryPage() {
     dispatch(fetchImages({ page: 1, limit: 20 }));
   }, [dispatch]);
 
-  // Bildirim gösterme fonksiyonu
-  // To do -> bunu component haline getir
-  const showNotification = (message, type = "success") => {
-    setNotification({ show: true, message, type });
-    setTimeout(() => {
-      setNotification({ show: false, message: "", type: "" });
-    }, 3000);
-  };
-
   // Hata mesajı varsa bildirim göster
   useEffect(() => {
     if (error) {
-      showNotification(error, "error");
+      showError(error);
       // Hata mesajını gösterdikten sonra temizle
       setTimeout(() => {
         dispatch(clearImageErrors());
       }, 3000);
     }
-  }, [error, dispatch]);
+  }, [error, dispatch, showError]);
 
   // Bir görseli seçme
   const handleSelectImage = (id) => {
@@ -58,12 +46,12 @@ function GalleryPage() {
   // Kopyalama
   const handleCopy = () => {
     if (!selectedImageId) {
-      showNotification("Lütfen bir görsel seçin.", "warning");
+      warning("Lütfen bir görsel seçin.");
       return;
     }
     const foundImage = images.find((img) => img._id === selectedImageId);
     if (!foundImage) {
-      showNotification("Seçilen görsel bulunamadı.", "error");
+      showError("Seçilen görsel bulunamadı.");
       return;
     }
 
@@ -71,18 +59,18 @@ function GalleryPage() {
     navigator.clipboard
       .writeText(markdownLink)
       .then(() => {
-        showNotification("Görsel linki kopyalandı!");
+        success("Görsel linki kopyalandı!");
       })
       .catch((err) => {
         console.error("Kopyalama hatası:", err);
-        showNotification("Kopyalama sırasında bir hata oluştu.", "error");
+        showError("Kopyalama sırasında bir hata oluştu.");
       });
   };
 
   // Silme
   const handleDelete = () => {
     if (!selectedImageId) {
-      showNotification("Lütfen silmek için bir görsel seçin.", "warning");
+      warning("Lütfen silmek için bir görsel seçin.");
       return;
     }
     if (!window.confirm("Bu görseli silmek istediğinize emin misiniz?")) return;
@@ -91,14 +79,11 @@ function GalleryPage() {
       .unwrap()
       .then((result) => {
         setSelectedImageId(null);
-        showNotification("Görsel başarıyla silindi.");
+        success("Görsel başarıyla silindi.");
       })
       .catch((err) => {
         console.error("Silme hatası:", err);
-        showNotification(
-          err.message || "Görsel silinirken bir hata oluştu.",
-          "error"
-        );
+        showError(err.message || "Görsel silinirken bir hata oluştu.");
       });
   };
 
@@ -120,7 +105,7 @@ function GalleryPage() {
   const handleReload = () => {
     dispatch(fetchImages({ page: 1, limit: 20 }));
     setSelectedImageId(null);
-    showNotification("Görseller yenilendi.");
+    success("Görseller yenilendi.");
   };
 
   // "Görsel Ekle" butonu: modal aç
@@ -223,28 +208,13 @@ function GalleryPage() {
           </Button>
         </div>
 
-        {/* Bildirim */}
-        {notification.show && (
-          <div
-            className={`fixed bottom-4 right-4 px-4 py-2 rounded shadow-lg ${
-              notification.type === "error"
-                ? "bg-red-500 text-white"
-                : notification.type === "warning"
-                ? "bg-yellow-500 text-white"
-                : "bg-green-500 text-white"
-            }`}
-          >
-            {notification.message}
-          </div>
-        )}
-
         {/* Yükleme Modalı */}
         {isUploaderOpen && (
           <ImageUploaderModal
             onClose={() => setIsUploaderOpen(false)}
             onSuccess={() => {
               setIsUploaderOpen(false);
-              showNotification("Görsel başarıyla yüklendi.");
+              success("Görsel başarıyla yüklendi.");
               dispatch(fetchImages({ page: 1, limit: 20 }));
             }}
           />
@@ -254,7 +224,7 @@ function GalleryPage() {
   );
 }
 
-// Error Boundary ile sarmalayarak dışa aktarıyoruz
+// Hata sınırı ile sarmak
 function GalleryPageWithErrorBoundary() {
   return (
     <ErrorBoundary>

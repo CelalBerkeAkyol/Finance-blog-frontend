@@ -3,11 +3,11 @@ import { useSelector, useDispatch } from "react-redux";
 import { fetchPosts } from "../../../app/features/blogs/postsSlice";
 import PostCardComponent from "./PostCardComponent";
 import BlogsSkeleton from "./BlogsSkeleton";
-import ServerErrorComponent from "../../uyarılar/ServerErrorComponent";
+import ErrorComponent from "../../error/ErrorComponent";
 
 export default function BlogsComponent() {
   const dispatch = useDispatch();
-  const { posts, isLoading, isError, errorMessage } = useSelector(
+  const { posts, isLoading, isError, errorMessage, errorCode } = useSelector(
     (state) => state.posts
   );
 
@@ -20,11 +20,11 @@ export default function BlogsComponent() {
   }
 
   if (isError) {
-    return <div className="text-center mt-8 text-red-500">{errorMessage}</div>;
-  }
-
-  if (posts.length === 0) {
-    return <div className="text-center mt-8">Hiç post bulunamadı.</div>;
+    return (
+      <div className="w-full py-8">
+        <ErrorComponent message={errorMessage} code={errorCode} />
+      </div>
+    );
   }
 
   return (

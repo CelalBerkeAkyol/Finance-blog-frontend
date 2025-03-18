@@ -1,17 +1,14 @@
 // src/app/components/ImageUploaderModal.jsx
 import React from "react";
 import ImageUploader from "./ImageUploader"; // ImageUploader'ın doğru yolu
-import { useDispatch } from "react-redux";
-import { fetchImages } from "../../../app/features/image/imageGallerySlice";
 import { Button } from "@nextui-org/react";
+import { useFeedback } from "../../../context/FeedbackContext";
 
 const ImageUploaderModal = ({ onClose, onSuccess }) => {
-  const dispatch = useDispatch();
+  const { showAlert } = useFeedback();
 
   // Upload başarılı olursa gallery'deki görselleri yenile ve modalı kapat.
   const handleUploadSuccess = () => {
-    dispatch(fetchImages({ page: 1, limit: 20 }));
-
     // onSuccess prop'u varsa çağır
     if (onSuccess && typeof onSuccess === "function") {
       onSuccess();

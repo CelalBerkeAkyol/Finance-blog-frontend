@@ -21,7 +21,6 @@ const ChangeRoleModal = ({
   setSelectedRole,
   handleUpdateRole,
   roleUpdateLoading,
-  roleUpdateError,
 }) => {
   return (
     <Modal isOpen={roleModalOpen} onClose={onClose}>
@@ -62,9 +61,6 @@ const ChangeRoleModal = ({
                     </DropdownMenu>
                   </Dropdown>
                 </div>
-              )}
-              {roleUpdateError && (
-                <p className="text-danger">{roleUpdateError}</p>
               )}
             </ModalBody>
             <ModalFooter>

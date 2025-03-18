@@ -7,6 +7,7 @@ import { Input, Textarea, Button, Card } from "@nextui-org/react";
 import CategorySelector from "../helpers/CategorySelector";
 import StatusSelector from "../helpers/StatusSelector";
 import ImageGalleryModal from "../../image/ImageGalleryModal";
+import { useFeedback } from "../../../../context/FeedbackContext";
 
 import {
   fetchPostById,
@@ -17,6 +18,7 @@ const EditPostComponent = () => {
   const { id } = useParams();
   const dispatch = useDispatch();
   const navigate = useNavigate();
+  const { showAlert, success, error: showError } = useFeedback();
 
   // Redux state'den post verilerini ve durum bilgilerini çekiyoruz
   const { posts, isLoading, isError, errorMessage } = useSelector(
@@ -62,6 +64,13 @@ const EditPostComponent = () => {
     }
   }, [posts, id]);
 
+  // Hata mesajı varsa alert göster
+  useEffect(() => {
+    if (isError && errorMessage) {
+      showError(errorMessage);
+    }
+  }, [isError, errorMessage, showError]);
+
   const handleChange = (e) => {
     const { name, value } = e.target;
     setPostData({ ...postData, [name]: value });
@@ -104,16 +113,22 @@ const EditPostComponent = () => {
     setShowErrors(true);
 
     if (Object.values(newErrors).some((error) => error)) {
-      console.error("EditPostComponent: Tüm alanlar doldurulmalıdır.");
+      showAlert({
+        title: "Hata",
+        message: "Lütfen tüm alanları doldurun.",
+        type: "error",
+      });
       return;
     }
 
     try {
       // updatePost thunk'ını dispatch edip, sonucu unwrap ediyoruz
       await dispatch(updatePost({ id, postData })).unwrap();
+      success(`"${postData.title}" başlıklı post başarıyla güncellendi.`);
       navigate("/dashboard/posts");
     } catch (err) {
       console.error("EditPostComponent: Güncelleme hatası:", err);
+      showError(err?.message || "Post güncellenirken bir hata oluştu.");
     }
   };
 
@@ -123,21 +138,8 @@ const EditPostComponent = () => {
         <h1 className="text-2xl font-bold text-center mb-6">Postu Düzenle</h1>
         {isLoading ? (
           <p className="text-center">Yükleniyor...</p>
-        ) : isError ? (
-          <p className="text-center text-red-500">{errorMessage}</p>
         ) : (
           <>
-            {showErrors && Object.values(errors).some((error) => error) && (
-              <div
-                className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4"
-                role="alert"
-              >
-                <strong className="font-bold">Hata! </strong>
-                <span className="block sm:inline">
-                  Lütfen tüm alanları doldurun.
-                </span>
-              </div>
-            )}
             <Input
               type="text"
               name="title"
@@ -230,6 +232,15 @@ const EditPostComponent = () => {
       <ImageGalleryModal
         isOpen={isGalleryOpen}
         onClose={() => setIsGalleryOpen(false)}
+        onSelectImage={(imageUrl) => {
+          // Seçilen görsel URL'ini içeriğe ekle
+          const imageMarkdown = `\n![Resim](${imageUrl})\n`;
+          setPostData({
+            ...postData,
+            content: postData.content + imageMarkdown,
+          });
+          success("Görsel içeriğe eklendi!");
+        }}
       />
     </div>
   );

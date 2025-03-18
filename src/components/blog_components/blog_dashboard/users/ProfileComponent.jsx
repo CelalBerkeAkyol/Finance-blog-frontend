@@ -28,6 +28,7 @@ import {
 } from "@nextui-org/react";
 import { Icon } from "@iconify/react";
 import { logInfo, logError } from "../../../../utils/logger";
+import { useFeedback } from "../../../../context/FeedbackContext";
 
 const ProfileComponent = () => {
   const dispatch = useDispatch();
@@ -35,12 +36,29 @@ const ProfileComponent = () => {
     (state) => state.user
   );
 
+  // Feedback context'i kullan
+  const { success, error: showError, info } = useFeedback();
+
   const [editMode, setEditMode] = useState(false);
   const [formData, setFormData] = useState({});
   const [saveLoading, setSaveLoading] = useState(false);
   const [saveError, setSaveError] = useState(null);
   const { isOpen, onOpen, onClose } = useDisclosure();
   const [isUserDataReady, setIsUserDataReady] = useState(false);
+
+  // Hata durumunda bildirim göster
+  useEffect(() => {
+    if (isError && errorMessage) {
+      showError(errorMessage);
+    }
+  }, [isError, errorMessage, showError]);
+
+  // saveError durumunda bildirim göster
+  useEffect(() => {
+    if (saveError) {
+      showError(saveError);
+    }
+  }, [saveError, showError]);
 
   // Kullanıcı bilgilerinin hazır olup olmadığını kontrol et
   useEffect(() => {
@@ -86,7 +104,7 @@ const ProfileComponent = () => {
         onOpen();
       } catch (error) {
         // Hata durumu Redux slice'da zaten loglanacak
-        alert(
+        showError(
           "Kullanıcı bilgileri getirilemedi. Lütfen sayfayı yenileyip tekrar deneyin."
         );
       }
@@ -132,6 +150,7 @@ const ProfileComponent = () => {
         logInfo("👤 Profil", "Düzenleme modu kapatıldı");
         setEditMode(false);
         onClose();
+        success("Profil bilgileriniz başarıyla güncellendi");
       } else if (updateUserProfile.rejected.match(resultAction)) {
         // Hata durumu Redux slice'da zaten loglanacak
         setSaveError(

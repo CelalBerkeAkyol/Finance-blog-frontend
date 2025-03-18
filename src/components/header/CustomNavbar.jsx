@@ -184,7 +184,7 @@ function CustomNavbar() {
               <NavbarItem className="hidden lg:flex">
                 <button
                   onClick={() => handleNavigate("/login")}
-                  className="text-sm xl:text-sm px-2 hover:text-primary"
+                  className="text-[14px] px-2 hover:text-primary"
                 >
                   Login
                 </button>
@@ -193,7 +193,7 @@ function CustomNavbar() {
               <NavbarItem className="hidden lg:flex">
                 <button
                   onClick={() => handleNavigate("/register")}
-                  className="text-sm xl:text-sm px-2 hover:text-primary"
+                  className="text-[14px] px-2 hover:text-primary"
                 >
                   Register
                 </button>

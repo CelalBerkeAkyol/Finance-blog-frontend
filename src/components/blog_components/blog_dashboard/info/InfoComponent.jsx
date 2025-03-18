@@ -60,9 +60,11 @@ const data = [
 
 export default function InfoComponent() {
   return (
-    <div>
-      <h2 className="text-3xl font-bold py-8 text-center"> Web Page Status</h2>
-      <dl className="grid w-full grid-cols-1 gap-5 md:grid-cols-3 lg:grid-cols-4">
+    <div className="mt-4">
+      <h2 className="text-xl sm:text-2xl md:text-3xl font-bold py-4 sm:py-6">
+        Web Page Status
+      </h2>
+      <dl className="grid w-full grid-cols-1 gap-3 sm:gap-4 md:gap-5 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-3 xl:grid-cols-4">
         {data.map((item, index) => (
           <CircleChartCard key={index} {...item} />
         ))}
@@ -81,15 +83,15 @@ const CircleChartCard = React.forwardRef(
       <Card
         ref={ref}
         className={cn(
-          "h-[250px] border border-transparent dark:border-default-100",
+          "h-[200px] sm:h-[220px] md:h-[250px] border border-transparent dark:border-default-100",
           className
         )}
         {...props}
       >
-        <div className="flex flex-col gap-y-2 p-4 pb-0">
+        <div className="flex flex-col gap-y-1 sm:gap-y-2 p-3 sm:p-4 pb-0">
           <div className="flex items-center justify-between gap-x-2">
             <dt>
-              <h3 className="text-small font-medium text-gray-700 dark:text-gray-300">
+              <h3 className="text-xs sm:text-sm font-medium text-gray-700 dark:text-gray-300">
                 {title}
               </h3>
             </dt>
@@ -119,13 +121,13 @@ const CircleChartCard = React.forwardRef(
             width="100%"
           >
             <RadialBarChart
-              barSize={10}
+              barSize={8}
               cx="50%"
               cy="50%"
               data={chartData}
               endAngle={-45}
-              innerRadius={90}
-              outerRadius={70}
+              innerRadius={70}
+              outerRadius={60}
               startAngle={225}
             >
               <PolarAngleAxis
@@ -149,14 +151,14 @@ const CircleChartCard = React.forwardRef(
               <g>
                 <text textAnchor="middle" x="50%" y="48%">
                   <tspan
-                    className="fill-gray-500 text-tiny"
+                    className="fill-gray-500 text-[10px] sm:text-tiny"
                     dy="-0.5em"
                     x="50%"
                   >
                     {chartData?.[0].name}
                   </tspan>
                   <tspan
-                    className="fill-gray-900 dark:fill-gray-100 text-medium font-semibold"
+                    className="fill-gray-900 dark:fill-gray-100 text-sm sm:text-medium font-semibold"
                     dy="1.5em"
                     x="50%"
                   >

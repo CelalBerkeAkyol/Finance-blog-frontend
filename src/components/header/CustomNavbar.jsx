@@ -10,6 +10,10 @@ import {
   DropdownTrigger,
   DropdownMenu,
   DropdownItem,
+  NavbarMenuToggle,
+  NavbarMenu,
+  NavbarMenuItem,
+  NavbarBrand,
 } from "@nextui-org/react";
 import SearchModal from "../modals/SearchModal";
 import { useSelector } from "react-redux";
@@ -46,6 +50,7 @@ function CustomNavbar() {
   logRender("CustomNavbar", false); // false parametresi ile loglama kapatılabilir
 
   const [isSearchOpen, setIsSearchOpen] = useState(false);
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
   const navigate = useNavigate();
 
   // useSelector kullanımını optimize ediyoruz, her bir değeri ayrı ayrı seçerek
@@ -73,23 +78,37 @@ function CustomNavbar() {
   const handleNavigate = useCallback(
     (path) => {
       navigate(path);
+      setIsMenuOpen(false);
     },
     [navigate]
   );
 
   return (
     <>
-      <Navbar className="bg-gray-50 w-screen" maxWidth="xl">
-        <NavbarContent className="flex" justify="center">
-          <p className="font-bold text-inherit text-lg">Fin AI</p>
-        </NavbarContent>
+      <Navbar
+        className="bg-gray-50 py-1"
+        maxWidth="xl"
+        isMenuOpen={isMenuOpen}
+        onMenuOpenChange={setIsMenuOpen}
+      >
+        {/* Hamburger menü butonu - sadece mobil görünümde */}
+        <NavbarMenuToggle
+          aria-label={isMenuOpen ? "Close menu" : "Open menu"}
+          className="lg:hidden mr-1"
+        />
 
-        <NavbarContent className="hidden sm:flex" justify="center">
+        {/* Logo */}
+        <NavbarBrand className="mr-0 sm:mr-4">
+          <p className="font-bold text-inherit text-lg">Fin AI</p>
+        </NavbarBrand>
+
+        {/* Ana Navigasyon Bağlantıları - tablet ve desktop */}
+        <NavbarContent className="hidden lg:flex gap-3 xl:gap-4 flex-1 justify-start">
           {navbarLinks.map((item, index) => (
-            <NavbarItem key={index}>
+            <NavbarItem key={index} className="h-full flex items-center">
               <button
                 onClick={() => handleNavigate(item.path)}
-                className="hover:text-primary px-2"
+                className="hover:text-primary text-sm xl:text-base px-2"
               >
                 {item.name}
               </button>
@@ -100,7 +119,7 @@ function CustomNavbar() {
             <DropdownTrigger color="secondary">
               <Button
                 variant="flat"
-                className="text-gray-900 text-sm hover:text-secondary"
+                className="text-gray-900 text-sm hover:text-secondary h-full"
                 endContent={
                   <Icon icon="material-symbols:arrow-drop-down" width="20" />
                 }
@@ -121,59 +140,60 @@ function CustomNavbar() {
           </Dropdown>
         </NavbarContent>
 
-        <NavbarContent justify="center">
-          <NavbarItem className="mr-2">
+        {/* Ara butonu ve kullanıcı işlemleri */}
+        <NavbarContent justify="end" className="gap-2">
+          <NavbarItem>
             <Button
               variant="bordered"
               color="secondary"
               radius="lg"
               startContent={<Icon icon="material-symbols:search" width="14" />}
-              size="md"
+              size="sm"
               onClick={handleSearchOpen}
+              className="min-w-0 px-2 sm:px-3"
             >
-              Ara
+              <span className="hidden sm:block">Ara</span>
             </Button>
           </NavbarItem>
 
           {/* Eğer kullanıcı giriş yapmışsa profil ve çıkış butonu */}
           {isLoggedIn ? (
             <>
-
               {/* Sadece admin ve author rollerine sahip kullanıcılar için profil butonu göster */}
               {canAccessProfile && (
-                <NavbarItem className="ml-2">
+                <NavbarItem className="hidden lg:flex">
                   <Button
                     variant="ghost"
                     size="sm"
-                    startContent={<Icon icon="ic:round-person" width="20" />}
+                    startContent={<Icon icon="ic:round-person" width="16" />}
                     onClick={() => navigate("/profile")}
+                    className="text-xs xl:text-sm min-w-0 px-2"
                   >
-                    {userName} - {userRole}
+                    <span className="hidden xl:block">{userName}</span>
                   </Button>
                 </NavbarItem>
               )}
 
               {/* Tüm giriş yapmış kullanıcılar için çıkış butonu */}
-              <NavbarItem className={canAccessProfile ? "" : "ml-2"}>
-
+              <NavbarItem className="hidden lg:flex">
                 <LogoutComponent />
               </NavbarItem>
             </>
           ) : (
             <>
-              <NavbarItem className="ml-2">
+              <NavbarItem className="hidden lg:flex">
                 <button
                   onClick={() => handleNavigate("/login")}
-                  className="pl-4 hover:text-primary"
+                  className="text-sm xl:text-sm px-2 hover:text-primary"
                 >
                   Login
                 </button>
               </NavbarItem>
 
-              <NavbarItem>
+              <NavbarItem className="hidden lg:flex">
                 <button
                   onClick={() => handleNavigate("/register")}
-                  className="hover:text-primary"
+                  className="text-sm xl:text-sm px-2 hover:text-primary"
                 >
                   Register
                 </button>
@@ -181,6 +201,76 @@ function CustomNavbar() {
             </>
           )}
         </NavbarContent>
+
+        {/* Mobil ve tablet menü */}
+        <NavbarMenu className="pt-4 lg:hidden">
+          <div className="flex flex-col gap-2">
+            {navbarLinks.map((item, index) => (
+              <NavbarMenuItem key={index}>
+                <button
+                  onClick={() => handleNavigate(item.path)}
+                  className="w-full text-left py-2 hover:text-primary"
+                >
+                  {item.name}
+                </button>
+              </NavbarMenuItem>
+            ))}
+
+            <NavbarMenuItem>
+              <div className="py-2">
+                <p className="font-semibold mb-2">Ekonomi & Finans</p>
+                <div className="flex flex-col gap-1 pl-2">
+                  {categories.map((item, index) => (
+                    <button
+                      key={index}
+                      onClick={() => handleNavigate(item.path)}
+                      className="w-full text-left py-1 hover:text-primary"
+                    >
+                      {item.name}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            </NavbarMenuItem>
+
+            {isLoggedIn ? (
+              <>
+                {canAccessProfile && (
+                  <NavbarMenuItem>
+                    <button
+                      onClick={() => handleNavigate("/profile")}
+                      className="w-full text-left py-2 hover:text-primary"
+                    >
+                      Profil ({userName})
+                    </button>
+                  </NavbarMenuItem>
+                )}
+                <NavbarMenuItem>
+                  <LogoutComponent />
+                </NavbarMenuItem>
+              </>
+            ) : (
+              <>
+                <NavbarMenuItem>
+                  <button
+                    onClick={() => handleNavigate("/login")}
+                    className="w-full text-left py-2 hover:text-primary"
+                  >
+                    Login
+                  </button>
+                </NavbarMenuItem>
+                <NavbarMenuItem>
+                  <button
+                    onClick={() => handleNavigate("/register")}
+                    className="w-full text-left py-2 hover:text-primary"
+                  >
+                    Register
+                  </button>
+                </NavbarMenuItem>
+              </>
+            )}
+          </div>
+        </NavbarMenu>
       </Navbar>
 
       <SearchModal isOpen={isSearchOpen} onClose={handleSearchClose} />

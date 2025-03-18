@@ -4,6 +4,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { fetchUser } from "./app/features/user/userSlice"; // Adjust the path as necessary
 import { logRender } from "./utils/logger";
 import ErrorBoundary from "./components/Error/ErrorBoundary";
+import { FeedbackProvider } from "./context/FeedbackContext";
 
 import HomePage from "./pages/HomePage";
 import PricePage from "./pages/other_pages/PricePage";
@@ -47,109 +48,110 @@ function App() {
 
   return (
     <ErrorBoundary>
-      <div className="min-h-screen flex flex-col">
-        <Router>
-          <main className="flex-1">
-            <Routes>
-              <Route path="/" element={<HomePage />} />
+      <Router>
+        <FeedbackProvider>
+          <div className="min-h-screen flex flex-col">
+            <main className="flex-1">
+              <Routes>
+                <Route path="/" element={<HomePage />} />
 
-              {/* Blog yazarları için */}
+                {/* Blog yazarları için */}
 
+                <Route path="/plans" element={<PricePage />} />
+                <Route path="/about-us" element={<AboutUsPage />} />
+                <Route path="/disclaimer" element={<DisclaimerPage />} />
+                <Route path="/privacy-policy" element={<PrivacyPolicyPage />} />
+                <Route path="/login" element={<LoginPage />} />
+                <Route path="/register" element={<RegisterPage />} />
+                <Route
+                  path="/profile"
+                  element={
+                    <ProtectedRoute allowedRoles={["admin", "author"]}>
+                      <ProfilePage />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/dashboard/home"
+                  element={
+                    <ProtectedRoute allowedRoles={["admin", "author"]}>
+                      <DashboardHomePage />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/dashboard/posts"
+                  element={
+                    <ProtectedRoute allowedRoles={["admin", "author"]}>
+                      <AllBlogPostsPage />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/dashboard/post/new"
+                  element={
+                    <ProtectedRoute allowedRoles={["admin", "author"]}>
+                      <NewPostPage />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/dashboard/post/edit/:id"
+                  element={
+                    <ProtectedRoute allowedRoles={["admin", "author"]}>
+                      <EditPostPage />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/dashboard/images"
+                  element={
+                    <ProtectedRoute allowedRoles={["admin", "author"]}>
+                      <ImagePage />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/dashboard/cheat-sheet"
+                  element={
+                    <ProtectedRoute allowedRoles={["admin", "author"]}>
+                      <CheatSheet />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/dashboard/gallery"
+                  element={
+                    <ProtectedRoute allowedRoles={["admin", "author"]}>
+                      <GalleryPage />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route path="/blog/posts/" element={<BlogsPage />} />
+                <Route path="/blog/post/:id" element={<BlogPostPage />} />
+                <Route path="/blog/categories" element={<CategoriesPage />} />
+                <Route
+                  path="/blog/category/:category"
+                  element={<CategoryBasePostsPage />}
+                />
+                <Route
+                  path="/dashboard/users"
+                  element={
+                    <ProtectedRoute allowedRoles={["admin"]}>
+                      <UsersPage />
+                    </ProtectedRoute>
+                  }
+                />
 
-              <Route path="/plans" element={<PricePage />} />
-              <Route path="/about-us" element={<AboutUsPage />} />
-              <Route path="/disclaimer" element={<DisclaimerPage />} />
-              <Route path="/privacy-policy" element={<PrivacyPolicyPage />} />
-              <Route path="/login" element={<LoginPage />} />
-              <Route path="/register" element={<RegisterPage />} />
-              <Route
-                path="/profile"
-                element={
-                  <ProtectedRoute allowedRoles={["admin", "author"]}>
-                    <ProfilePage />
-                  </ProtectedRoute>
-                }
-              />
-              <Route
-                path="/dashboard/home"
-                element={
-                  <ProtectedRoute allowedRoles={["admin", "author"]}>
-                    <DashboardHomePage />
-                  </ProtectedRoute>
-                }
-              />
-              <Route
-                path="/dashboard/posts"
-                element={
-                  <ProtectedRoute allowedRoles={["admin", "author"]}>
-                    <AllBlogPostsPage />
-                  </ProtectedRoute>
-                }
-              />
-              <Route
-                path="/dashboard/post/new"
-                element={
-                  <ProtectedRoute allowedRoles={["admin", "author"]}>
-                    <NewPostPage />
-                  </ProtectedRoute>
-                }
-              />
-              <Route
-                path="/dashboard/post/edit/:id"
-                element={
-                  <ProtectedRoute allowedRoles={["admin", "author"]}>
-                    <EditPostPage />
-                  </ProtectedRoute>
-                }
-              />
-              <Route
-                path="/dashboard/images"
-                element={
-                  <ProtectedRoute allowedRoles={["admin", "author"]}>
-                    <ImagePage />
-                  </ProtectedRoute>
-                }
-              />
-              <Route
-                path="/dashboard/cheat-sheet"
-                element={
-                  <ProtectedRoute allowedRoles={["admin", "author"]}>
-                    <CheatSheet />
-                  </ProtectedRoute>
-                }
-              />
-              <Route
-                path="/dashboard/gallery"
-                element={
-                  <ProtectedRoute allowedRoles={["admin", "author"]}>
-                    <GalleryPage />
-                  </ProtectedRoute>
-                }
-              />
-              <Route path="/blog/posts/" element={<BlogsPage />} />
-              <Route path="/blog/post/:id" element={<BlogPostPage />} />
-              <Route path="/blog/categories" element={<CategoriesPage />} />
-              <Route
-                path="/blog/category/:category"
-                element={<CategoryBasePostsPage />}
-              />
-              <Route
-                path="/dashboard/users"
-                element={
-                  <ProtectedRoute allowedRoles={["admin"]}>
-                    <UsersPage />
-                  </ProtectedRoute>
-                }
-              />
-
-              {/* 404 Sayfası */}
-              <Route path="*" element={<PageNotFound />} />
-              {/* Blog author sayfaları */}
-            </Routes>
-          </main>
-          <Footer />
-        </Router>
-      </div>
+                {/* 404 Sayfası */}
+                <Route path="*" element={<PageNotFound />} />
+                {/* Blog author sayfaları */}
+              </Routes>
+            </main>
+            <Footer />
+          </div>
+        </FeedbackProvider>
+      </Router>
     </ErrorBoundary>
   );
 }

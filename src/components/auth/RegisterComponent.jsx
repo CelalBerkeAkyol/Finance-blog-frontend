@@ -4,10 +4,14 @@ import { registerUser, clearState } from "../../app/features/user/userSlice";
 import { Button, Input, Checkbox, Link, Divider } from "@heroui/react";
 import { Icon } from "@iconify/react";
 import { useNavigate } from "react-router-dom";
+import { useFeedback } from "../../context/FeedbackContext";
 
 export default function RegisterComponent() {
   const dispatch = useDispatch();
   const navigate = useNavigate();
+
+  // Feedback context'i kullan
+  const { error: showError, success, warning } = useFeedback();
 
   const { isSuccess, isError, errorMessage } = useSelector(
     (state) => state.user
@@ -36,7 +40,7 @@ export default function RegisterComponent() {
   const handleSubmit = (e) => {
     e.preventDefault();
     if (formData.password !== formData.confirmPassword) {
-      alert("Passwords do not match");
+      warning("Parolalar eşleşmiyor. Lütfen kontrol ediniz.");
       return;
     }
     dispatch(registerUser(formData));
@@ -45,19 +49,27 @@ export default function RegisterComponent() {
   // Kayıt başarılı olduğunda yönlendirme ve state temizleme
   useEffect(() => {
     if (isSuccess) {
-      console.info("Register successful. Redirecting to login page.");
+      success("Hesabınız başarıyla oluşturuldu!");
       dispatch(clearState()); // State temizliği
       navigate("/"); // Login sayfasına yönlendirme
     }
 
     if (isError) {
-      console.error("Register failed:", errorMessage);
+      showError(errorMessage || "Kayıt işlemi sırasında bir hata oluştu.");
     }
 
     return () => {
       dispatch(clearState()); // Component unmount olduğunda state sıfırlama
     };
-  }, [isSuccess, isError, errorMessage, dispatch, navigate]);
+  }, [
+    isSuccess,
+    isError,
+    errorMessage,
+    dispatch,
+    navigate,
+    success,
+    showError,
+  ]);
 
   return (
     <div className="flex h-full w-full items-center justify-center py-8">
@@ -147,10 +159,6 @@ export default function RegisterComponent() {
             Sign Up
           </Button>
         </form>
-
-        {isError && (
-          <p className="text-red-500 text-sm text-center">{errorMessage}</p>
-        )}
 
         <div className="flex items-center gap-4 py-2">
           <Divider className="flex-1" />

@@ -5,7 +5,8 @@ import { useNavigate } from "react-router-dom";
 import { logoutUser, clearState } from "../../app/features/user/userSlice";
 import { Button } from "@nextui-org/react";
 import { Icon } from "@iconify/react";
-const LogoutComponent = () => {
+
+const LogoutComponent = ({ sidebar = false }) => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
 
@@ -18,6 +19,14 @@ const LogoutComponent = () => {
       console.error("Logout failed:", error);
     }
   };
+  // sidebarda sadece logout yazısı gözükmesi için böyle bir çözüm bulduk
+  if (sidebar) {
+    return (
+      <span className="flex-1 cursor-pointer" onClick={handleLogout}>
+        Logout
+      </span>
+    );
+  }
 
   return (
     <Button

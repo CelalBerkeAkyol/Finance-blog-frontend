@@ -5,7 +5,7 @@ import { useParams } from "react-router-dom";
 import { fetchPostsByCategory } from "../../../app/features/blogs/postsSlice";
 import BlogsSkeleton from "./BlogsSkeleton";
 import PostCardComponent from "./PostCardComponent";
-import ErrorComponent from "../../uyarılar/ErrorComponent";
+import ErrorComponent from "../../error/ErrorComponent";
 
 export default function CategoryBasePosts() {
   const dispatch = useDispatch();

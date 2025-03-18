@@ -3,7 +3,7 @@ import { Navigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { fetchUser } from "../app/features/user/userSlice";
 import { logDebug, logError } from "../utils/logger";
-import ErrorComponent from "./uyarılar/ErrorComponent";
+import ErrorComponent from "./error/ErrorComponent";
 
 /**
  * Korumalı route bileşeni

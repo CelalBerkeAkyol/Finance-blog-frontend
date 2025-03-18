@@ -3,7 +3,7 @@ import { useSelector, useDispatch } from "react-redux";
 import { fetchPosts } from "../../../app/features/blogs/postsSlice";
 import PostCardComponent from "./PostCardComponent";
 import BlogsSkeleton from "./BlogsSkeleton";
-import ErrorComponent from "../../uyarılar/ErrorComponent";
+import ErrorComponent from "../../error/ErrorComponent";
 
 export default function BlogsComponent() {
   const dispatch = useDispatch();

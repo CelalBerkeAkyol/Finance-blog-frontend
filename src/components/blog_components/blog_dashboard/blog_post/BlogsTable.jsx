@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useEffect, useMemo, useState, useRef } from "react";
 import {
   Table,
   TableHeader,
@@ -57,6 +57,7 @@ const BlogsTable = () => {
   const [page, setPage] = useState(1);
   const limit = 20;
   const navigate = useNavigate();
+  const errorShownRef = useRef(false);
 
   // Postları getirme
   useEffect(() => {
@@ -65,10 +66,12 @@ const BlogsTable = () => {
 
   // Hata mesajı varsa bildirim göster
   useEffect(() => {
-    if (isError && errorMessage) {
+    if (isError && errorMessage && !errorShownRef.current) {
       showError(errorMessage);
+      errorShownRef.current = true;
       setTimeout(() => {
         dispatch(clearState());
+        errorShownRef.current = false;
       }, 3000);
     }
   }, [isError, errorMessage, showError, dispatch]);

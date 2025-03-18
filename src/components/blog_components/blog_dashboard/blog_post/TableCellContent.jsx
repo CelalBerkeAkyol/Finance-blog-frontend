@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useRef } from "react";
 import {
   Chip,
   Button,
@@ -34,7 +34,8 @@ const TableCellContent = ({ posts, columnKey }) => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const { isOpen, onOpen, onClose } = useDisclosure();
-  const { success, error: showError } = useFeedback();
+  const { success, error: showError, showAlert } = useFeedback();
+  const errorShownRef = useRef(false);
 
   const handleView = () => {
     navigate(`/blog/post/${posts._id}`);
@@ -49,17 +50,25 @@ const TableCellContent = ({ posts, columnKey }) => {
   };
 
   const confirmDelete = () => {
+    onClose();
     dispatch(deletePost(posts._id))
       .unwrap()
       .then(() => {
         dispatch(removePost(posts._id));
         success(`"${posts.title}" başlıklı post başarıyla silindi.`);
-        onClose();
       })
       .catch((err) => {
-        console.error("TableCellContent: Silme işlemi hata verdi:", err);
-        showError(err?.message || "Post silinirken bir hata oluştu.");
-        onClose();
+        showAlert({
+          cpde: err?.code,
+          title: "Yetki Hatası",
+          message: "Bu içeriği sadece içerik sahibi veya admin silebilir.",
+          type: "error",
+        });
+
+        errorShownRef.current = true;
+        setTimeout(() => {
+          errorShownRef.current = false;
+        }, 2000);
       });
   };
 

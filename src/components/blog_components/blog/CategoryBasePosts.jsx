@@ -12,7 +12,7 @@ export default function CategoryBasePosts() {
   const { category } = useParams(); // URL'den kategori parametresi alınıyor
 
   // Redux'tan postları alın
-  const { posts, isLoading, isError, errorMessage } = useSelector(
+  const { posts, isLoading, isError, errorMessage, errorCode } = useSelector(
     (state) => state.posts
   );
 
@@ -30,7 +30,7 @@ export default function CategoryBasePosts() {
       <div className="w-full py-8">
         <ErrorComponent
           message={errorMessage}
-          type="server"
+          code={errorCode}
           actionText="Kategorilere Dön"
           onAction={() => (window.location.href = "/blog/categories")}
         />

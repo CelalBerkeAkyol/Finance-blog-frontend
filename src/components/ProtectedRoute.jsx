@@ -19,9 +19,8 @@ function ProtectedRoute({
   redirectPath = "/login",
 }) {
   const dispatch = useDispatch();
-  const { userInfo, isLoading, isLoggedIn, isAdmin, isAuthor } = useSelector(
-    (state) => state.user
-  );
+  const { userInfo, isLoading, isLoggedIn, isAdmin, isAuthor, errorCode } =
+    useSelector((state) => state.user);
   const [hasPermission, setHasPermission] = useState(null);
 
   // Kullanıcının rollerini kontrol et
@@ -85,9 +84,9 @@ function ProtectedRoute({
     return (
       <div className="h-screen flex items-center justify-center">
         <ErrorComponent
-          type="auth"
+          code={errorCode}
           title="Erişim Reddedildi"
-          message={`Bu sayfaya erişmek için gerekli yetkilere sahip değilsiniz. Gereken roller: ${neededRoles}`}
+          message={`Şimdilik bu sayfa kullanıma açık değil`}
           actionText="Ana Sayfaya Dön"
           onAction={() => (window.location.href = "/")}
           color="warning"

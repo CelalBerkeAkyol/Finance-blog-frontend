@@ -7,7 +7,7 @@ import ErrorComponent from "../../error/ErrorComponent";
 
 export default function BlogsComponent() {
   const dispatch = useDispatch();
-  const { posts, isLoading, isError, errorMessage } = useSelector(
+  const { posts, isLoading, isError, errorMessage, errorCode } = useSelector(
     (state) => state.posts
   );
 
@@ -22,13 +22,9 @@ export default function BlogsComponent() {
   if (isError) {
     return (
       <div className="w-full py-8">
-        <ErrorComponent message={errorMessage} type="server" />
+        <ErrorComponent message={errorMessage} code={errorCode} />
       </div>
     );
-  }
-
-  if (posts.length === 0) {
-    return <div className="text-center mt-8">Hiç post bulunamadı.</div>;
   }
 
   return (

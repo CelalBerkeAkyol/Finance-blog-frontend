@@ -177,9 +177,7 @@ function CustomNavbar() {
                     onClick={() => navigate("/profile")}
                     className="min-w-0 px-2"
                   >
-                    <span className="hidden xl:block" style={navTextStyle}>
-                      {userName}
-                    </span>
+                    <span className="hidden xl:block">{userName}</span>
                   </Button>
                 </NavbarItem>
               )}
@@ -258,7 +256,7 @@ function CustomNavbar() {
                       className="w-full text-left py-2 hover:text-primary"
                       style={navTextStyle}
                     >
-                      Profil ({userName})
+                      Profile ({userName})
                     </button>
                   </NavbarMenuItem>
                 )}

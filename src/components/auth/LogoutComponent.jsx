@@ -33,8 +33,8 @@ export default function LogoutComponent({ sidebar = false }) {
       }`}
       style={navTextStyle}
     >
-      {!sidebar && <Icon icon="solar:logout-3-bold-duotone" width="16" />}
       Logout
+      <Icon icon="heroicons:arrow-right-on-rectangle" width="16" />
     </button>
   );
 }

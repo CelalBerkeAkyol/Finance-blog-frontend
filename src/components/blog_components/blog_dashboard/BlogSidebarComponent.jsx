@@ -120,9 +120,16 @@ const BlogSidebarComponent = () => {
       {/* User Actions Section */}
       <div className="p-2 border-t border-content">
         <div className="flex flex-col gap-2">
+          <div className="flex items-center p-2 rounded-lg hover:bg-content3 w-full">
+            {isOpen ? (
+              <LogoutComponent />
+            ) : (
+              <span className="sr-only">Logout</span>
+            )}
+          </div>
           <Link
             to="/profile"
-            className="flex items-center p-2 rounded-lg hover:bg-content3 w-full"
+            className="flex items-center px-2 pb-2 rounded-lg hover:bg-content3 w-full"
           >
             <Avatar
               src={userInfo?.profileImage}
@@ -133,14 +140,6 @@ const BlogSidebarComponent = () => {
               <span className="ml-2 truncate">{userInfo.userName}</span>
             )}
           </Link>
-          <div className="flex items-center p-2 rounded-lg hover:bg-content3 w-full">
-            <Icon icon="mdi:logout" className="h-5 w-5 min-w-5" />
-            {isOpen ? (
-              <LogoutComponent sidebar={true} />
-            ) : (
-              <span className="sr-only">Logout</span>
-            )}
-          </div>
         </div>
       </div>
     </div>

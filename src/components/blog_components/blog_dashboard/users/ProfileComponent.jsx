@@ -25,7 +25,7 @@ import {
   uploadProfileImage,
   validateImageFile,
   createImagePreview,
-} from "./profile-components";
+} from "./profile-components/ProfileComponents";
 
 // Ana bileşen
 const ProfileComponent = () => {

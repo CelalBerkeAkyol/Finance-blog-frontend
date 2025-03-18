@@ -1,4 +1,4 @@
-// Bileşenleri export ediyoruz
+// Tüm profil bileşenlerini tek yerden export ediyoruz
 export { default as ProfileImageUploader } from "./ProfileImageUploader";
 export { default as ProfileEditForm } from "./ProfileEditForm";
 export { default as ProfileSummaryCard } from "./ProfileSummaryCard";

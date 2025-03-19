@@ -114,12 +114,12 @@ function GalleryPage() {
   };
 
   return (
-    <div className="flex min-h-screen">
+    <div className="flex min-h-screen w-full">
       {/* Sidebar solda sabit */}
       <BlogSidebarComponent />
 
       {/* İçerik */}
-      <div className="flex-1 p-4 md:p-6">
+      <div className="flex-1 p-4 md:p-6 overflow-x-auto">
         {/* Üst Butonlar */}
         <div className="mb-4 flex flex-wrap gap-2 justify-end">
           <Button

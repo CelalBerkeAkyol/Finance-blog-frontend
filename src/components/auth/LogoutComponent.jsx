@@ -4,9 +4,10 @@ import { Icon } from "@iconify/react";
 import { useDispatch } from "react-redux";
 import { logoutUser, clearState } from "../../app/features/user/userSlice";
 import { useFeedback } from "../../context/FeedbackContext";
+import { Button } from "@nextui-org/react";
 
-// Navbar ile aynı metin boyutu için stil
-const navTextStyle = { fontSize: "15px" };
+// Sidebar için font boyutu
+const sidebarTextStyle = { fontSize: "0.8rem" }; // xs boyutu
 
 export default function LogoutComponent({ sidebar = false }) {
   const dispatch = useDispatch();
@@ -22,19 +23,36 @@ export default function LogoutComponent({ sidebar = false }) {
     }
   };
 
-  // Sidebar için farklı bir tasarım, normal durum için farklı
+  // Sidebar modu için farklı render yapısı
+  if (sidebar) {
+    return (
+      <button
+        onClick={handleLogout}
+        className="w-full text-left py-2 hover:text-primary text-xs flex items-center gap-2"
+        style={sidebarTextStyle}
+      >
+        <Icon
+          icon="heroicons:arrow-right-on-rectangle"
+          width="16"
+          className="text-gray-600"
+        />
+        Logout
+      </button>
+    );
+  }
+
+  // Normal navbar için NextUI Button kullan
   return (
-    <button
+    <Button
+      variant="ghost"
+      size="sm"
+      startContent={
+        <Icon icon="heroicons:arrow-right-on-rectangle" width="16" />
+      }
       onClick={handleLogout}
-      className={`flex items-center gap-2 ${
-        sidebar
-          ? "w-full text-left py-2 hover:text-primary"
-          : "hover:text-primary px-2 py-1"
-      }`}
-      style={navTextStyle}
+      className="min-w-0 px-2"
     >
-      Logout
-      <Icon icon="heroicons:arrow-right-on-rectangle" width="16" />
-    </button>
+      <span className="hidden xl:block">Çıkış</span>
+    </Button>
   );
 }

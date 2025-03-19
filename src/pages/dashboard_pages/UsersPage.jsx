@@ -29,11 +29,11 @@ function UsersPage() {
   }
 
   return (
-    <div className="flex min-h-screen flex-1">
+    <div className="flex min-h-screen w-full">
       <BlogSidebarComponent />
 
       {/* İçerik Alanı */}
-      <div className="flex-1 p-6 flex flex-col gap-6 mx-auto">
+      <div className="flex-1 p-4 md:p-6 flex flex-col gap-6 overflow-x-auto">
         <h1 className="text-2xl font-bold">Kullanıcı Yönetimi</h1>
         <p className="text-sm text-gray-500">
           Bu sayfada tüm kullanıcıları görüntüleyebilir ve yönetebilirsiniz.

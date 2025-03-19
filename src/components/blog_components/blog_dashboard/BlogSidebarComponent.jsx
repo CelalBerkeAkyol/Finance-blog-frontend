@@ -13,12 +13,12 @@ const BlogSidebarComponent = () => {
     setIsOpen(!isOpen);
   };
 
-  // Sidebar genişliği için dinamik sınıf
-  const sidebarClass = isOpen ? "w-64 md:w-1/5 lg:w-1/6" : "w-16 md:w-16";
+  // Sabit genişlik değerleri - tüm sayfalarda tutarlı olması için
+  const sidebarClass = isOpen ? "w-46 lg:w-48 md:w-44" : "w-16 lg:w-16 md:w-16";
 
   return (
     <div
-      className={`${sidebarClass} h-screen flex flex-col border-r border-gray-200 justify-between overflow-hidden text-sm transition-all duration-300 bg-white`}
+      className={`${sidebarClass} h-screen flex flex-col border-r border-gray-200 justify-between overflow-hidden text-sm transition-all duration-300 bg-white min-h-screen sticky top-0 left-0`}
     >
       {/* Header & Toggle Button */}
       <div className="p-4 flex justify-between items-center">
@@ -30,7 +30,7 @@ const BlogSidebarComponent = () => {
 
         <button
           onClick={toggleSidebar}
-          className="bg-white rounded-full p-1.5 shadow-lg border border-gray-300 flex items-center justify-center"
+          className="bg-white rounded-full p-0.5 shadow-lg border border-gray-300 flex items-center justify-center focus:outline-none focus:ring-2 focus:ring-primary"
         >
           <Icon
             icon={isOpen ? "mdi:chevron-left" : "mdi:chevron-right"}
@@ -117,26 +117,36 @@ const BlogSidebarComponent = () => {
       </nav>
 
       {/* User Actions Section */}
-      <div className="p-2 border-t border-content">
+      <div className="p-2 border-t border-gray-200">
         <div className="flex flex-col gap-2">
           <div className="flex items-center p-2 rounded-lg hover:bg-content3 w-full overflow-hidden">
             {isOpen ? (
-              <LogoutComponent />
+              <LogoutComponent sidebar={true} />
             ) : (
-              <span className="sr-only">Logout</span>
+              <button
+                onClick={toggleSidebar}
+                className="w-full flex justify-center items-center"
+                title="Logout"
+              >
+                <Icon
+                  icon="heroicons:arrow-right-on-rectangle"
+                  className="h-5 w-5 text-gray-600 hover:text-primary"
+                />
+              </button>
             )}
           </div>
           <Link
             to="/profile"
-            className="flex items-center px-2 pb-2 rounded-lg hover:bg-content3 w-full overflow-hidden"
+            className="flex items-center p-2 rounded-lg hover:bg-content3 w-full overflow-hidden"
           >
             <Avatar
               src={userInfo?.profileImage}
-              fallback={<Icon icon="mdi:account" className="h-4 w-4" />}
+              name={userInfo?.userName?.charAt(0) || "U"}
               size="sm"
+              className="min-w-[20px]"
             />
             {isOpen && (
-              <span className="ml-2 truncate">
+              <span className="ml-2 text-xs truncate">
                 {userInfo?.userName || "Profil"}
               </span>
             )}

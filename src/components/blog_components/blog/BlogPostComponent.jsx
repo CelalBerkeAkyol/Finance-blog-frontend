@@ -26,23 +26,25 @@ const BlogPostComponent = ({ post }) => {
   };
 
   return (
-    <div className="prose p-4 text-start w-full max-w-4xl mx-auto">
+    <div className="prose p-2 sm:p-3 md:p-4 text-start w-full max-w-full md:max-w-3xl mx-auto">
       {/* Başlık */}
-      <h1 className="text-3xl sm:text-4xl font-bold mb-4">{post.title}</h1>
+      <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold mb-3 md:mb-4">
+        {post.title}
+      </h1>
 
       {/* Blog detayları */}
       <div
         id="blog-details"
-        className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4  pb-4 border-b"
+        className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 md:gap-4 pb-3 md:pb-4 border-b"
       >
         {/* Sol Taraf: Kategori Butonu ve Post Bilgileri */}
-        <div className="flex flex-wrap  gap-4 text-sm leading-tight">
+        <div className="flex flex-wrap gap-2 md:gap-4 text-xs sm:text-sm leading-tight">
           <Button
             color="secondary"
             variant="ghost"
             radius="lg"
             size="sm"
-            className="w-auto px-4 py-1"
+            className="w-auto px-3 py-1"
             onClick={() => navigate(`/blog/category/${post.category}`)}
           >
             {slugToReadable(post.category)}
@@ -70,7 +72,7 @@ const BlogPostComponent = ({ post }) => {
       </div>
 
       {/* Blog İçeriği */}
-      <div className="overflow-x-auto pt-4 text-base leading-relaxed">
+      <div className="overflow-x-auto pt-3 md:pt-4 text-sm sm:text-base leading-relaxed">
         <ReactMarkdown
           remarkPlugins={[remarkGfm]}
           rehypePlugins={[rehypeRaw, rehypeSlug]}
@@ -80,8 +82,7 @@ const BlogPostComponent = ({ post }) => {
       </div>
 
       {/* Upvote & Downvote ve Yukarı Çık Butonu */}
-
-      <div className="flex justify-between items-center w-full mt-2 pt-4 border-t-1">
+      <div className="flex justify-between items-center w-full mt-2 pt-3 md:pt-4 border-t-1">
         {/* Beğeni Butonları (Sol Tarafta) */}
         <VoteButtons postId={post._id} />
 
@@ -95,7 +96,7 @@ const BlogPostComponent = ({ post }) => {
       <div className="fixed bottom-5 right-5">
         <Button
           onClick={scrollToTop}
-          className="bg-gray-700 text-white  rounded-full shadow-lg hover:bg-gray-900 hover:text-white transition-all"
+          className="bg-gray-700 text-white rounded-full shadow-lg hover:bg-gray-900 hover:text-white transition-all"
         >
           <Icon icon="mdi:arrow-up" width="18" />
         </Button>

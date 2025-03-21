@@ -236,7 +236,7 @@ const AddPost = () => {
               size="md"
               color="primary"
               variant="solid"
-              className="w-full sm:w-auto font-medium bg-primary text-white"
+              className="w-full sm:w-auto font-medium bg-blue-600 text-white"
               isLoading={isSubmitting}
             >
               {isSubmitting ? "Ekleniyor..." : "Ekle"}
@@ -244,7 +244,6 @@ const AddPost = () => {
           </div>
         </div>
       </form>
-
       {/* Modal'ı ekrana getiriyoruz */}
       <ImageGalleryModal
         isOpen={isGalleryOpen}
@@ -265,16 +264,10 @@ const AddPost = () => {
             <p>Yazınız başarıyla eklendi. Şimdi ne yapmak istersiniz?</p>
           </ModalBody>
           <ModalFooter>
-            <Button
-              color="primary"
-              variant="light"
-              onPress={() => setShowSuccessModal(false)}
-            >
+            <Button variant="light" onPress={() => setShowSuccessModal(false)}>
               Kapat
             </Button>
-            <Button color="primary" onPress={viewPost}>
-              Postu Görüntüle
-            </Button>
+            <Button onPress={viewPost}>Postu Görüntüle</Button>
           </ModalFooter>
         </ModalContent>
       </Modal>

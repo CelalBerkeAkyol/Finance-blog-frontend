@@ -13,6 +13,7 @@ import {
   DropdownTrigger,
   DropdownMenu,
   DropdownItem,
+  Tooltip,
 } from "@nextui-org/react";
 import { useSelector, useDispatch } from "react-redux";
 import {
@@ -23,6 +24,7 @@ import TableCellContent from "./TableCellContent";
 import { capitalize } from "../../../../utils/capitalize";
 import { useNavigate } from "react-router-dom";
 import { useFeedback } from "../../../../context/FeedbackContext";
+import { Icon } from "@iconify/react";
 
 const columns = [
   { name: "Başlık", uid: "title" },
@@ -138,63 +140,90 @@ const BlogsTable = () => {
     }
 
     return (
-      <div>
-        <Table
-          aria-label="Blogs Table"
-          sortDescriptor={sortDescriptor}
-          onSortChange={handleSortChange}
-          isStriped
-        >
-          <TableHeader columns={columns}>
-            {(column) => (
-              <TableColumn key={column.uid} allowsSorting>
-                {column.name}
-              </TableColumn>
-            )}
-          </TableHeader>
-          <TableBody emptyContent={"Görüntülenecek post bulunamadı."}>
-            {sortedBlogs.map((post, index) => (
-              <TableRow key={post._id || `row-${index}`}>
-                {columns.map((column) => (
-                  <TableCell
-                    key={`${post._id || `row-${index}`}-${column.uid}`}
-                  >
-                    <TableCellContent posts={post} columnKey={column.uid} />
-                  </TableCell>
-                ))}
-              </TableRow>
-            ))}
-          </TableBody>
-        </Table>
-        <div className="flex justify-between align-center items-center mt-4">
+      <>
+        <div>
+          <Table
+            aria-label="Blogs Table"
+            sortDescriptor={sortDescriptor}
+            onSortChange={handleSortChange}
+            isStriped
+            classNames={{
+              wrapper: "shadow-sm",
+              base: "overflow-hidden",
+              th: "text-xs sm:text-sm whitespace-nowrap bg-default-100",
+              td: "text-xs sm:text-sm",
+            }}
+          >
+            <TableHeader columns={columns}>
+              {(column) => (
+                <TableColumn
+                  key={column.uid}
+                  allowsSorting
+                  className={
+                    column.uid === "actions" ? "text-right w-[80px]" : ""
+                  }
+                >
+                  {column.name}
+                </TableColumn>
+              )}
+            </TableHeader>
+            <TableBody emptyContent={"Görüntülenecek post bulunamadı."}>
+              {sortedBlogs.map((post, index) => (
+                <TableRow key={post._id || `row-${index}`}>
+                  {columns.map((column) => (
+                    <TableCell
+                      key={`${post._id || `row-${index}`}-${column.uid}`}
+                      className={
+                        column.uid === "title" ? "max-w-[180px] truncate" : ""
+                      }
+                    >
+                      <TableCellContent posts={post} columnKey={column.uid} />
+                    </TableCell>
+                  ))}
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        </div>
+        <div className="flex justify-center sm:justify-between align-center items-center mt-4 flex-wrap gap-2">
           <Pagination
             total={Math.ceil((total || 0) / limit)}
             initialPage={1}
             page={page}
             onChange={(p) => setPage(p)}
             size="sm"
+            showControls
+            className="mx-auto sm:mx-0"
           />
         </div>
-      </div>
+      </>
     );
   };
 
   return (
-    <div className="p-12 w-full">
-      <div className="flex mb-4 gap-6">
+    <div className="p-3 sm:p-6 md:p-8 w-full">
+      <div className="flex flex-wrap mb-3 gap-2 sm:gap-4">
         <Input
           clearable
           placeholder="Başlık ile ara..."
           value={filterValue}
           onChange={handleFilterChange}
           size="sm"
-          className="flex-initial w-[40%]"
+          startContent={<Icon icon="mdi:magnify" width="16" />}
+          className="min-w-[200px] flex-1 max-w-md"
         />
         <Dropdown>
           <DropdownTrigger>
-            <Button size="sm" color="primary">
-              Durum:{" "}
-              {statusFilter === "all" ? "Tümü" : capitalize(statusFilter)}
+            <Button
+              size="sm"
+              color="primary"
+              className="whitespace-nowrap min-w-0"
+            >
+              <Icon icon="mdi:filter-variant" className="block sm:hidden" />
+              <span className="hidden sm:block">
+                Durum:{" "}
+                {statusFilter === "all" ? "Tümü" : capitalize(statusFilter)}
+              </span>
             </Button>
           </DropdownTrigger>
           <DropdownMenu
@@ -216,27 +245,38 @@ const BlogsTable = () => {
             ))}
           </DropdownMenu>
         </Dropdown>
-        <div className="flex items-center gap-2">
-          <Button
-            color="default"
-            variant="flat"
-            size="sm"
-            onClick={handleRefresh}
-          >
-            Yenile
-          </Button>
-          <Button
-            color="primary"
-            variant="flat"
-            size="sm"
-            onClick={handleAddPostClick}
-          >
-            Yeni ekle
-          </Button>
+        <div className="flex items-center gap-1 sm:gap-2 ml-auto">
+          <Tooltip content="Yenile">
+            <Button
+              color="default"
+              variant="flat"
+              size="sm"
+              isIconOnly
+              onClick={handleRefresh}
+              className="min-w-0"
+            >
+              <Icon icon="mdi:refresh" width="18" />
+            </Button>
+          </Tooltip>
+          <Tooltip content="Yeni post ekle">
+            <Button
+              color="primary"
+              variant="flat"
+              size="sm"
+              onClick={handleAddPostClick}
+              className="min-w-0 whitespace-nowrap"
+              startContent={
+                <Icon icon="mdi:plus" width="18" className="block sm:hidden" />
+              }
+            >
+              <span className="hidden sm:block">Yeni ekle</span>
+              <span className="block sm:hidden">Ekle</span>
+            </Button>
+          </Tooltip>
         </div>
       </div>
 
-      {renderContent()}
+      <div className="overflow-x-auto overflow-y-hidden">{renderContent()}</div>
     </div>
   );
 };

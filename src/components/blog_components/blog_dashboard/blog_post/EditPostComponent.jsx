@@ -151,8 +151,8 @@ const EditPostComponent = () => {
 
   return (
     <div className="flex items-center justify-center min-h-screen bg-gray-100 w-full">
-      <Card className="w-full max-w-[80%] p-6 bg-white shadow-lg min-h-screen rounded-lg">
-        <h1 className="text-2xl font-bold text-center mb-6">Postu Düzenle</h1>
+      <Card className="w-full max-w-[95%] md:max-w-[90%] p-3 sm:p-4 md:p-6 bg-white shadow-lg min-h-screen rounded-lg">
+        <h1 className="text-2xl font-bold text-center mb-4">Postu Düzenle</h1>
         {isLoading ? (
           <p className="text-center">Yükleniyor...</p>
         ) : (
@@ -164,14 +164,14 @@ const EditPostComponent = () => {
               fullWidth
               value={postData.title}
               onChange={handleChange}
-              className="mb-4"
+              className="mb-4 w-full"
               required
               color={errors.title && showErrors ? "danger" : "default"}
               errorMessage={
                 errors.title && showErrors ? "Başlık alanı zorunludur" : ""
               }
             />
-            <div className="relative mb-4">
+            <div className="relative mb-4 w-full">
               <Textarea
                 name="summary"
                 label="Özet (Maksimum 200 karakter)"
@@ -187,6 +187,7 @@ const EditPostComponent = () => {
                 errorMessage={
                   errors.summary && showErrors ? "Özet alanı zorunludur" : ""
                 }
+                className="w-full"
               />
               <div className="absolute bottom-2 right-2 text-sm text-gray-500">
                 {charCount}/200
@@ -200,7 +201,7 @@ const EditPostComponent = () => {
               maxRows={25}
               value={postData.content}
               onChange={handleChange}
-              className="mb-6"
+              className="mb-6 w-full"
               required
               color={errors.content && showErrors ? "danger" : "default"}
               errorMessage={
@@ -209,39 +210,53 @@ const EditPostComponent = () => {
             />
 
             {/* Kategori, durum ve butonların bulunduğu alan */}
-            <div className="flex items-center justify-evenly">
-              <div className="flex flex-col">
-                <CategorySelector
-                  selectedCategory={postData.category}
-                  onChange={handleCategoryChange}
-                  required
-                  isInvalid={errors.category && showErrors}
-                />
-                {errors.category && showErrors && (
-                  <span className="text-red-500 text-xs mt-1">
-                    Kategori seçimi zorunludur
-                  </span>
-                )}
+            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+              <div className="flex flex-col sm:flex-row gap-4 w-full sm:w-auto">
+                <div className="flex flex-col w-full sm:w-auto">
+                  <CategorySelector
+                    selectedCategory={postData.category}
+                    onChange={handleCategoryChange}
+                    required
+                    isInvalid={errors.category && showErrors}
+                    className="w-full"
+                  />
+                  {errors.category && showErrors && (
+                    <span className="text-red-500 text-xs mt-1">
+                      Kategori seçimi zorunludur
+                    </span>
+                  )}
+                </div>
+
+                <div className="flex flex-col w-full sm:w-auto">
+                  <StatusSelector
+                    value={postData.status}
+                    onChange={handleStatusChange}
+                    required
+                    isInvalid={errors.status && showErrors}
+                    className="w-full"
+                  />
+                  {errors.status && showErrors && (
+                    <span className="text-red-500 text-xs mt-1">
+                      Durum seçimi zorunludur
+                    </span>
+                  )}
+                </div>
               </div>
 
-              <div className="flex flex-col">
-                <StatusSelector
-                  value={postData.status}
-                  onChange={handleStatusChange}
-                  required
-                  isInvalid={errors.status && showErrors}
-                />
-                {errors.status && showErrors && (
-                  <span className="text-red-500 text-xs mt-1">
-                    Durum seçimi zorunludur
-                  </span>
-                )}
+              <div className="flex flex-col sm:flex-row gap-3 w-full sm:w-auto">
+                <Button
+                  onClick={() => setIsGalleryOpen(true)}
+                  className="w-full sm:w-auto"
+                >
+                  Görseller
+                </Button>
+                <Button
+                  onClick={handleUpdate}
+                  className="w-full sm:w-auto font-medium bg-blue-600 text-white hover:bg-blue-700"
+                >
+                  Güncelle
+                </Button>
               </div>
-
-              <Button onClick={() => setIsGalleryOpen(true)}>Görseller</Button>
-              <Button color="primary" onClick={handleUpdate}>
-                Güncelle
-              </Button>
             </div>
           </>
         )}

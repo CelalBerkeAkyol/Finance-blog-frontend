@@ -154,9 +154,9 @@ const AddPost = () => {
   };
 
   return (
-    <div className="p-8 mb-4 w-[80%] h-screen">
+    <div className="p-4 sm:p-6 md:p-8 w-full max-w-full">
       <h2 className="text-xl font-bold mb-4">Yeni Post Ekle</h2>
-      <form onSubmit={handleSubmit} className="flex flex-col gap-4">
+      <form onSubmit={handleSubmit} className="flex flex-col gap-4 w-full">
         <Input
           clearable
           label="Başlık"
@@ -168,8 +168,9 @@ const AddPost = () => {
           errorMessage={
             errors.title && showErrors ? "Başlık alanı zorunludur" : ""
           }
+          className="w-full"
         />
-        <div className="relative">
+        <div className="relative w-full">
           <Textarea
             clearable
             label="Özet (Maksimum 200 karakter)"
@@ -185,6 +186,7 @@ const AddPost = () => {
             errorMessage={
               errors.summary && showErrors ? "Özet alanı zorunludur" : ""
             }
+            className="w-full"
           />
           <div className="absolute bottom-2 right-2 text-sm text-gray-500">
             {charCount}/200
@@ -194,7 +196,7 @@ const AddPost = () => {
           clearable
           label="İçerik"
           name="content"
-          minRowsrows={20}
+          minRows={15}
           maxRows={25}
           onChange={handleChange}
           value={formData.content}
@@ -203,13 +205,14 @@ const AddPost = () => {
           errorMessage={
             errors.content && showErrors ? "İçerik alanı zorunludur" : ""
           }
+          className="w-full"
         />
-        <div className="flex justify-between items-center">
-          <div className="flex flex-col">
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+          <div className="w-full sm:w-auto">
             <CategorySelector
               selectedCategory={formData.category}
               onChange={handleCategoryChange}
-              className="w-auto"
+              className="w-full"
               required
               isInvalid={errors.category && showErrors}
             />
@@ -219,15 +222,21 @@ const AddPost = () => {
               </span>
             )}
           </div>
-          <div className="flex gap-4">
+          <div className="flex flex-col sm:flex-row gap-3 w-full sm:w-auto">
             {/* Görseller butonu */}
-            <Button type="button" onClick={() => setIsGalleryOpen(true)}>
+            <Button
+              type="button"
+              onClick={() => setIsGalleryOpen(true)}
+              className="w-full sm:w-auto"
+            >
               Görseller
             </Button>
             <Button
               type="submit"
               size="md"
-              className="self-end"
+              color="primary"
+              variant="solid"
+              className="w-full sm:w-auto font-medium bg-primary text-white"
               isLoading={isSubmitting}
             >
               {isSubmitting ? "Ekleniyor..." : "Ekle"}

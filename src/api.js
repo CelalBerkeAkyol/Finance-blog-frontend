@@ -5,9 +5,15 @@ import { logError, logSuccess } from "./utils/logger";
 // Ortam değişkenlerinden API URL'sini al
 const API_URL = import.meta.env.VITE_API_URL || "http://localhost:3000/blog";
 
+// Mobil erişim için daha geniş yetkilendirmeler
 const instance = axios.create({
-  baseURL: API_URL, // Ortam değişkeninden alınan URL
+  baseURL: API_URL,
   withCredentials: true, // Cookie gönderimi için gerekli
+  timeout: 30000, // Mobil ağlar için daha uzun timeout (30 saniye)
+  headers: {
+    "Content-Type": "application/json",
+    Accept: "application/json",
+  },
 });
 
 // Response interceptor - merkezi hata yönetimi ve başarılı cevapları loglama
@@ -26,6 +32,17 @@ instance.interceptors.response.use(
     return response; // Cevabı döndür
   },
   (error) => {
+    // Ağ hatası veya API'ye erişim sorunu
+    if (!error.response) {
+      console.error("API bağlantı hatası:", error.message);
+      return Promise.reject({
+        message:
+          "Sunucuya bağlanılamıyor. Lütfen internet bağlantınızı kontrol edin veya daha sonra tekrar deneyin.",
+        code: "NETWORK_ERROR",
+        status: 0,
+      });
+    }
+
     const errMessage =
       error.response?.data?.message ||
       "Beklenmedik bir hata oluştu. (hata mesajı bulunamadı)";

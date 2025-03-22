@@ -11,8 +11,11 @@ export default defineConfig(({ mode }) => {
       "import.meta.env.PROD": env.NODE_ENV === "production",
     },
     server: {
-      port: 5173, // İsteğe bağlı, geliştirme için özel port
-      host: "0.0.0.0", // Tüm ağ arayüzlerinden erişimi etkinleştir (mobil dahil)
+      host: "0.0.0.0",
+      port: 5173,
+      strictPort: false,
+      open: false,
+      cors: true,
     },
   };
 });

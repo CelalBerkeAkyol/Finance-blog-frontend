@@ -63,7 +63,6 @@ function CustomNavbar() {
   const isAdmin = useSelector(selectIsAdmin);
 
   const userName = userInfo?.username || userInfo?.userName || "Guest";
-  const userRole = userInfo?.role || "User";
 
   // Admin veya author rolüne sahip kullanıcılar profil sayfasına erişebilir
   const canAccessProfile =
@@ -155,7 +154,7 @@ function CustomNavbar() {
               radius="lg"
               startContent={<Icon icon="material-symbols:search" width="16" />}
               size="sm"
-              onClick={handleSearchOpen}
+              onPress={handleSearchOpen}
               className="min-w-0 px-2 sm:px-3"
             >
               <span className="hidden sm:block" style={navTextStyle}>

@@ -3,7 +3,7 @@ import React from "react";
 const SearchButton = ({ onClick }) => {
   return (
     <button
-      onPress={onClick}
+      onClick={onClick}
       className="flex flex-auto w-full items-center justify-start text-sm gap-2 px-4 py-2 border border-gray-300 rounded-lg shadow-sm bg-white text-black hover:bg-gray-100 focus:ring-2 focus:ring-gray-500 focus:outline-none"
     >
       <svg

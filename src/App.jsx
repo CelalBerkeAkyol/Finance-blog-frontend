@@ -48,8 +48,8 @@ function App() {
 
   return (
     <ErrorBoundary>
-      <Router>
-        <FeedbackProvider>
+      <FeedbackProvider>
+        <Router>
           <div className="min-h-screen flex flex-col">
             <main className="flex-1">
               <Routes>
@@ -150,8 +150,8 @@ function App() {
             </main>
             <Footer />
           </div>
-        </FeedbackProvider>
-      </Router>
+        </Router>
+      </FeedbackProvider>
     </ErrorBoundary>
   );
 }

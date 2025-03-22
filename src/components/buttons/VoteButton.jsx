@@ -3,7 +3,6 @@ import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import { upvotePost, downvotePost } from "../../app/features/blogs/postsSlice";
 import { Icon } from "@iconify/react";
-import { handleTouchClick } from "../../utils/touchHandler";
 
 const VoteButtons = ({ postId }) => {
   const dispatch = useDispatch();
@@ -47,14 +46,14 @@ const VoteButtons = ({ postId }) => {
   return (
     <div className="inline-flex items-center bg-gray-200 text-black rounded-full px-4 py-2 gap-2">
       <button
-        onClick={handleUpvote}
+        onPress={handleUpvote}
         className="hover:bg-gray-300 rounded-full p-1 transition-colors"
       >
         <Icon icon="mdi:thumb-up" width="20" />
       </button>
       <span className="text-sm font-semibold">{likeCount}</span>
       <button
-        onClick={handleDownvote}
+        onPress={handleDownvote}
         className="hover:bg-gray-300 rounded-full p-1 transition-colors"
       >
         <Icon icon="mdi:thumb-down" width="20" />

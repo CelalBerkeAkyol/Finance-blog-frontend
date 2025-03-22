@@ -160,7 +160,7 @@ function GalleryPage() {
               return (
                 <div
                   key={img._id}
-                  onClick={() => handleSelectImage(img._id)}
+                  onPress={() => handleSelectImage(img._id)}
                   className={`cursor-pointer border p-1 ${
                     isSelected ? "border-blue-500" : "border-gray-200"
                   }`}

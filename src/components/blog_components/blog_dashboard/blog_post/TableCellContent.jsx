@@ -102,12 +102,12 @@ const TableCellContent = ({ posts, columnKey }) => {
         <>
           <div className="relative flex justify-end items-center gap-1">
             <Tooltip content="Görüntüle">
-              <Button isIconOnly size="sm" variant="light" onClick={handleView}>
+              <Button isIconOnly size="sm" variant="light" onPress={handleView}>
                 <Icon icon="mdi:eye-outline" width="16" />
               </Button>
             </Tooltip>
             <Tooltip content="Düzenle">
-              <Button isIconOnly size="sm" variant="light" onClick={handleEdit}>
+              <Button isIconOnly size="sm" variant="light" onPress={handleEdit}>
                 <Icon icon="mdi:pencil-outline" width="16" />
               </Button>
             </Tooltip>
@@ -117,7 +117,7 @@ const TableCellContent = ({ posts, columnKey }) => {
                 size="sm"
                 variant="light"
                 color="danger"
-                onClick={handleDelete}
+                onPress={handleDelete}
               >
                 <Icon icon="mdi:trash-outline" width="16" />
               </Button>

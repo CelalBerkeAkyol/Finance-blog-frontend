@@ -252,7 +252,7 @@ const BlogsTable = () => {
               variant="flat"
               size="sm"
               isIconOnly
-              onClick={handleRefresh}
+              onPress={handleRefresh}
               className="min-w-0"
             >
               <Icon icon="mdi:refresh" width="18" />
@@ -263,7 +263,7 @@ const BlogsTable = () => {
               color="primary"
               variant="flat"
               size="sm"
-              onClick={handleAddPostClick}
+              onPress={handleAddPostClick}
               className="min-w-0 whitespace-nowrap"
               startContent={
                 <Icon icon="mdi:plus" width="18" className="block sm:hidden" />

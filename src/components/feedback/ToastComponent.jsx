@@ -63,7 +63,7 @@ export default function ToastComponent({
           size="sm"
           variant="light"
           className="ml-2 text-white bg-transparent"
-          onClick={onClose}
+          onPress={onClose}
         >
           ✕
         </Button>

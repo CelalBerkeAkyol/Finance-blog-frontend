@@ -226,7 +226,7 @@ const AddPost = () => {
             {/* Görseller butonu */}
             <Button
               type="button"
-              onClick={() => setIsGalleryOpen(true)}
+              onPress={() => setIsGalleryOpen(true)}
               className="w-full sm:w-auto"
             >
               Görseller

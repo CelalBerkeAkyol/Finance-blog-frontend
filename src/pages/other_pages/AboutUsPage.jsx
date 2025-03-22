@@ -121,7 +121,7 @@ const AboutUsPage = () => {
             color="primary"
             variant="shadow"
             className="px-6 py-3 text-lg"
-            onClick={() =>
+            onPress={() =>
               window.open("https://www.buymeacoffee.com/celalberke", "_blank")
             }
           >

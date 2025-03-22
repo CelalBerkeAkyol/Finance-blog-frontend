@@ -23,19 +23,19 @@ const BlogPostComponent = ({ post }) => {
   return (
     <div className="prose p-2 sm:p-3 md:p-4 text-start w-full max-w-full md:max-w-3xl mx-auto">
       {/* Başlık */}
-      <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold mb-3 md:mb-4">
+      <h1 className="text-4xl sm:text-3xl md:text-4xl font-bold mb-6 md:mb-6">
         {post.title}
       </h1>
 
       {/* Blog detayları */}
       <div
         id="blog-details"
-        className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 md:gap-4 pb-3 md:pb-4 border-b"
+        className="flex flex-col gap-3 md:gap-4 pb-3 md:pb-4 border-b"
       >
         {/* Sol Taraf: Kategori Butonu ve Post Bilgileri */}
         <div className="flex flex-wrap gap-2 md:gap-4 text-xs sm:text-sm leading-tight">
           <Button
-            color="secondary"
+            color="primary"
             variant="ghost"
             radius="lg"
             size="sm"
@@ -52,16 +52,21 @@ const BlogPostComponent = ({ post }) => {
               day: "numeric",
             })}
           </p>
-          <p className="flex items-center gap-1">
-            ✍️ Yazar: {post.author.userName}
-          </p>
+
           <p className="flex items-center gap-1">
             👀 {post.views} Görüntülenme
           </p>
+          <p className="flex items-center gap-1">
+            ✍️ Yazar:{" "}
+            {typeof post.author === "object" && post.author?.userName
+              ? post.author.userName
+              : "İsimsiz Yazar"}
+          </p>
         </div>
 
-        {/* Sağ Taraf: Paylaşım Butonları */}
-        <div className="flex items-center gap-2">
+        {/* Paylaşım Butonları - Ayrı satırda */}
+        <div className="flex items-center gap-2 justify-start">
+          <span className=" font-bold text-gray-600 mr-1">Paylaş:</span>
           <ShareButtons url={currentURL} />
         </div>
       </div>

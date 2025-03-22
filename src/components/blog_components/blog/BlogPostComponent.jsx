@@ -5,9 +5,9 @@ import rehypeRaw from "rehype-raw";
 import rehypeSlug from "rehype-slug";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@nextui-org/react";
-import { Icon } from "@iconify/react";
 import ShareButtons from "../../buttons/ShareButtons";
 import VoteButtons from "../../buttons/VoteButton";
+import ScrollToTopButton from "../../buttons/ScrollToTopButton";
 // Kategori isimlerini okunabilir hale getiriyor
 function slugToReadable(slug) {
   return slug
@@ -19,11 +19,6 @@ function slugToReadable(slug) {
 const BlogPostComponent = ({ post }) => {
   const navigate = useNavigate();
   const currentURL = window.location.href; // Sayfanın mevcut URL'si
-
-  // Sayfanın en yukarısına çıkma fonksiyonu
-  const scrollToTop = () => {
-    window.scrollTo({ top: 0, behavior: "smooth" });
-  };
 
   return (
     <div className="prose p-2 sm:p-3 md:p-4 text-start w-full max-w-full md:max-w-3xl mx-auto">
@@ -93,14 +88,7 @@ const BlogPostComponent = ({ post }) => {
       </div>
 
       {/* Yukarı Çık Butonu */}
-      <div className="fixed bottom-5 right-5">
-        <Button
-          onClick={scrollToTop}
-          className="bg-gray-700 text-white rounded-full shadow-lg hover:bg-gray-900 hover:text-white transition-all"
-        >
-          <Icon icon="mdi:arrow-up" width="18" />
-        </Button>
-      </div>
+      <ScrollToTopButton />
     </div>
   );
 };

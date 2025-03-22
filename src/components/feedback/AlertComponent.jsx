@@ -68,13 +68,13 @@ export default function AlertComponent({
       {(onAction || showCloseButton) && (
         <div className="flex gap-3 mt-2 justify-end">
           {onAction && (
-            <Button color={color} onClick={onAction}>
+            <Button color={color} onPress={onAction}>
               {actionText}
             </Button>
           )}
 
           {showCloseButton && (
-            <Button variant="light" onClick={onClose}>
+            <Button variant="light" onPress={onClose}>
               Kapat
             </Button>
           )}

@@ -28,7 +28,7 @@ const ProfileSummaryCard = ({ userInfo, onEditClick }) => (
       <Button
         color="primary"
         variant="flat"
-        onClick={onEditClick}
+        onPress={onEditClick}
         startContent={<Icon icon="mdi:pencil" />}
       >
         Profili Düzenle

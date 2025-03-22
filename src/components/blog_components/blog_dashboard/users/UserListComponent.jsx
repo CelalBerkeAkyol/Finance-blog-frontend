@@ -214,7 +214,7 @@ const UserListComponent = () => {
           size="sm"
           variant="light"
           className="text-yellow-500 hover:bg-yellow-100"
-          onClick={() => openRoleModal(user)}
+          onPress={() => openRoleModal(user)}
         >
           <Icon icon="mdi:account-convert" />
         </Button>
@@ -225,7 +225,7 @@ const UserListComponent = () => {
           size="sm"
           variant="light"
           className="text-red-500 hover:bg-red-100"
-          onClick={() => openDeleteModal(user)}
+          onPress={() => openDeleteModal(user)}
         >
           <Icon icon="mdi:delete" />
         </Button>
@@ -273,7 +273,7 @@ const UserListComponent = () => {
               isIconOnly
               className="bg-gray-100 text-gray-700 hover:bg-gray-200"
               size="sm"
-              onClick={handleRefreshUsers}
+              onPress={handleRefreshUsers}
               aria-label="Yenile"
             >
               <Icon icon="mdi:refresh" className="text-lg" />

@@ -63,7 +63,7 @@ class ErrorBoundary extends Component {
 
               <div className="flex flex-col sm:flex-row gap-4 w-full justify-center">
                 <button
-                  onClick={() => window.location.reload()}
+                  onPress={() => window.location.reload()}
                   className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
                 >
                   <div className="flex items-center justify-center">
@@ -86,7 +86,7 @@ class ErrorBoundary extends Component {
                 </button>
 
                 <button
-                  onClick={this.handleGoBack}
+                  onPress={this.handleGoBack}
                   className="px-6 py-3 bg-gray-200 text-gray-800 rounded-lg hover:bg-gray-300 transition-colors font-medium focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2"
                 >
                   <div className="flex items-center justify-center">

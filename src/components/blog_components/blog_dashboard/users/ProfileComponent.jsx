@@ -242,7 +242,7 @@ const ProfileComponent = () => {
     return (
       <div className="flex flex-col justify-center items-center h-64 text-danger gap-4">
         <p>Hata: {errorMessage}</p>
-        <Button color="primary" onClick={() => dispatch(fetchUser())}>
+        <Button color="primary" onPress={() => dispatch(fetchUser())}>
           Tekrar Dene
         </Button>
       </div>
@@ -254,7 +254,7 @@ const ProfileComponent = () => {
     return (
       <div className="flex flex-col justify-center items-center h-64 gap-4">
         <p>Kullanıcı bilgileri bulunamadı.</p>
-        <Button color="primary" onClick={() => dispatch(fetchUser())}>
+        <Button color="primary" onPress={() => dispatch(fetchUser())}>
           Tekrar Dene
         </Button>
       </div>

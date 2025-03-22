@@ -245,13 +245,13 @@ const EditPostComponent = () => {
 
               <div className="flex flex-col sm:flex-row gap-3 w-full sm:w-auto">
                 <Button
-                  onClick={() => setIsGalleryOpen(true)}
+                  onPress={() => setIsGalleryOpen(true)}
                   className="w-full sm:w-auto"
                 >
                   Görseller
                 </Button>
                 <Button
-                  onClick={handleUpdate}
+                  onPress={handleUpdate}
                   className="w-full sm:w-auto font-medium bg-blue-600 text-white hover:bg-blue-700"
                 >
                   Güncelle

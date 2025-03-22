@@ -47,18 +47,16 @@ const VoteButtons = ({ postId }) => {
     <div className="inline-flex items-center bg-gray-200 text-black rounded-full px-4 py-2 gap-2">
       <button
         onClick={handleUpvote}
-        className="hover:bg-gray-300 rounded-full p-1 transition-colors"
+        className="hover:bg-gray-300 rounded-full p-1 transition-colors touch-fix"
       >
-        <Icon icon="mdi:arrow-up" width="18" height="18" />
+        <Icon icon="mdi:thumb-up" width="20" />
       </button>
-
-      <span className="font-semibold">{likeCount}</span>
-
+      <span className="text-sm font-semibold">{likeCount}</span>
       <button
         onClick={handleDownvote}
-        className="hover:bg-gray-300 rounded-full p-1 transition-colors"
+        className="hover:bg-gray-300 rounded-full p-1 transition-colors touch-fix"
       >
-        <Icon icon="mdi:arrow-down" width="18" height="18" />
+        <Icon icon="mdi:thumb-down" width="20" />
       </button>
     </div>
   );

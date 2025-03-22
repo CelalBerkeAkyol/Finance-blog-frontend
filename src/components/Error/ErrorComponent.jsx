@@ -69,13 +69,13 @@ export default function ErrorComponent({
         {onAction && (
           <Button
             color={color === "danger" ? "primary" : color}
-            onClick={onAction}
+            onPress={onAction}
           >
             {actionText}
           </Button>
         )}
 
-        <Button variant="ghost" onClick={onBack}>
+        <Button variant="ghost" onPress={onBack}>
           Geri Dön
         </Button>
       </div>

@@ -32,17 +32,6 @@ instance.interceptors.response.use(
     return response; // Cevabı döndür
   },
   (error) => {
-    // Ağ hatası veya API'ye erişim sorunu
-    if (!error.response) {
-      console.error("API bağlantı hatası:", error.message);
-      return Promise.reject({
-        message:
-          "Sunucuya bağlanılamıyor. Lütfen internet bağlantınızı kontrol edin veya daha sonra tekrar deneyin.",
-        code: "NETWORK_ERROR",
-        status: 0,
-      });
-    }
-
     const errMessage =
       error.response?.data?.message ||
       "Beklenmedik bir hata oluştu. (hata mesajı bulunamadı)";

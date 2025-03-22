@@ -20,6 +20,11 @@ const BlogPostComponent = ({ post }) => {
   const navigate = useNavigate();
   const currentURL = window.location.href; // Sayfanın mevcut URL'si
 
+  // Navigate to team page
+  const navigateToTeam = () => {
+    navigate("/team");
+  };
+
   return (
     <div className="prose p-2 sm:p-3 md:p-4 text-start w-full max-w-full md:max-w-3xl mx-auto">
       {/* Başlık */}
@@ -58,9 +63,14 @@ const BlogPostComponent = ({ post }) => {
           </p>
           <p className="flex items-center gap-1">
             ✍️ Yazar:{" "}
-            {typeof post.author === "object" && post.author?.userName
-              ? post.author.userName
-              : "İsimsiz Yazar"}
+            <span
+              onClick={navigateToTeam}
+              className="cursor-pointer hover:text-primary transition-colors"
+            >
+              {typeof post.author === "object" && post.author?.userName
+                ? post.author.userName
+                : "İsimsiz Yazar"}
+            </span>
           </p>
         </div>
 

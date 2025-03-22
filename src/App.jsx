@@ -10,15 +10,7 @@ import HomePage from "./pages/HomePage";
 import PricePage from "./pages/other_pages/PricePage";
 import PageNotFound from "./pages/other_pages/PageNotFound";
 import ProfilePage from "./pages/other_pages/ProfilePage";
-
-import ProtectedRoute from "./components/ProtectedRoute";
-import BlogPostPage from "./pages/blog_pages/BlogPostPage";
-import BlogsPage from "./pages/blog_pages/BlogsPage";
-import Footer from "./components/footer/Footer";
-import CategoryBasePostsPage from "./pages/blog_pages/CategoryBasePostsPage";
-import CategoriesPage from "./pages/blog_pages/CategoriesPage";
-
-import CheatSheet from "./components/blog_components/blog_dashboard/helpers/CheatSheet";
+import TeamPage from "./pages/other_pages/TeamPage";
 import AboutUsPage from "./pages/other_pages/AboutUsPage";
 import DisclaimerPage from "./pages/other_pages/DisclaimerPage";
 import PrivacyPolicyPage from "./pages/other_pages/PrivacyPolicyPage";
@@ -36,6 +28,15 @@ import UsersPage from "./pages/dashboard_pages/UsersPage";
 
 import LoginPage from "./pages/auth/LoginPage";
 import RegisterPage from "./pages/auth/RegisterPage";
+
+import ProtectedRoute from "./components/ProtectedRoute";
+import BlogPostPage from "./pages/blog_pages/BlogPostPage";
+import BlogsPage from "./pages/blog_pages/BlogsPage";
+import Footer from "./components/footer/Footer";
+import CategoryBasePostsPage from "./pages/blog_pages/CategoryBasePostsPage";
+import CategoriesPage from "./pages/blog_pages/CategoriesPage";
+
+import CheatSheet from "./components/blog_components/blog_dashboard/helpers/CheatSheet";
 
 function App() {
   const dispatch = useDispatch();
@@ -63,6 +64,7 @@ function App() {
                 <Route path="/privacy-policy" element={<PrivacyPolicyPage />} />
                 <Route path="/login" element={<LoginPage />} />
                 <Route path="/register" element={<RegisterPage />} />
+                <Route path="/team" element={<TeamPage />} />
                 <Route
                   path="/profile"
                   element={

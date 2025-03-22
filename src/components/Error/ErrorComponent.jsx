@@ -8,7 +8,7 @@ import { Alert, Button } from "@nextui-org/react";
  * @param {string} props.title - The title of the error alert
  * @param {string} props.code - Error code (optional)
  * @param {string} props.type - Error code from backend: 'NOT_FOUND', 'INTERNAL_SERVER_ERROR', etc.
- * @param {string} props.color - Alert color: 'danger', 'warning', 'success', 'primary', 'secondary'
+ * @param {string} props.color - Alert color: 'danger', 'warning', 'success', 'primary', 'primary'
  * @param {function} props.onAction - Callback function for action button
  * @param {string} props.actionText - Text for the action button
  * @param {function} props.onBack - Callback when back button is clicked

@@ -34,7 +34,7 @@ const data = [
   },
   {
     title: "Engagement",
-    color: "#9333EA", // Secondary
+    color: "#9333EA", // primary
     total: 4200,
     chartData: [{ name: "Daily Views", value: 3150, fill: "#9333EA" }],
   },

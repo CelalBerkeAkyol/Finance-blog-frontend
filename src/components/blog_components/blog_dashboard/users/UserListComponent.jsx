@@ -167,7 +167,7 @@ const UserListComponent = () => {
 
   // Basit renk tanımı
   const renderRole = (role) => {
-    let bgColorClass = "bg-secondary-500";
+    let bgColorClass = "bg-primary-500";
     let textColorClass = "text-white";
 
     if (role?.toLowerCase() === "admin") {
@@ -297,7 +297,7 @@ const UserListComponent = () => {
                   isCompact
                   showControls
                   showShadow
-                  className="text-secondary-500"
+                  className="text-primary-500"
                   page={page}
                   total={pages}
                   onChange={(p) => setPage(p)}

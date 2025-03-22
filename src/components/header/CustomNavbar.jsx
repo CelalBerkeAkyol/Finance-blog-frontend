@@ -119,10 +119,10 @@ function CustomNavbar() {
           ))}
 
           <Dropdown>
-            <DropdownTrigger color="secondary">
+            <DropdownTrigger className="default">
               <Button
-                variant="flat"
-                className="text-gray-900 hover:text-secondary h-full"
+                variant="default"
+                className="text-gray-900 hover:text-primary h-full"
                 endContent={
                   <Icon icon="material-symbols:arrow-drop-down" width="20" />
                 }
@@ -131,7 +131,7 @@ function CustomNavbar() {
                 Ekonomi & Finans
               </Button>
             </DropdownTrigger>
-            <DropdownMenu aria-label="Kategoriler" color="primary">
+            <DropdownMenu aria-label="Kategoriler" color="default">
               {categories.map((item, index) => (
                 <DropdownItem
                   key={index}
@@ -150,7 +150,7 @@ function CustomNavbar() {
           <NavbarItem>
             <Button
               variant="bordered"
-              color="secondary"
+              color="default"
               radius="lg"
               startContent={<Icon icon="material-symbols:search" width="16" />}
               size="sm"

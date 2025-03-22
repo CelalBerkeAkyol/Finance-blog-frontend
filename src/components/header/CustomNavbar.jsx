@@ -25,6 +25,7 @@ import LogoutComponent from "../auth/LogoutComponent";
 const navbarLinks = [
   { name: "Ana Sayfa", path: "/" },
   { name: "Blog", path: "/blog/posts" },
+  { name: "Kategoriler", path: "/blog/categories" },
   { name: "Ekibimiz", path: "/team" },
   { name: "Araştırma", path: "/blog/category/arastirma" },
   { name: "Data Science", path: "/blog/category/data-science" },
@@ -142,6 +143,15 @@ function CustomNavbar() {
                   <span style={navTextStyle}>{item.name}</span>
                 </DropdownItem>
               ))}
+              <DropdownItem
+                key="all-categories"
+                onClick={() => handleNavigate("/blog/categories")}
+                textValue="Tüm Kategoriler"
+                startContent={<Icon icon="mdi:view-grid" width="18" />}
+                className="text-primary"
+              >
+                <span style={navTextStyle}>Tüm Kategoriler</span>
+              </DropdownItem>
             </DropdownMenu>
           </Dropdown>
         </NavbarContent>
@@ -243,6 +253,14 @@ function CustomNavbar() {
                       {item.name}
                     </button>
                   ))}
+                  <button
+                    onClick={() => handleNavigate("/blog/categories")}
+                    className="w-full text-left py-2 text-primary font-medium touch-manipulation flex items-center"
+                    style={navTextStyle}
+                  >
+                    <Icon icon="mdi:view-grid" className="mr-2" width="18" />
+                    Tüm Kategoriler
+                  </button>
                 </div>
               </div>
             </NavbarMenuItem>

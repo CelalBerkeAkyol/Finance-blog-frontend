@@ -4,9 +4,11 @@ import BlogSidebarComponent from "../../components/blog_components/blog_dashboar
 
 export default function EditPostPage() {
   return (
-    <div className="flex flex-1">
+    <div className="flex min-h-screen w-full">
       <BlogSidebarComponent />
-      <EditPostComponent />
+      <div className="flex-1 overflow-x-auto">
+        <EditPostComponent />
+      </div>
     </div>
   );
 }

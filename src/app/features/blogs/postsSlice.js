@@ -23,6 +23,29 @@ const handleRejected = (state, action, defaultMessage) => {
   state.errorCode = action.payload?.code || "UNKNOWN_ERROR";
 };
 
+// Yazar bilgisini koruyan post güncelleme yardımcısı
+const updatePostPreserveAuthor = (state, updatedPost) => {
+  const index = state.posts.findIndex((p) => p._id === updatedPost._id);
+  if (index !== -1) {
+    // Mevcut yazar bilgisini koru
+    const currentAuthor = state.posts[index].author;
+
+    // Eğer güncellenmiş postta yazar bilgisi yoksa veya sadece ID string ise
+    // ve mevcut yazarda daha fazla bilgi varsa, mevcut yazarı koru
+    const shouldPreserveAuthor =
+      !updatedPost.author ||
+      (typeof updatedPost.author === "string" &&
+        typeof currentAuthor === "object");
+
+    state.posts[index] = {
+      ...updatedPost,
+      author: shouldPreserveAuthor ? currentAuthor : updatedPost.author,
+    };
+    return true;
+  }
+  return false;
+};
+
 /* =====================
    Thunk İşlemleri
 ===================== */
@@ -250,6 +273,8 @@ const postsSlice = createSlice({
           );
           state.posts.push(fetchedPost);
         }
+        state.isLoading = false;
+        state.isSuccess = true;
       })
       .addCase(fetchPostById.rejected, (state, action) =>
         handleRejected(state, action, "Tekil post getirilirken hata oluştu.")
@@ -258,15 +283,11 @@ const postsSlice = createSlice({
       // upvotePost
       .addCase(upvotePost.fulfilled, (state, action) => {
         const updatedPost = action.payload;
-        const index = state.posts.findIndex(
-          (post) => post._id === updatedPost._id
-        );
-        if (index !== -1) {
+        if (updatePostPreserveAuthor(state, updatedPost)) {
           logInfo(
             "👍 Upvote",
             `Post upvote edildi: ${updatedPost.title || updatedPost._id}`
           );
-          state.posts[index] = updatedPost;
         }
       })
       .addCase(upvotePost.rejected, (state, action) =>
@@ -276,15 +297,11 @@ const postsSlice = createSlice({
       // downvotePost
       .addCase(downvotePost.fulfilled, (state, action) => {
         const updatedPost = action.payload;
-        const index = state.posts.findIndex(
-          (post) => post._id === updatedPost._id
-        );
-        if (index !== -1) {
+        if (updatePostPreserveAuthor(state, updatedPost)) {
           logInfo(
             "👎 Downvote",
             `Post downvote edildi: ${updatedPost.title || updatedPost._id}`
           );
-          state.posts[index] = updatedPost;
         }
       })
       .addCase(downvotePost.rejected, (state, action) =>
@@ -325,18 +342,14 @@ const postsSlice = createSlice({
       .addCase(updatePost.pending, handlePending)
       .addCase(updatePost.fulfilled, (state, action) => {
         const updatedPost = action.payload.post || action.payload;
-        logInfo(
-          "✅ Post Güncelleme",
-          `Post güncellendi: ${updatedPost.title || updatedPost._id}`
-        );
+        if (updatePostPreserveAuthor(state, updatedPost)) {
+          logInfo(
+            "✅ Post Güncelleme",
+            `Post güncellendi: ${updatedPost.title || updatedPost._id}`
+          );
+        }
         state.isLoading = false;
         state.isSuccess = true;
-        const index = state.posts.findIndex(
-          (post) => post._id === updatedPost._id
-        );
-        if (index !== -1) {
-          state.posts[index] = updatedPost;
-        }
       })
       .addCase(updatePost.rejected, (state, action) =>
         handleRejected(state, action, "Post güncellerken hata oluştu.")
@@ -357,13 +370,11 @@ const postsSlice = createSlice({
       // incrementPostView
       .addCase(incrementPostView.fulfilled, (state, action) => {
         const updatedPost = action.payload;
-        const index = state.posts.findIndex((p) => p._id === updatedPost._id);
-        if (index !== -1) {
+        if (updatePostPreserveAuthor(state, updatedPost)) {
           logInfo(
             "👁️ Görüntülenme",
             `Post görüntülendi: ${updatedPost.title || updatedPost._id}`
           );
-          state.posts[index] = updatedPost;
         }
       })
       .addCase(incrementPostView.rejected, (state, action) =>

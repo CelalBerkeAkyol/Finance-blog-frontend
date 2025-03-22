@@ -5,9 +5,9 @@ import rehypeRaw from "rehype-raw";
 import rehypeSlug from "rehype-slug";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@nextui-org/react";
-import { Icon } from "@iconify/react";
 import ShareButtons from "../../buttons/ShareButtons";
 import VoteButtons from "../../buttons/VoteButton";
+import ScrollToTopButton from "../../buttons/ScrollToTopButton";
 // Kategori isimlerini okunabilir hale getiriyor
 function slugToReadable(slug) {
   return slug
@@ -20,30 +20,27 @@ const BlogPostComponent = ({ post }) => {
   const navigate = useNavigate();
   const currentURL = window.location.href; // Sayfanın mevcut URL'si
 
-  // Sayfanın en yukarısına çıkma fonksiyonu
-  const scrollToTop = () => {
-    window.scrollTo({ top: 0, behavior: "smooth" });
-  };
-
   return (
-    <div className="prose p-4 text-start w-full max-w-4xl mx-auto">
+    <div className="prose p-2 sm:p-3 md:p-4 text-start w-full max-w-full md:max-w-3xl mx-auto">
       {/* Başlık */}
-      <h1 className="text-3xl sm:text-4xl font-bold mb-4">{post.title}</h1>
+      <h1 className="text-4xl sm:text-3xl md:text-4xl font-bold mb-6 md:mb-6">
+        {post.title}
+      </h1>
 
       {/* Blog detayları */}
       <div
         id="blog-details"
-        className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4  pb-4 border-b"
+        className="flex flex-col gap-3 md:gap-4 pb-3 md:pb-4 border-b"
       >
         {/* Sol Taraf: Kategori Butonu ve Post Bilgileri */}
-        <div className="flex flex-wrap  gap-4 text-sm leading-tight">
+        <div className="flex flex-wrap gap-2 md:gap-4 text-xs sm:text-sm leading-tight">
           <Button
-            color="secondary"
+            color="primary"
             variant="ghost"
             radius="lg"
             size="sm"
-            className="w-auto px-4 py-1"
-            onClick={() => navigate(`/blog/category/${post.category}`)}
+            className="w-auto px-3 py-1"
+            onPress={() => navigate(`/blog/category/${post.category}`)}
           >
             {slugToReadable(post.category)}
           </Button>
@@ -55,22 +52,27 @@ const BlogPostComponent = ({ post }) => {
               day: "numeric",
             })}
           </p>
-          <p className="flex items-center gap-1">
-            ✍️ Yazar: {post.author.userName}
-          </p>
+
           <p className="flex items-center gap-1">
             👀 {post.views} Görüntülenme
           </p>
+          <p className="flex items-center gap-1">
+            ✍️ Yazar:{" "}
+            {typeof post.author === "object" && post.author?.userName
+              ? post.author.userName
+              : "İsimsiz Yazar"}
+          </p>
         </div>
 
-        {/* Sağ Taraf: Paylaşım Butonları */}
-        <div className="flex items-center gap-2">
+        {/* Paylaşım Butonları - Ayrı satırda */}
+        <div className="flex items-center gap-2 justify-start">
+          <span className=" font-bold text-gray-600 mr-1">Paylaş:</span>
           <ShareButtons url={currentURL} />
         </div>
       </div>
 
       {/* Blog İçeriği */}
-      <div className="overflow-x-auto pt-4 text-base leading-relaxed">
+      <div className="overflow-x-auto pt-3 md:pt-4 text-sm sm:text-base leading-relaxed">
         <ReactMarkdown
           remarkPlugins={[remarkGfm]}
           rehypePlugins={[rehypeRaw, rehypeSlug]}
@@ -80,8 +82,7 @@ const BlogPostComponent = ({ post }) => {
       </div>
 
       {/* Upvote & Downvote ve Yukarı Çık Butonu */}
-
-      <div className="flex justify-between items-center w-full mt-2 pt-4 border-t-1">
+      <div className="flex justify-between items-center w-full mt-2 pt-3 md:pt-4 border-t-1">
         {/* Beğeni Butonları (Sol Tarafta) */}
         <VoteButtons postId={post._id} />
 
@@ -92,14 +93,7 @@ const BlogPostComponent = ({ post }) => {
       </div>
 
       {/* Yukarı Çık Butonu */}
-      <div className="fixed bottom-5 right-5">
-        <Button
-          onClick={scrollToTop}
-          className="bg-gray-700 text-white  rounded-full shadow-lg hover:bg-gray-900 hover:text-white transition-all"
-        >
-          <Icon icon="mdi:arrow-up" width="18" />
-        </Button>
-      </div>
+      <ScrollToTopButton />
     </div>
   );
 };

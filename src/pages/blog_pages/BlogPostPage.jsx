@@ -38,9 +38,10 @@ function BlogPostPage() {
     <div className="flex flex-col">
       <BannerComponent />
       <CustomNavbar />
-      <div className="flex flex-col md:flex-row gap-8 py-8 container">
-        <div className="md:w-[25%] w-full border-r min-w-[20%]">
-          <div className="sticky top-20 max-h-[calc(100vh-8rem)] overflow-y-auto py-4">
+      <div className="flex flex-col md:flex-row gap-4 md:gap-8 py-6 md:py-8 container mx-auto ">
+        {/* Masaüstü için Table of Contents */}
+        <div className="md:w-[20%] w-full md:border-r min-w-[180px] hidden md:block">
+          <div className="sticky top-20 max-h-[calc(100vh-8rem)] overflow-y-auto py-4 pr-2">
             {isLoading ? (
               <TableSkeleton />
             ) : post ? (
@@ -48,7 +49,25 @@ function BlogPostPage() {
             ) : null}
           </div>
         </div>
-        <div className="md:w-[70%] w-full margin-auto px-4">
+
+        {/* Mobil için içeriğin üzerinde Table of Contents */}
+        <div className="w-full md:hidden mb-3 bg-gray-50 rounded-lg p-2 shadow-sm">
+          <details className="w-full">
+            <summary className="text-sm font-medium text-gray-700 cursor-pointer py-2 touch-manipulation">
+              İçindekiler 📑
+            </summary>
+            <div className="mt-2 border-t pt-2">
+              {isLoading ? (
+                <TableSkeleton />
+              ) : post ? (
+                <TableOfContents content={post.content} />
+              ) : null}
+            </div>
+          </details>
+        </div>
+
+        {/* Blog İçeriği - Sağdan boşluk ile */}
+        <div className="w-full md:w-[75%] lg:w-[70%] mx-auto md:pr-4 lg:pr-8">
           {isLoading ? (
             <BlogPostSkeleton />
           ) : post ? (

@@ -3,9 +3,11 @@ import BlogSidebarComponent from "../../components/blog_components/blog_dashboar
 
 function AllBlogPostsPage() {
   return (
-    <div className="flex flex-row flex-1">
+    <div className="flex min-h-screen w-full">
       <BlogSidebarComponent />
-      <BlogsTable />
+      <div className="flex-1 overflow-x-auto">
+        <BlogsTable />
+      </div>
     </div>
   );
 }

@@ -42,17 +42,19 @@ const serverData = [
 
 export default function ServerStatus() {
   return (
-    <div>
-      <h2 className="text-center font-bold text-3xl py-8">Server Status</h2>
-      <dl className="grid w-full grid-cols-1 gap-5 sm:grid-cols-2 md:grid-cols-4">
+    <div className="mb-6">
+      <h2 className="text-xl sm:text-2xl md:text-3xl font-bold py-4 sm:py-6">
+        Server Status
+      </h2>
+      <dl className="grid w-full grid-cols-1 gap-3 sm:gap-4 md:gap-5 sm:grid-cols-2 lg:grid-cols-4">
         {serverData.map(({ title, value, status, iconName }, index) => (
           <Card
             key={index}
-            className="flex flex-col border border-transparent p-4 dark:border-default-100"
+            className="flex flex-col border border-transparent p-3 sm:p-4 dark:border-default-100"
           >
             <div
               className={cn(
-                "flex h-8 w-8 items-center justify-center rounded-md border p-0.5",
+                "flex h-7 w-7 sm:h-8 sm:w-8 items-center justify-center rounded-md border p-0.5",
                 {
                   "border-success-200 bg-success-50 dark:border-success-100":
                     status === "good",
@@ -70,15 +72,15 @@ export default function ServerStatus() {
                   "text-danger-500": status === "danger",
                 })}
                 icon={iconName}
-                width={20}
+                width={18}
               />
             </div>
 
             <div className="pt-1">
-              <dt className="my-2 text-sm font-medium text-default-500">
+              <dt className="my-1 sm:my-2 text-xs sm:text-sm font-medium text-default-500">
                 {title}
               </dt>
-              <dd className="text-2xl font-semibold text-default-700">
+              <dd className="text-xl sm:text-2xl font-semibold text-default-700">
                 {value}%
               </dd>
             </div>

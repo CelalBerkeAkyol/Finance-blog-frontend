@@ -12,6 +12,7 @@ import {
   ModalBody,
   ModalFooter,
   useDisclosure,
+  Tooltip,
 } from "@nextui-org/react";
 import { capitalize } from "../../../../utils/capitalize";
 import { useNavigate } from "react-router-dom";
@@ -21,6 +22,7 @@ import {
   deletePost,
 } from "../../../../app/features/blogs/postsSlice";
 import { useFeedback } from "../../../../context/FeedbackContext";
+import { Icon } from "@iconify/react";
 
 const statusColorMap = {
   yayında: "success",
@@ -81,40 +83,45 @@ const TableCellContent = ({ posts, columnKey }) => {
       return (
         <Chip
           color={statusColorMap[posts.status] || "default"}
-          className="capitalize"
+          size="sm"
+          variant="flat"
+          className="capitalize text-xs max-w-[110px] truncate"
         >
           {capitalize(posts.status)}
         </Chip>
       );
     case "createdAt":
     case "updatedAt":
-      return new Date(cellValue).toLocaleDateString();
+      return (
+        <span className="text-xs whitespace-nowrap">
+          {new Date(cellValue).toLocaleDateString()}
+        </span>
+      );
     case "actions":
       return (
         <>
-          <div className="relative flex justify-end items-center gap-2">
-            <Dropdown>
-              <DropdownTrigger>
-                <Button isIconOnly radius="full" size="sm" variant="light">
-                  <span>⋮</span>
-                </Button>
-              </DropdownTrigger>
-              <DropdownMenu>
-                <DropdownItem key={`view-${posts._id}`} onClick={handleView}>
-                  Görüntüle
-                </DropdownItem>
-                <DropdownItem key={`edit-${posts._id}`} onClick={handleEdit}>
-                  Düzenle
-                </DropdownItem>
-                <DropdownItem
-                  key={`delete-${posts._id}`}
-                  color="danger"
-                  onClick={handleDelete}
-                >
-                  Sil
-                </DropdownItem>
-              </DropdownMenu>
-            </Dropdown>
+          <div className="relative flex justify-end items-center gap-1">
+            <Tooltip content="Görüntüle">
+              <Button isIconOnly size="sm" variant="light" onPress={handleView}>
+                <Icon icon="mdi:eye-outline" width="16" />
+              </Button>
+            </Tooltip>
+            <Tooltip content="Düzenle">
+              <Button isIconOnly size="sm" variant="light" onPress={handleEdit}>
+                <Icon icon="mdi:pencil-outline" width="16" />
+              </Button>
+            </Tooltip>
+            <Tooltip content="Sil" color="danger">
+              <Button
+                isIconOnly
+                size="sm"
+                variant="light"
+                color="danger"
+                onPress={handleDelete}
+              >
+                <Icon icon="mdi:trash-outline" width="16" />
+              </Button>
+            </Tooltip>
           </div>
 
           {/* Silme Onay Modalı */}

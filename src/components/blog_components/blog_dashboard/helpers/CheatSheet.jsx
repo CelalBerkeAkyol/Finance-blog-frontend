@@ -70,11 +70,15 @@ console.log("Merhaba, dünya!");
 
 const CheatSheet = () => {
   return (
-    <div className="flex flex-1 w-full">
+    <div className="flex min-h-screen w-full">
       <BlogSidebarComponent />
-      <div className="flex-grow max-w-[80%] mx-auto p-8 bg-white shadow-lg rounded-lg">
+      <div className="flex-1 p-4 md:p-6 overflow-x-auto">
         <h1 className="text-2xl font-bold mb-4">📖 Markdown Cheat Sheet</h1>
-        <ReactMarkdown className="prose ">{markdownContent}</ReactMarkdown>
+        <div className="bg-white shadow-lg rounded-lg p-6">
+          <ReactMarkdown className="prose max-w-none">
+            {markdownContent}
+          </ReactMarkdown>
+        </div>
       </div>
     </div>
   );

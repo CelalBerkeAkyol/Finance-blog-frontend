@@ -85,7 +85,7 @@ export default function SearchModal({ isOpen, onClose }) {
             )}
             {filteredPosts.map((post) => (
               <div key={post._id} className="border-b py-2">
-                <Link to={`/blog/post/${post._id}`} onClick={() => onClose()}>
+                <Link to={`/blog/post/${post._id}`} onPress={() => onClose()}>
                   <p className="font-semibold text-blue-800">{post.title}</p>
                 </Link>
                 <div className="text-sm text-gray-600 line-clamp-2">

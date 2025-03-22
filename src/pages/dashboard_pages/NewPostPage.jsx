@@ -4,9 +4,13 @@ import BlogSidebarComponent from "../../components/blog_components/blog_dashboar
 
 const NewPostPage = () => {
   return (
-    <div className="flex flex-1">
+    <div className="flex min-h-screen w-full">
       <BlogSidebarComponent />
-      <AddPost />
+      <div className="flex-1 overflow-auto">
+        <div className="max-w-6xl mx-auto">
+          <AddPost />
+        </div>
+      </div>
     </div>
   );
 };

@@ -35,7 +35,7 @@ const ProfileImageUploader = ({
     <div className="flex gap-2">
       <Button
         color="primary"
-        onClick={onImageClick}
+        onPress={onImageClick}
         startContent={<Icon icon="mdi:camera" />}
         isLoading={uploadingImage}
         isDisabled={uploadingImage}
@@ -47,7 +47,7 @@ const ProfileImageUploader = ({
         <Button
           color="danger"
           variant="light"
-          onClick={onImageRemove}
+          onPress={onImageRemove}
           startContent={<Icon icon="mdi:close" />}
           isDisabled={uploadingImage}
         >

@@ -1,6 +1,12 @@
 import React from "react";
+import { Select, SelectItem } from "@nextui-org/react";
 
-const CategorySelector = ({ selectedCategory, onChange, isInvalid }) => {
+const CategorySelector = ({
+  selectedCategory,
+  onChange,
+  className,
+  isInvalid,
+}) => {
   const categories = [
     "mikro-ekonomi",
     "makro-ekonomi",
@@ -12,36 +18,26 @@ const CategorySelector = ({ selectedCategory, onChange, isInvalid }) => {
     "araştırma",
   ];
 
-  const handleChange = (e) => {
+  const handleSelectionChange = (e) => {
     onChange(e.target.value);
   };
 
   return (
-    <div>
-      <label
-        htmlFor="category"
-        className="block text-sm font-medium text-gray-700"
-      >
-        Kategori Seç
-      </label>
-      <select
-        id="category"
-        name="category"
-        value={selectedCategory}
-        onChange={handleChange}
-        className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm"
-        required
-      >
-        <option value="" disabled>
-          Kategori seçiniz
-        </option>
-        {categories.map((category) => (
-          <option key={category} value={category}>
-            {category}
-          </option>
-        ))}
-      </select>
-    </div>
+    <Select
+      label="Kategori Seç"
+      placeholder="Kategori seçiniz"
+      selectedKeys={selectedCategory ? [selectedCategory] : []}
+      onChange={handleSelectionChange}
+      className={className}
+      isInvalid={isInvalid}
+      errorMessage={isInvalid ? "Kategori seçimi zorunludur" : ""}
+    >
+      {categories.map((category) => (
+        <SelectItem key={category} value={category}>
+          {category}
+        </SelectItem>
+      ))}
+    </Select>
   );
 };
 

@@ -24,7 +24,7 @@ const ImageUploaderModal = ({ onClose, onSuccess }) => {
         <Button
           auto
           color="error"
-          onClick={onClose}
+          onPress={onClose}
           className="absolute top-2 right-2"
         >
           Kapat

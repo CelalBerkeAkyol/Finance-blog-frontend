@@ -167,20 +167,43 @@ const UserListComponent = () => {
 
   // Basit renk tanımı
   const renderRole = (role) => {
-    let color = "primary";
-    if (role?.toLowerCase() === "admin") color = "danger";
-    if (role?.toLowerCase() === "author") color = "warning";
+    let bgColorClass = "bg-secondary-500";
+    let textColorClass = "text-white";
+
+    if (role?.toLowerCase() === "admin") {
+      bgColorClass = "bg-red-500";
+      textColorClass = "text-white";
+    }
+    if (role?.toLowerCase() === "author") {
+      bgColorClass = "bg-yellow-500";
+      textColorClass = "text-black";
+    }
+
     return (
-      <Chip color={color} size="sm" variant="flat">
+      <Chip
+        size="sm"
+        variant="flat"
+        className={`${bgColorClass} ${textColorClass}`}
+      >
         {role || "User"}
       </Chip>
     );
   };
-  const renderStatus = (isVerified) => (
-    <Chip color={isVerified ? "success" : "default"} size="sm" variant="flat">
-      {isVerified ? "Verified" : "Not Verified"}
-    </Chip>
-  );
+
+  const renderStatus = (isVerified) => {
+    const bgColorClass = isVerified ? "bg-green-500" : "bg-gray-300";
+    const textColorClass = isVerified ? "text-white" : "text-gray-700";
+
+    return (
+      <Chip
+        size="sm"
+        variant="flat"
+        className={`${bgColorClass} ${textColorClass}`}
+      >
+        {isVerified ? "Verified" : "Not Verified"}
+      </Chip>
+    );
+  };
 
   // Aksiyon butonları
   const renderActions = (user) => (
@@ -190,9 +213,10 @@ const UserListComponent = () => {
           isIconOnly
           size="sm"
           variant="light"
-          onClick={() => openRoleModal(user)}
+          className="text-yellow-500 hover:bg-yellow-100"
+          onPress={() => openRoleModal(user)}
         >
-          <Icon icon="mdi:account-convert" className="text-warning" />
+          <Icon icon="mdi:account-convert" />
         </Button>
       </Tooltip>
       <Tooltip content="Delete User">
@@ -200,9 +224,10 @@ const UserListComponent = () => {
           isIconOnly
           size="sm"
           variant="light"
-          onClick={() => openDeleteModal(user)}
+          className="text-red-500 hover:bg-red-100"
+          onPress={() => openDeleteModal(user)}
         >
-          <Icon icon="mdi:delete" className="text-danger" />
+          <Icon icon="mdi:delete" />
         </Button>
       </Tooltip>
     </div>
@@ -220,7 +245,7 @@ const UserListComponent = () => {
   // Hata
   if (error) {
     return (
-      <div className="flex justify-center items-center h-64 text-danger">
+      <div className="flex justify-center items-center h-64 text-red-500">
         <p>Hata: {error}</p>
       </div>
     );
@@ -228,70 +253,87 @@ const UserListComponent = () => {
 
   // Asıl render
   return (
-    <div className="w-full flex flex-col gap-4">
+    <div className="w-full flex flex-col gap-4 overflow-hidden">
       {/* Üst kısım */}
-      <div className="flex justify-between items-center">
-        <h2 className="text-xl font-bold">Kullanıcı Listesi</h2>
-        <div className="flex gap-2">
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 sm:gap-2 w-full overflow-hidden">
+        <h1 className="text-2xl font-bold whitespace-nowrap">
+          Kullanıcı Listesi
+        </h1>
+        <div className="flex w-full sm:w-auto items-center justify-end gap-2">
           <Input
             placeholder="Kullanıcı ara..."
             value={searchTerm}
             onChange={handleSearch}
             startContent={<Icon icon="mdi:magnify" />}
-            className="w-64"
+            className="w-full max-w-full sm:max-w-xs"
+            size="sm"
           />
-          <Button
-            color="primary"
-            startContent={<Icon icon="mdi:refresh" />}
-            onClick={handleRefreshUsers}
-          >
-            Yenile
-          </Button>
+          <Tooltip content="Yenile">
+            <Button
+              isIconOnly
+              className="bg-gray-100 text-gray-700 hover:bg-gray-200"
+              size="sm"
+              onPress={handleRefreshUsers}
+              aria-label="Yenile"
+            >
+              <Icon icon="mdi:refresh" className="text-lg" />
+            </Button>
+          </Tooltip>
         </div>
       </div>
 
       {/* Tablo */}
-      <Table
-        aria-label="Kullanıcı listesi"
-        bottomContent={
-          pages > 0 && (
-            <div className="flex w-full justify-center">
-              <Pagination
-                isCompact
-                showControls
-                showShadow
-                color="primary"
-                page={page}
-                total={pages}
-                onChange={(p) => setPage(p)}
-              />
-            </div>
-          )
-        }
-      >
-        <TableHeader>
-          <TableColumn>KULLANICI ADI</TableColumn>
-          <TableColumn>E-POSTA</TableColumn>
-          <TableColumn>ROL</TableColumn>
-          <TableColumn>DURUM</TableColumn>
-          <TableColumn>KAYIT TARİHİ</TableColumn>
-          <TableColumn>İŞLEMLER</TableColumn>
-        </TableHeader>
-        <TableBody items={items} emptyContent={"Kullanıcı bulunamadı."}>
-          {(item) => (
-            <TableRow key={item._id}>
-              <TableCell>{item.userName}</TableCell>
-              <TableCell>{item.email}</TableCell>
-              <TableCell>{renderRole(item.role)}</TableCell>
-              <TableCell>{renderStatus(item.isVerified)}</TableCell>
-              <TableCell>
-                {new Date(item.createdAt).toLocaleDateString("tr-TR")}
-              </TableCell>
-              <TableCell>{renderActions(item)}</TableCell>
-            </TableRow>
-          )}
-        </TableBody>
-      </Table>
+      <div className="w-full overflow-x-auto">
+        <Table
+          aria-label="Kullanıcı listesi"
+          classNames={{
+            base: "max-w-full",
+            table: "min-w-full",
+          }}
+          bottomContent={
+            pages > 0 && (
+              <div className="flex w-full justify-center">
+                <Pagination
+                  isCompact
+                  showControls
+                  showShadow
+                  className="text-secondary-500"
+                  page={page}
+                  total={pages}
+                  onChange={(p) => setPage(p)}
+                />
+              </div>
+            )
+          }
+        >
+          <TableHeader>
+            <TableColumn className="w-[130px]">KULLANICI ADI</TableColumn>
+            <TableColumn className="w-[180px]">E-POSTA</TableColumn>
+            <TableColumn className="w-[70px]">ROL</TableColumn>
+            <TableColumn className="w-[80px]">DURUM</TableColumn>
+            <TableColumn className="w-[100px]">KAYIT TARİHİ</TableColumn>
+            <TableColumn className="w-[70px]">İŞLEMLER</TableColumn>
+          </TableHeader>
+          <TableBody items={items} emptyContent={"Kullanıcı bulunamadı."}>
+            {(item) => (
+              <TableRow key={item._id}>
+                <TableCell className="truncate max-w-[130px]">
+                  {item.userName}
+                </TableCell>
+                <TableCell className="truncate max-w-[180px]">
+                  {item.email}
+                </TableCell>
+                <TableCell>{renderRole(item.role)}</TableCell>
+                <TableCell>{renderStatus(item.isVerified)}</TableCell>
+                <TableCell className="truncate max-w-[100px]">
+                  {new Date(item.createdAt).toLocaleDateString("tr-TR")}
+                </TableCell>
+                <TableCell>{renderActions(item)}</TableCell>
+              </TableRow>
+            )}
+          </TableBody>
+        </Table>
+      </div>
 
       {/* Modallar */}
       <DeleteUserModal

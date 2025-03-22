@@ -43,7 +43,10 @@ const TeamMemberCard = ({ author }) => {
           radius="full"
           size="lg"
           src={author.profileImage || defaultImage}
-          className="w-20 h-20 text-large"
+          className="w-28 h-28 text-large"
+          imgProps={{
+            className: "object-cover",
+          }}
         />
         <h4 className="font-bold text-xl mt-4">
           {author.fullName || author.userName || "Team Member"}

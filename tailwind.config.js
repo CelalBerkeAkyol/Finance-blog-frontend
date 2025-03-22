@@ -1,6 +1,6 @@
 // tailwind.config.js
 
-const { nextui } = require("@nextui-org/react");
+import { nextui } from "@nextui-org/react";
 
 /** @type {import('tailwindcss').Config} */
 export default {
@@ -12,87 +12,13 @@ export default {
   theme: {
     extend: {
       screens: {
-        xs: "360px", // Ekstra küçük (telefon - mini)
+        xs: "360px", // Ekstra küçük (mini telefon)
         sm: "640px", // Küçük (telefon)
         md: "768px", // Orta (tablet)
         lg: "1024px", // Büyük (laptop)
         xl: "1280px", // Ekstra büyük (desktop)
-        "2xl": "1536px", // 2x Ekstra büyük (geniş ekranlar)
       },
-      colors: {
-        primary: {
-          50: "#eff6ff",
-          100: "#dbeafe",
-          200: "#bfdbfe",
-          300: "#93c5fd",
-          400: "#60a5fa",
-          500: "#3b82f6",
-          600: "#2563eb",
-          700: "#1d4ed8",
-          800: "#1e40af",
-          900: "#1e3a8a",
-        },
-        secondary: {
-          50: "#f0fdfa",
-          100: "#ccfbf1",
-          200: "#99f6e4",
-          300: "#5eead4",
-          400: "#2dd4bf",
-          500: "#14b8a6",
-          600: "#0d9488",
-          700: "#0f766e",
-          800: "#115e59",
-          900: "#134e4a",
-        },
-        tertiary: {
-          50: "#ecfdf5",
-          100: "#d1fae5",
-          200: "#a7f3d0",
-          300: "#6ee7b7",
-          400: "#34d399",
-          500: "#10b981",
-          600: "#059669",
-          700: "#047857",
-          800: "#065f46",
-          900: "#064e3b",
-        },
-        quaternary: {
-          50: "#fffbeb",
-          100: "#fef3c7",
-          200: "#fde68a",
-          300: "#fcd34d",
-          400: "#fbbf24",
-          500: "#f59e0b",
-          600: "#d97706",
-          700: "#b45309",
-          800: "#92400e",
-          900: "#78350f",
-        },
-        neutral: {
-          50: "#fafafa",
-          100: "#f5f5f5",
-          200: "#e5e5e5",
-          300: "#d4d4d4",
-          400: "#a3a3a3",
-          500: "#737373",
-          600: "#525252",
-          700: "#404040",
-          800: "#262626",
-          900: "#171717",
-        },
-        accent: {
-          50: "#fdf4ff",
-          100: "#fae8ff",
-          200: "#f5d0fe",
-          300: "#f0abfc",
-          400: "#e879f9",
-          500: "#d946ef",
-          600: "#c026d3",
-          700: "#a21caf",
-          800: "#86198f",
-          900: "#701a75",
-        },
-      },
+
       keyframes: {
         fadeIn: {
           "0%": { opacity: 0, transform: "translateY(10px)" },
@@ -121,7 +47,10 @@ export default {
               },
             },
             h1: {
-              fontSize: "2.5rem", // Büyük ve belirgin başlık
+              fontSize: "1.875rem", // Mobil: 30px
+              "@screen md": {
+                fontSize: "2.25rem", // md ve üzeri: 36px
+              },
               fontWeight: "bold",
               color: theme("colors.gray.900"),
               marginBottom: "1.5rem",
@@ -130,7 +59,10 @@ export default {
               scrollMarginTop: "5rem",
             },
             h2: {
-              fontSize: "2rem",
+              fontSize: "1.6rem", // Mobil: 25.6px (yaklaşık)
+              "@screen md": {
+                fontSize: "1.8rem", // md ve üzeri: 28.8px
+              },
               fontWeight: "bold",
               color: theme("colors.gray.800"),
               marginBottom: "1.25rem",
@@ -139,7 +71,10 @@ export default {
               scrollMarginTop: "5rem",
             },
             h3: {
-              fontSize: "1.75rem",
+              fontSize: "1.4rem", // Mobil: 22.4px
+              "@screen md": {
+                fontSize: "1.6rem", // md ve üzeri: 25.6px
+              },
               fontWeight: "bold",
               color: theme("colors.gray.800"),
               marginBottom: "1rem",
@@ -148,7 +83,10 @@ export default {
               scrollMarginTop: "5rem",
             },
             h4: {
-              fontSize: "1.5rem",
+              fontSize: "1.35rem", // Mobil: 21.6px
+              "@screen md": {
+                fontSize: "1.5rem", // md ve üzeri: 24px
+              },
               fontWeight: "bold",
               color: theme("colors.gray.800"),
               marginBottom: "0.85rem",
@@ -157,7 +95,10 @@ export default {
               scrollMarginTop: "5rem",
             },
             h5: {
-              fontSize: "1.25rem",
+              fontSize: "1.15rem", // Mobil: 18.4px
+              "@screen md": {
+                fontSize: "1.25rem", // md ve üzeri: 20px
+              },
               fontWeight: "600",
               color: theme("colors.gray.800"),
               marginBottom: "0.75rem",
@@ -166,7 +107,10 @@ export default {
               scrollMarginTop: "5rem",
             },
             h6: {
-              fontSize: "1.125rem",
+              fontSize: "1rem", // Mobil: 16px (varsayılan)
+              "@screen md": {
+                fontSize: "1.125rem", // md ve üzeri: 18px
+              },
               fontWeight: "600",
               color: theme("colors.gray.800"),
               marginBottom: "0.5rem",
@@ -175,7 +119,7 @@ export default {
               scrollMarginTop: "5rem",
             },
             p: {
-              fontSize: "0.8 rem",
+              fontSize: "1rem",
               marginTop: "0.5rem",
               marginBottom: "1rem",
               lineHeight: "1.75",
@@ -193,7 +137,7 @@ export default {
               marginBottom: "1rem",
             },
             li: {
-              fontSize: "1 rem",
+              fontSize: "1rem",
               marginBottom: "0.5rem",
               lineHeight: "1.6",
             },

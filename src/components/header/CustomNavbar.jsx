@@ -97,7 +97,7 @@ function CustomNavbar() {
         {/* Hamburger menü butonu - sadece mobil görünümde */}
         <NavbarMenuToggle
           aria-label={isMenuOpen ? "Close menu" : "Open menu"}
-          className="lg:hidden mr-1"
+          className="lg:hidden mr-1 touch-manipulation"
         />
 
         {/* Logo */}
@@ -213,13 +213,13 @@ function CustomNavbar() {
         </NavbarContent>
 
         {/* Mobil ve tablet menü */}
-        <NavbarMenu className="pt-4 lg:hidden">
+        <NavbarMenu className="pt-4 lg:hidden overflow-y-auto max-h-[85vh]">
           <div className="flex flex-col gap-2">
             {navbarLinks.map((item, index) => (
               <NavbarMenuItem key={index}>
                 <button
                   onClick={() => handleNavigate(item.path)}
-                  className="w-full text-left py-2 hover:text-primary"
+                  className="w-full text-left py-3 hover:text-primary touch-manipulation"
                   style={navTextStyle}
                 >
                   {item.name}
@@ -237,7 +237,7 @@ function CustomNavbar() {
                     <button
                       key={index}
                       onClick={() => handleNavigate(item.path)}
-                      className="w-full text-left py-1 hover:text-primary"
+                      className="w-full text-left py-2 hover:text-primary touch-manipulation"
                       style={navTextStyle}
                     >
                       {item.name}

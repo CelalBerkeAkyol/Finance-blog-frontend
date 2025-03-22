@@ -1,3 +1,24 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+/* Mobil cihazlarda dokunmatik deneyimi iyileştirme */
+@layer base {
+  html {
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  /* Dokunmatik hedef boyutlarını artır */
+  button,
+  a,
+  [role="button"] {
+    @apply touch-manipulation;
+  }
+
+  /* Mobil cihazlarda yumuşak kaydırma */
+  html,
+  body {
+    -webkit-overflow-scrolling: touch;
+    scroll-behavior: smooth;
+  }
+}

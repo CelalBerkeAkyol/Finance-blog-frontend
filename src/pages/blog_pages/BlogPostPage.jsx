@@ -51,9 +51,9 @@ function BlogPostPage() {
         </div>
 
         {/* Mobil için içeriğin üzerinde Table of Contents */}
-        <div className="w-full md:hidden mb-4 bg-gray-50 rounded-lg p-3">
+        <div className="w-full md:hidden mb-3 bg-gray-50 rounded-lg p-2 shadow-sm">
           <details className="w-full">
-            <summary className="font-medium text-gray-700 cursor-pointer py-2">
+            <summary className="text-sm font-medium text-gray-700 cursor-pointer py-2 touch-manipulation">
               İçindekiler 📑
             </summary>
             <div className="mt-2 border-t pt-2">

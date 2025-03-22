@@ -25,6 +25,7 @@ import LogoutComponent from "../auth/LogoutComponent";
 const navbarLinks = [
   { name: "Ana Sayfa", path: "/" },
   { name: "Blog", path: "/blog/posts" },
+  { name: "Ekibimiz", path: "/team" },
   { name: "Araştırma", path: "/blog/category/arastirma" },
   { name: "Data Science", path: "/blog/category/data-science" },
   { name: "Machine Learning", path: "/blog/category/machine-learning" },

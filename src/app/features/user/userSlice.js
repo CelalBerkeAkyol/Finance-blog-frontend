@@ -74,6 +74,17 @@ const handleFetchUserFulfilled = (state, action) => {
   state.isSuccess = true;
 };
 
+// FetchTeamMembers fulfilled: Yazarlar ve adminleri state'e aktarır
+const handleFetchTeamMembersFulfilled = (state, action) => {
+  logInfo(
+    "✅ Yazarlar ve Adminler",
+    `${action.payload.data.length} kişi alındı`
+  );
+  state.teamMembers = action.payload.data;
+  state.isTeamLoading = false;
+  state.isTeamSuccess = true;
+};
+
 // UpdateUserProfile fulfilled: Profil güncellemesi sonrası state'i günceller.
 const handleUpdateProfileFulfilled = (state, action) => {
   if (action.payload.success && action.payload.data) {
@@ -206,6 +217,24 @@ export const updateUserProfile = createAsyncThunk(
   }
 );
 
+// Yazarlar ve adminleri getirme thunk'ı
+export const fetchTeamMembers = createAsyncThunk(
+  "user/fetchTeamMembers",
+  async (_, thunkAPI) => {
+    try {
+      const response = await axios.get("/user/team");
+      if (!response.data.success) {
+        throw new Error("Yazarlar ve adminler alınamadı.");
+      }
+      return response.data;
+    } catch (error) {
+      const errMessage = error.message || "Yazarlar ve adminler alınamadı.";
+      const errCode = error.code || "UNKNOWN_ERROR";
+      return thunkAPI.rejectWithValue({ message: errMessage, code: errCode });
+    }
+  }
+);
+
 /* =====================
    Slice Tanımı
 ===================== */
@@ -222,6 +251,11 @@ const userSlice = createSlice({
     isError: false,
     errorMessage: "",
     errorCode: "",
+    teamMembers: [],
+    isTeamLoading: false,
+    isTeamSuccess: false,
+    isTeamError: false,
+    teamErrorMessage: "",
   },
   reducers: {
     clearState: (state) => {
@@ -279,9 +313,27 @@ const userSlice = createSlice({
       .addCase(updateUserProfile.fulfilled, handleUpdateProfileFulfilled)
       .addCase(updateUserProfile.rejected, (state, action) =>
         handleRejected(state, action, "Profil güncellenemedi.")
-      );
+      )
+      // Fetch Team Members (authors and admins)
+      .addCase(fetchTeamMembers.pending, (state) => {
+        state.isTeamLoading = true;
+        state.isTeamError = false;
+        state.teamErrorMessage = "";
+      })
+      .addCase(fetchTeamMembers.fulfilled, handleFetchTeamMembersFulfilled)
+      .addCase(fetchTeamMembers.rejected, (state, action) => {
+        state.isTeamLoading = false;
+        state.isTeamError = true;
+        state.teamErrorMessage =
+          action.payload?.message || "Yazarlar ve adminler alınamadı.";
+      });
   },
 });
 
 export const { clearState, clearUserState } = userSlice.actions;
 export default userSlice.reducer;
+
+// Selectors for easy access to team members
+export const selectTeamMembers = (state) => state.user.teamMembers;
+export const selectIsTeamLoading = (state) => state.user.isTeamLoading;
+export const selectIsTeamError = (state) => state.user.isTeamError;

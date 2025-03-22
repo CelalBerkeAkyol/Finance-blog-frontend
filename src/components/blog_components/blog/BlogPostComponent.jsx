@@ -40,7 +40,7 @@ const BlogPostComponent = ({ post }) => {
             radius="lg"
             size="sm"
             className="w-auto px-3 py-1"
-            onClick={() => navigate(`/blog/category/${post.category}`)}
+            onPress={() => navigate(`/blog/category/${post.category}`)}
           >
             {slugToReadable(post.category)}
           </Button>

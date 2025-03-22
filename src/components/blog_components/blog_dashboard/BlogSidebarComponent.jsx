@@ -123,7 +123,7 @@ const BlogSidebarComponent = () => {
             {isOpen ? (
               <LogoutComponent sidebar={true} />
             ) : (
-              <button
+              <Button
                 onClick={toggleSidebar}
                 className="w-full flex justify-center items-center"
                 title="Logout"
@@ -132,7 +132,7 @@ const BlogSidebarComponent = () => {
                   icon="heroicons:arrow-right-on-rectangle"
                   className="h-5 w-5 text-gray-600 hover:text-primary"
                 />
-              </button>
+              </Button>
             )}
           </div>
           <Link

@@ -94,10 +94,17 @@ export default function SearchModal({ isOpen, onClose }) {
       isOpen={isOpen}
       // NextUI v2: onClose yerine onOpenChange
       onOpenChange={onClose}
-      // Boyut
-      size="lg"
+      // Boyut - mobil/tablet/masaüstü için responsive
+      size={{
+        "@initial": "full", // Mobil için tam ekran
+        "@sm": "lg", // Tablet ve üstü için normal modal
+      }}
       // Modal içi kaydırma
       scrollBehavior="inside"
+      classNames={{
+        body: "p-3 md:p-5", // Mobilde daha az padding
+        base: "max-h-[90vh] sm:max-h-[80vh]", // Mobilde daha fazla yükseklik
+      }}
     >
       <ModalContent>
         {/* Başlık */}
@@ -107,26 +114,48 @@ export default function SearchModal({ isOpen, onClose }) {
 
         {/* İçerik */}
         <ModalBody>
-          <div className="flex gap-2">
+          {/* Arama alanı - Mobilde Dikey, Masaüstünde Yatay */}
+          <div className="flex flex-row gap-2 items-center">
             <Input
               type="text"
               placeholder="Arama terimini girin..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               className="w-full"
+              size="md"
               startContent={
-                <Icon icon="material-symbols:search" width="20" height="20" />
+                <Icon
+                  icon="material-symbols:search"
+                  width="18"
+                  height="18"
+                  className="text-gray-400"
+                />
               }
+              endContent={
+                searchTerm && (
+                  <Button
+                    isIconOnly
+                    size="sm"
+                    variant="light"
+                    onPress={() => setSearchTerm("")}
+                    className="bg-transparent"
+                  >
+                    <Icon
+                      icon="material-symbols:close"
+                      width="18"
+                      height="18"
+                    />
+                  </Button>
+                )
+              }
+              autoFocus
             />
-            <Button color="primary" onPress={() => setSearchTerm("")}>
-              Temizle
-            </Button>
           </div>
 
           {/* Sonuçlar */}
           <div className="mt-4">
             {searchTerm && filteredPosts.length === 0 && (
-              <p className="text-gray-500">Sonuç bulunamadı</p>
+              <p className="text-gray-500 text-center py-4">Sonuç bulunamadı</p>
             )}
             {filteredPosts.map((post) => (
               <Link
@@ -135,15 +164,16 @@ export default function SearchModal({ isOpen, onClose }) {
                 onClick={handlePostClick}
                 className="block"
               >
-                <div className="border rounded-md p-3 mb-3 hover:bg-gray-50 transition-colors">
-                  <h3 className="font-semibold text-lg text-blue-800">
+                <div className="border rounded-md p-2 sm:p-3 mb-3 hover:bg-gray-50 transition-colors">
+                  <h3 className="font-semibold text-base sm:text-lg text-blue-800 line-clamp-2">
                     {post.title}
                   </h3>
 
-                  <div className="flex flex-wrap gap-2 mt-1 mb-2">
+                  <div className="flex flex-wrap gap-1 sm:gap-2 mt-1 mb-1 sm:mb-2">
                     {post.category && (
                       <Tooltip
                         content={`Kategori: ${slugToReadable(post.category)}`}
+                        delay={500}
                       >
                         <Link
                           to={`/blog/category/${post.category}`}
@@ -179,12 +209,15 @@ export default function SearchModal({ isOpen, onClose }) {
                     )}
                   </div>
 
-                  <div className="text-sm text-gray-600 my-2">
-                    {truncateText(post.summary || post.content, 150)}
+                  <div className="text-xs sm:text-sm text-gray-600 my-1 sm:my-2 line-clamp-2 sm:line-clamp-3">
+                    {truncateText(
+                      post.summary || post.content,
+                      window.innerWidth < 640 ? 100 : 150
+                    )}
                   </div>
 
                   {post.createdAt && (
-                    <div className="text-xs text-gray-500 flex items-center mt-2">
+                    <div className="text-xs text-gray-500 flex items-center mt-1 sm:mt-2">
                       <Icon icon="mdi:calendar" className="mr-1" width="14" />
                       {formatDate(post.createdAt)}
                     </div>
@@ -197,7 +230,13 @@ export default function SearchModal({ isOpen, onClose }) {
 
         {/* Footer */}
         <ModalFooter>
-          <Button color="primary" onPress={onClose}>
+          <Button
+            color="primary"
+            onPress={onClose}
+            className="rounded-full"
+            size="sm"
+            variant="flat"
+          >
             Kapat
           </Button>
         </ModalFooter>

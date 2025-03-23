@@ -124,9 +124,12 @@ export default function SearchModal({ isOpen, onClose }) {
     <Modal
       isOpen={isOpen}
       onOpenChange={onClose}
-      size={{ "@initial": "full", "@sm": "2xl" }}
+      size={{ "@initial": "full", "@sm": "3xl", "@md": "4xl", "@lg": "5xl" }}
       scrollBehavior="inside"
-      classNames={{ body: "p-3 md:p-5", base: "max-h-[90vh] sm:max-h-[80vh]" }}
+      classNames={{
+        body: "p-3 md:p-5",
+        base: "max-h-[90vh] sm:max-h-[60vh] max-w-full sm:max-w-[75%] md:max-w-[70%] lg:max-w-[65%]",
+      }}
     >
       <ModalContent>
         <ModalHeader>

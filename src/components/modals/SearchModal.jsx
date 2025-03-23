@@ -128,7 +128,7 @@ export default function SearchModal({ isOpen, onClose }) {
       scrollBehavior="inside"
       classNames={{
         body: "p-3 md:p-5",
-        base: "max-h-[90vh] sm:max-h-[60vh] max-w-full sm:max-w-[75%] md:max-w-[70%] lg:max-w-[65%]",
+        base: "max-h-[90vh] sm:max-h-[80vh] max-w-full sm:max-w-[75%] md:max-w-[70%] lg:max-w-[65%]",
       }}
     >
       <ModalContent>
@@ -262,18 +262,6 @@ export default function SearchModal({ isOpen, onClose }) {
             ))}
           </div>
         </ModalBody>
-
-        <ModalFooter>
-          <Button
-            color="primary"
-            onPress={onClose}
-            className="rounded-full"
-            size="sm"
-            variant="flat"
-          >
-            Kapat
-          </Button>
-        </ModalFooter>
       </ModalContent>
     </Modal>
   );

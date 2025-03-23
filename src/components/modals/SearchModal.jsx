@@ -1,5 +1,5 @@
 // src/components/yardımcılar/SearchModal.jsx
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback, useRef } from "react";
 // DİKKAT: NextUI v2'de Modal ile ilgili alt bileşenleri böyle import ediyoruz
 import {
   Modal,
@@ -16,157 +16,161 @@ import {
 import { Icon } from "@iconify/react";
 import { useSelector, useDispatch } from "react-redux";
 import { fetchPosts } from "../../app/features/blogs/postsSlice";
-import { Link } from "react-router-dom";
-
-// Helper functions
-const slugToReadable = (slug) => {
-  return slug
-    .split("-")
-    .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
-    .join(" ");
-};
-
-const truncateText = (text, maxLength = 100) => {
-  if (!text) return "";
-  return text.length > maxLength ? text.slice(0, maxLength) + "..." : text;
-};
-
-const formatDate = (dateString) => {
-  if (!dateString) return "";
-  const date = new Date(dateString);
-  return date.toLocaleDateString("tr-TR", {
-    year: "numeric",
-    month: "long",
-    day: "numeric",
-  });
-};
+import { Link, useNavigate } from "react-router-dom";
+import axios from "../../api"; // Axios instance'ınızı import edin
+// Format fonksiyonlarını import et
+import {
+  slugToReadable,
+  truncateText,
+  formatDate,
+} from "../../utils/formatters";
 
 export default function SearchModal({ isOpen, onClose }) {
-  // Tüm postlar Redux'ta "posts" slice içinde
-  const { posts: allPosts, loading } = useSelector((state) => state.posts);
+  const navigate = useNavigate();
+  const { posts: reduxPosts, loading: reduxLoading } = useSelector(
+    (state) => state.posts
+  );
   const dispatch = useDispatch();
 
-  const [searchTerm, setSearchTerm] = useState("");
-  const [filteredPosts, setFilteredPosts] = useState([]);
-  const [initialLoad, setInitialLoad] = useState(true);
+  const [term, setTerm] = useState("");
+  const [results, setResults] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [controller, setController] = useState(null);
+  const debounceTimer = useRef(null);
+  const MIN_CHARS = 3;
 
-  // Modal açıldığında tüm postları çek
-  useEffect(() => {
-    if (isOpen) {
-      // Modal her açıldığında tüm postları çek
-      // Tüm postları getirmek için yüksek limit değeri kullanıyoruz
-      dispatch(fetchPosts({ page: 1, limit: 1000 }));
-      setInitialLoad(false);
-    } else {
-      // Modal kapandığında arama alanını sıfırlayalım
-      setSearchTerm("");
-      setFilteredPosts([]);
+  // İsteği iptal et
+  const cancelSearch = useCallback(() => {
+    if (controller) {
+      controller.abort();
+      setController(null);
+      setLoading(false);
     }
-  }, [isOpen, dispatch]); // allPosts'u bağımlılıklardan kaldırıldı
+  }, [controller]);
 
-  // Arama terimi her değiştiğinde client-side filtre
+  // Cleanup effect
   useEffect(() => {
-    if (!searchTerm || !allPosts) {
-      setFilteredPosts([]);
+    if (!isOpen) {
+      setTerm("");
+      setResults([]);
+      cancelSearch();
+      if (debounceTimer.current) clearTimeout(debounceTimer.current);
+    }
+    return () => {
+      cancelSearch();
+      if (debounceTimer.current) clearTimeout(debounceTimer.current);
+    };
+  }, [isOpen, cancelSearch]);
+
+  // Arama terimini izle ve debounce ile arama yap
+  useEffect(() => {
+    if (term.length < MIN_CHARS) {
+      setResults([]);
       return;
     }
 
-    const term = searchTerm.toLowerCase();
-    const results = allPosts.filter((post) => {
-      const titleMatch = post.title?.toLowerCase().includes(term);
-      const contentMatch = post.content?.toLowerCase().includes(term);
-      const categoryMatch = post.category?.toLowerCase().includes(term);
-      const summaryMatch = post.summary?.toLowerCase().includes(term);
-      const authorMatch = post.author?.name?.toLowerCase().includes(term);
+    // Önceki zamanlayıcıyı temizle
+    if (debounceTimer.current) {
+      clearTimeout(debounceTimer.current);
+    }
 
-      return (
-        titleMatch ||
-        contentMatch ||
-        categoryMatch ||
-        summaryMatch ||
-        authorMatch
-      );
-    });
-    setFilteredPosts(results);
-  }, [searchTerm, allPosts]);
+    // Debounce: 300ms bekle ve sonra arama yap
+    debounceTimer.current = setTimeout(() => {
+      handleSearch();
+    }, 300);
 
-  const handlePostClick = () => {
-    onClose();
+    return () => {
+      if (debounceTimer.current) clearTimeout(debounceTimer.current);
+    };
+  }, [term]);
+
+  // Aramayı gerçekleştir
+  const handleSearch = async () => {
+    if (term.length < MIN_CHARS) return;
+
+    // Önceki isteği iptal et ve yeni controller oluştur
+    cancelSearch();
+    const newController = new AbortController();
+    setController(newController);
+    setLoading(true);
+
+    try {
+      const { data } = await axios.get("/posts/search", {
+        params: { query: term, limit: 20 },
+        signal: newController.signal,
+      });
+
+      if (!newController.signal.aborted) {
+        setResults(data?.success ? data.data : []);
+        setLoading(false);
+      }
+    } catch (error) {
+      if (error.name !== "AbortError") {
+        console.error("Arama hatası:", error);
+        setResults([]);
+        setLoading(false);
+      }
+    }
   };
 
-  const handleCategoryClick = (e) => {
+  // Kategori sayfasına git
+  const goToCategory = (e, category) => {
     e.stopPropagation();
     onClose();
+    navigate(`/blog/category/${category}`);
   };
 
   return (
     <Modal
       isOpen={isOpen}
-      // NextUI v2: onClose yerine onOpenChange
       onOpenChange={onClose}
-      // Boyut - mobil/tablet/masaüstü için responsive
-      size={{
-        "@initial": "full", // Mobil için tam ekran
-        "@sm": "lg", // Tablet ve üstü için normal modal
-      }}
-      // Modal içi kaydırma
+      size={{ "@initial": "full", "@sm": "2xl" }}
       scrollBehavior="inside"
-      classNames={{
-        body: "p-3 md:p-5", // Mobilde daha az padding
-        base: "max-h-[90vh] sm:max-h-[80vh]", // Mobilde daha fazla yükseklik
-      }}
+      classNames={{ body: "p-3 md:p-5", base: "max-h-[90vh] sm:max-h-[80vh]" }}
     >
       <ModalContent>
-        {/* Başlık */}
         <ModalHeader>
           <h2 className="text-xl font-bold">Arama</h2>
         </ModalHeader>
 
-        {/* İçerik */}
         <ModalBody>
-          {/* Arama alanı - Mobilde Dikey, Masaüstünde Yatay */}
-          <div className="flex flex-row gap-2 items-center">
+          {/* Arama alanı */}
+          <div className="w-full">
             <Input
-              type="text"
-              placeholder="Arama terimini girin..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
+              placeholder={`En az ${MIN_CHARS} karakter girin...`}
+              value={term}
+              onChange={(e) => setTerm(e.target.value)}
               className="w-full"
-              size="md"
+              autoFocus
               startContent={
                 <Icon
                   icon="material-symbols:search"
                   width="18"
-                  height="18"
                   className="text-gray-400"
                 />
               }
               endContent={
-                searchTerm &&
-                !loading && (
+                term && (
                   <Button
                     isIconOnly
                     size="sm"
                     variant="light"
-                    onPress={() => setSearchTerm("")}
-                    className="bg-transparent"
+                    onClick={() => {
+                      setTerm("");
+                      setResults([]);
+                    }}
                   >
-                    <Icon
-                      icon="material-symbols:close"
-                      width="18"
-                      height="18"
-                    />
+                    <Icon icon="material-symbols:close" width="18" />
                   </Button>
                 )
               }
-              autoFocus
               disabled={loading}
             />
           </div>
 
           {/* Sonuçlar */}
           <div className="mt-4">
-            {/* Yükleme durumu */}
+            {/* Yükleniyor */}
             {loading && (
               <div className="flex justify-center items-center py-4">
                 <Spinner color="primary" />
@@ -174,53 +178,55 @@ export default function SearchModal({ isOpen, onClose }) {
               </div>
             )}
 
-            {/* Sonuç bulunamadı */}
-            {!loading && searchTerm && filteredPosts.length === 0 && (
-              <p className="text-gray-500 text-center py-4">Sonuç bulunamadı</p>
+            {/* Uyarı mesajları */}
+            {!loading && (
+              <>
+                {term && term.length < MIN_CHARS && (
+                  <p className="text-gray-500 text-center py-4">
+                    Arama için en az {MIN_CHARS} karakter girin
+                  </p>
+                )}
+
+                {term && term.length >= MIN_CHARS && results.length === 0 && (
+                  <p className="text-gray-500 text-center py-4">
+                    Sonuç bulunamadı
+                  </p>
+                )}
+              </>
             )}
 
-            {/* Sonuç listesi - Yüklenirken önceki sonuçlar soluk gösterilir */}
-            {filteredPosts.map((post) => (
+            {/* Sonuç listesi */}
+            {results.map((post) => (
               <Link
                 key={post._id}
                 to={`/blog/post/${post._id}`}
-                onClick={handlePostClick}
-                className={`block ${
-                  loading ? "opacity-50 pointer-events-none" : ""
-                }`}
+                onClick={onClose}
+                className="block"
               >
                 <div className="border rounded-md p-2 sm:p-3 mb-3 hover:bg-gray-50 transition-colors">
+                  {/* Başlık */}
                   <h3 className="font-semibold text-base sm:text-lg text-blue-800 line-clamp-2">
                     {post.title}
                   </h3>
 
+                  {/* Kategori ve yazar */}
                   <div className="flex flex-wrap gap-1 sm:gap-2 mt-1 mb-1 sm:mb-2">
                     {post.category && (
                       <Tooltip
                         content={`Kategori: ${slugToReadable(post.category)}`}
-                        delay={500}
                       >
-                        <Link
-                          to={`/blog/category/${post.category}`}
-                          onClick={handleCategoryClick}
-                          className={`cursor-pointer ${
-                            loading ? "pointer-events-auto" : ""
-                          }`}
+                        <Button
+                          size="sm"
+                          color="primary"
+                          variant="flat"
+                          onClick={(e) => goToCategory(e, post.category)}
+                          className="cursor-pointer min-w-0 h-6 px-2"
+                          startContent={
+                            <Icon icon="material-symbols:category" width="16" />
+                          }
                         >
-                          <Chip
-                            size="sm"
-                            color="primary"
-                            variant="flat"
-                            startContent={
-                              <Icon
-                                icon="material-symbols:category"
-                                width="16"
-                              />
-                            }
-                          >
-                            {slugToReadable(post.category)}
-                          </Chip>
-                        </Link>
+                          {slugToReadable(post.category)}
+                        </Button>
                       </Tooltip>
                     )}
 
@@ -236,15 +242,14 @@ export default function SearchModal({ isOpen, onClose }) {
                     )}
                   </div>
 
+                  {/* İçerik özeti */}
                   <div className="text-xs sm:text-sm text-gray-600 my-1 sm:my-2 line-clamp-2 sm:line-clamp-3">
-                    {truncateText(
-                      post.summary || post.content,
-                      window.innerWidth < 640 ? 100 : 150
-                    )}
+                    {truncateText(post.summary || post.content, 150)}
                   </div>
 
+                  {/* Tarih */}
                   {post.createdAt && (
-                    <div className="text-xs text-gray-500 flex items-center mt-1 sm:mt-2">
+                    <div className="text-xs text-gray-500 flex items-center mt-1">
                       <Icon icon="mdi:calendar" className="mr-1" width="14" />
                       {formatDate(post.createdAt)}
                     </div>
@@ -255,7 +260,6 @@ export default function SearchModal({ isOpen, onClose }) {
           </div>
         </ModalBody>
 
-        {/* Footer */}
         <ModalFooter>
           <Button
             color="primary"

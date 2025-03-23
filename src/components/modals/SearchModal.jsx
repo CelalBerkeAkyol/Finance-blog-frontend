@@ -11,11 +11,12 @@ import {
   Button,
   Chip,
   Tooltip,
+  Spinner,
 } from "@nextui-org/react";
 import { Icon } from "@iconify/react";
-import { useSelector } from "react-redux";
+import { useSelector, useDispatch } from "react-redux";
+import { fetchPosts } from "../../app/features/blogs/postsSlice";
 import { Link } from "react-router-dom";
-import ReactMarkdown from "react-markdown";
 
 // Helper functions
 const slugToReadable = (slug) => {
@@ -42,25 +43,34 @@ const formatDate = (dateString) => {
 
 export default function SearchModal({ isOpen, onClose }) {
   // Tüm postlar Redux'ta "posts" slice içinde
-  const allPosts = useSelector((state) => state.posts.posts);
+  const { posts: allPosts, loading } = useSelector((state) => state.posts);
+  const dispatch = useDispatch();
 
   const [searchTerm, setSearchTerm] = useState("");
   const [filteredPosts, setFilteredPosts] = useState([]);
+  const [initialLoad, setInitialLoad] = useState(true);
 
+  // Modal açıldığında tüm postları çek
   useEffect(() => {
-    // Modal kapandığında arama alanını sıfırlayalım
-    if (!isOpen) {
+    if (isOpen) {
+      // Modal her açıldığında tüm postları çek
+      // Tüm postları getirmek için yüksek limit değeri kullanıyoruz
+      dispatch(fetchPosts({ page: 1, limit: 1000 }));
+      setInitialLoad(false);
+    } else {
+      // Modal kapandığında arama alanını sıfırlayalım
       setSearchTerm("");
       setFilteredPosts([]);
     }
-  }, [isOpen]);
+  }, [isOpen, dispatch]); // allPosts'u bağımlılıklardan kaldırıldı
 
   // Arama terimi her değiştiğinde client-side filtre
   useEffect(() => {
-    if (!searchTerm) {
+    if (!searchTerm || !allPosts) {
       setFilteredPosts([]);
       return;
     }
+
     const term = searchTerm.toLowerCase();
     const results = allPosts.filter((post) => {
       const titleMatch = post.title?.toLowerCase().includes(term);
@@ -132,7 +142,8 @@ export default function SearchModal({ isOpen, onClose }) {
                 />
               }
               endContent={
-                searchTerm && (
+                searchTerm &&
+                !loading && (
                   <Button
                     isIconOnly
                     size="sm"
@@ -149,20 +160,34 @@ export default function SearchModal({ isOpen, onClose }) {
                 )
               }
               autoFocus
+              disabled={loading}
             />
           </div>
 
           {/* Sonuçlar */}
           <div className="mt-4">
-            {searchTerm && filteredPosts.length === 0 && (
+            {/* Yükleme durumu */}
+            {loading && (
+              <div className="flex justify-center items-center py-4">
+                <Spinner color="primary" />
+                <p className="ml-2 text-gray-500">Arama yapılıyor...</p>
+              </div>
+            )}
+
+            {/* Sonuç bulunamadı */}
+            {!loading && searchTerm && filteredPosts.length === 0 && (
               <p className="text-gray-500 text-center py-4">Sonuç bulunamadı</p>
             )}
+
+            {/* Sonuç listesi - Yüklenirken önceki sonuçlar soluk gösterilir */}
             {filteredPosts.map((post) => (
               <Link
                 key={post._id}
                 to={`/blog/post/${post._id}`}
                 onClick={handlePostClick}
-                className="block"
+                className={`block ${
+                  loading ? "opacity-50 pointer-events-none" : ""
+                }`}
               >
                 <div className="border rounded-md p-2 sm:p-3 mb-3 hover:bg-gray-50 transition-colors">
                   <h3 className="font-semibold text-base sm:text-lg text-blue-800 line-clamp-2">
@@ -178,7 +203,9 @@ export default function SearchModal({ isOpen, onClose }) {
                         <Link
                           to={`/blog/category/${post.category}`}
                           onClick={handleCategoryClick}
-                          className="cursor-pointer"
+                          className={`cursor-pointer ${
+                            loading ? "pointer-events-auto" : ""
+                          }`}
                         >
                           <Chip
                             size="sm"

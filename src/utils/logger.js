@@ -70,8 +70,24 @@ export function logInfo(module, message, data = null) {
 
 /**
  * Hata mesajı loglar
+ * @param {string} module - Modül adı
+ * @param {string} message - Hata mesajı
+ * @param {any} error - Hata objesi veya mesajı
  */
 export function logError(module, message, error = null) {
+  // İptal edilen istekleri (AbortError) loglama
+  if (
+    error &&
+    ((typeof error === "string" && error.includes("cancel")) ||
+      error.name === "AbortError" ||
+      error.code === "ERR_CANCELED" ||
+      (typeof error === "object" &&
+        error.message &&
+        error.message.includes("cancel")))
+  ) {
+    return;
+  }
+
   if (shouldLog("error")) {
     console.error(
       `%c[ERROR] ${module}: ${message}`,

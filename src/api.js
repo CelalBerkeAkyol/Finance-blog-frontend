@@ -32,18 +32,42 @@ instance.interceptors.response.use(
     return response; // Cevabı döndür
   },
   (error) => {
-    const errMessage =
-      error.response?.data?.message ||
-      "Beklenmedik bir hata oluştu. (hata mesajı bulunamadı)";
-    const errCode = error.response?.data?.error?.code || "Error code not found";
+    // AbortError'ları (kullanıcı tarafından iptal edilen istekleri) hata olarak işleme
+    if (error.name === "AbortError" || error.code === "ERR_CANCELED") {
+      return Promise.reject({
+        message: "İstek iptal edildi",
+        code: "REQUEST_CANCELED",
+        status: 0,
+        isAborted: true,
+      });
+    }
+
+    // Hata objesi yapısını kontrol et
+    // Bazen bağlantı hatası, timeout gibi durumlarda error.response olmayabilir
+    const isNetworkError = !error.response;
+
+    let errMessage, errCode;
+
+    if (isNetworkError) {
+      // Ağ hatası, bağlantı hatası veya timeout durumu
+      errMessage =
+        error.message ||
+        "Sunucuya erişilemedi. İnternet bağlantınızı kontrol edin.";
+      errCode = "NETWORK_ERROR";
+    } else {
+      // API'den dönen hata
+      errMessage =
+        error.response?.data?.message || "Beklenmedik bir hata oluştu.";
+      errCode = error.response?.data?.error?.code || "UNKNOWN_ERROR";
+    }
 
     // Global logging - sadece geliştirme ortamında
     if (!import.meta.env.PROD) {
       logError(
         "API",
-        `[${error.response?.status}]  ${error.config.method.toUpperCase()} ${
-          error.config.url
-        } --> ${errCode} -->`,
+        `[${error.response?.status || "NETWORK_ERROR"}] ${
+          error.config?.method?.toUpperCase() || "REQUEST"
+        } ${error.config?.url || "UNKNOWN_URL"} --> ${errCode} -->`,
         errMessage
       );
     }
@@ -52,6 +76,7 @@ instance.interceptors.response.use(
       message: errMessage,
       code: errCode,
       status: error.response?.status,
+      isNetworkError: isNetworkError,
     });
   }
 );

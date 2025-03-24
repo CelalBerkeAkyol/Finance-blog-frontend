@@ -36,6 +36,7 @@ export default function SearchModal({ isOpen, onClose }) {
   const [results, setResults] = useState([]);
   const [loading, setLoading] = useState(false);
   const [controller, setController] = useState(null);
+  const [errorMessage, setErrorMessage] = useState("");
   const debounceTimer = useRef(null);
   const MIN_CHARS = 3;
 
@@ -93,6 +94,7 @@ export default function SearchModal({ isOpen, onClose }) {
     const newController = new AbortController();
     setController(newController);
     setLoading(true);
+    setErrorMessage("");
 
     try {
       const { data } = await axios.get("/posts/search", {
@@ -105,11 +107,33 @@ export default function SearchModal({ isOpen, onClose }) {
         setLoading(false);
       }
     } catch (error) {
-      if (error.name !== "AbortError") {
-        console.error("Arama hatası:", error);
-        setResults([]);
-        setLoading(false);
+      // İstek bilinçli olarak iptal edildiyse hiçbir işlem yapma
+      if (
+        error.isAborted ||
+        error.name === "AbortError" ||
+        error.code === "REQUEST_CANCELED"
+      ) {
+        return;
       }
+
+      // Sadece geliştirme ortamında hatayı logla
+      console.log("Arama hatası:", error);
+
+      // Hata durumuna göre mesaj göster
+      let message = "";
+      if (error.isNetworkError) {
+        message =
+          "Sunucuya bağlanılamadı. Lütfen internet bağlantınızı kontrol edin.";
+      } else if (error.status === 404) {
+        message = ""; // 404 hatası durumunda gösterilecek boş mesaj (UI zaten "Sonuç bulunamadı" gösterecek)
+      } else {
+        message =
+          "Arama sırasında bir hata oluştu. Lütfen daha sonra tekrar deneyin.";
+      }
+
+      setErrorMessage(message);
+      setResults([]);
+      setLoading(false);
     }
   };
 
@@ -181,8 +205,19 @@ export default function SearchModal({ isOpen, onClose }) {
               </div>
             )}
 
+            {/* Hata mesajı */}
+            {!loading && errorMessage && (
+              <div className="text-center py-4 border border-red-200 rounded-lg bg-red-50 shadow-sm">
+                <Icon
+                  icon="material-symbols:error"
+                  className="w-10 h-10 mx-auto text-red-500 mb-2"
+                />
+                <p className="text-red-700 font-medium">{errorMessage}</p>
+              </div>
+            )}
+
             {/* Uyarı mesajları */}
-            {!loading && (
+            {!loading && !errorMessage && (
               <>
                 {term && term.length < MIN_CHARS && (
                   <p className="text-gray-500 text-center py-4">
@@ -191,9 +226,19 @@ export default function SearchModal({ isOpen, onClose }) {
                 )}
 
                 {term && term.length >= MIN_CHARS && results.length === 0 && (
-                  <p className="text-gray-500 text-center py-4">
-                    Sonuç bulunamadı
-                  </p>
+                  <div className="text-center py-6 border border-gray-200 rounded-lg bg-gray-50 shadow-sm">
+                    <Icon
+                      icon="material-symbols:search-off"
+                      className="w-12 h-12 mx-auto text-gray-400 mb-3"
+                    />
+                    <p className="text-gray-700 font-medium mb-2">
+                      Aradığınız içerik bulunamadı
+                    </p>
+                    <p className="text-gray-500 text-sm px-4">
+                      Farklı anahtar kelimeler kullanarak yeniden arama
+                      yapabilirsiniz.
+                    </p>
+                  </div>
                 )}
               </>
             )}

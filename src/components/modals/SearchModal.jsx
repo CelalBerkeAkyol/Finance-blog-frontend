@@ -1,245 +1,321 @@
-// src/components/yardımcılar/SearchModal.jsx
-import React, { useState, useEffect } from "react";
-// DİKKAT: NextUI v2'de Modal ile ilgili alt bileşenleri böyle import ediyoruz
+// src/components/modals/SearchModal.jsx
+import React, { useState, useEffect, useCallback } from "react";
 import {
   Modal,
   ModalContent,
   ModalHeader,
   ModalBody,
-  ModalFooter,
   Input,
   Button,
   Chip,
   Tooltip,
+  Spinner,
 } from "@nextui-org/react";
 import { Icon } from "@iconify/react";
-import { useSelector } from "react-redux";
-import { Link } from "react-router-dom";
-import ReactMarkdown from "react-markdown";
+import { Link, useNavigate } from "react-router-dom";
+import {
+  slugToReadable,
+  truncateText,
+  formatDate,
+} from "../../utils/formatters";
 
-// Helper functions
-const slugToReadable = (slug) => {
-  return slug
-    .split("-")
-    .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
-    .join(" ");
-};
+// Custom hooks
+import useDebounce from "../../hooks/useDebounce";
+import useSearch from "../../hooks/useSearch";
+import useFocus from "../../hooks/useFocus";
 
-const truncateText = (text, maxLength = 100) => {
-  if (!text) return "";
-  return text.length > maxLength ? text.slice(0, maxLength) + "..." : text;
-};
-
-const formatDate = (dateString) => {
-  if (!dateString) return "";
-  const date = new Date(dateString);
-  return date.toLocaleDateString("tr-TR", {
-    year: "numeric",
-    month: "long",
-    day: "numeric",
-  });
-};
-
+/**
+ * Arama modalı bileşeni
+ * @param {boolean} isOpen - Modalın açık olup olmadığı
+ * @param {function} onClose - Modal kapatma fonksiyonu
+ */
 export default function SearchModal({ isOpen, onClose }) {
-  // Tüm postlar Redux'ta "posts" slice içinde
-  const allPosts = useSelector((state) => state.posts.posts);
-
+  const navigate = useNavigate();
   const [searchTerm, setSearchTerm] = useState("");
-  const [filteredPosts, setFilteredPosts] = useState([]);
+  const debouncedSearchTerm = useDebounce(searchTerm, 500);
+  const MIN_CHARS = 3;
 
+  // Custom hook'ları kullan
+  const { results, loading, error, searched, performSearch, resetSearch } =
+    useSearch(debouncedSearchTerm, MIN_CHARS);
+
+  const {
+    inputRef,
+    focusInput,
+    setupFocusHandlers,
+    handleInputBlur,
+    handleButtonClick,
+  } = useFocus();
+
+  // Arama ve temizleme işlemleri
+  const handleManualSearch = useCallback(() => {
+    performSearch(true);
+    focusInput();
+  }, [performSearch, focusInput]);
+
+  const clearSearch = useCallback(() => {
+    setSearchTerm("");
+    resetSearch();
+    focusInput();
+  }, [resetSearch, focusInput]);
+
+  // Modal açık/kapalı durum kontrolü ve focus yönetimi
   useEffect(() => {
-    // Modal kapandığında arama alanını sıfırlayalım
+    // Modal kapandığında arama işlemini sıfırla
     if (!isOpen) {
       setSearchTerm("");
-      setFilteredPosts([]);
+      resetSearch();
     }
-  }, [isOpen]);
 
-  // Arama terimi her değiştiğinde client-side filtre
+    // Focus yönetimi için kurulumu yap
+    return setupFocusHandlers(isOpen);
+  }, [isOpen, resetSearch, setupFocusHandlers]);
+
+  // Debouce'lu arama terimini izle
   useEffect(() => {
-    if (!searchTerm) {
-      setFilteredPosts([]);
-      return;
+    if (debouncedSearchTerm && debouncedSearchTerm.length >= MIN_CHARS) {
+      performSearch();
     }
-    const term = searchTerm.toLowerCase();
-    const results = allPosts.filter((post) => {
-      const titleMatch = post.title?.toLowerCase().includes(term);
-      const contentMatch = post.content?.toLowerCase().includes(term);
-      const categoryMatch = post.category?.toLowerCase().includes(term);
-      const summaryMatch = post.summary?.toLowerCase().includes(term);
-      const authorMatch = post.author?.name?.toLowerCase().includes(term);
+  }, [debouncedSearchTerm, performSearch, MIN_CHARS]);
 
-      return (
-        titleMatch ||
-        contentMatch ||
-        categoryMatch ||
-        summaryMatch ||
-        authorMatch
-      );
-    });
-    setFilteredPosts(results);
-  }, [searchTerm, allPosts]);
-
-  const handlePostClick = () => {
-    onClose();
-  };
-
-  const handleCategoryClick = (e) => {
+  // Kategori sayfasına yönlendirme
+  const goToCategory = (e, category) => {
     e.stopPropagation();
     onClose();
+    navigate(`/blog/category/${category}`);
   };
 
   return (
     <Modal
       isOpen={isOpen}
-      // NextUI v2: onClose yerine onOpenChange
       onOpenChange={onClose}
-      // Boyut - mobil/tablet/masaüstü için responsive
-      size={{
-        "@initial": "full", // Mobil için tam ekran
-        "@sm": "lg", // Tablet ve üstü için normal modal
-      }}
-      // Modal içi kaydırma
+      size={{ "@initial": "full", "@sm": "3xl", "@md": "4xl", "@lg": "5xl" }}
       scrollBehavior="inside"
       classNames={{
-        body: "p-3 md:p-5", // Mobilde daha az padding
-        base: "max-h-[90vh] sm:max-h-[80vh]", // Mobilde daha fazla yükseklik
+        body: "p-3 md:p-5",
+        base: "max-h-[90vh] sm:max-h-[80vh] max-w-full sm:max-w-[75%] md:max-w-[70%] lg:max-w-[65%]",
       }}
     >
       <ModalContent>
-        {/* Başlık */}
         <ModalHeader>
           <h2 className="text-xl font-bold">Arama</h2>
         </ModalHeader>
 
-        {/* İçerik */}
         <ModalBody>
-          {/* Arama alanı - Mobilde Dikey, Masaüstünde Yatay */}
-          <div className="flex flex-row gap-2 items-center">
+          {/* Arama Input'u */}
+          <div className="w-full">
             <Input
-              type="text"
-              placeholder="Arama terimini girin..."
+              ref={inputRef}
+              placeholder={`En az ${MIN_CHARS} karakter girin...`}
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
+              autoFocus
               className="w-full"
-              size="md"
               startContent={
                 <Icon
                   icon="material-symbols:search"
                   width="18"
-                  height="18"
                   className="text-gray-400"
                 />
               }
               endContent={
                 searchTerm && (
-                  <Button
-                    isIconOnly
-                    size="sm"
-                    variant="light"
-                    onPress={() => setSearchTerm("")}
-                    className="bg-transparent"
-                  >
-                    <Icon
-                      icon="material-symbols:close"
-                      width="18"
-                      height="18"
-                    />
-                  </Button>
+                  <div className="flex gap-1 items-center">
+                    {searchTerm.length >= MIN_CHARS && (
+                      <Button
+                        size="sm"
+                        variant="flat"
+                        color="primary"
+                        isIconOnly
+                        onClick={handleButtonClick(handleManualSearch)}
+                        isDisabled={loading}
+                      >
+                        <Icon icon="material-symbols:search" width="18" />
+                      </Button>
+                    )}
+                    <Button
+                      isIconOnly
+                      size="sm"
+                      variant="light"
+                      onClick={handleButtonClick(clearSearch)}
+                    >
+                      <Icon icon="material-symbols:close" width="18" />
+                    </Button>
+                  </div>
                 )
               }
-              autoFocus
+              disabled={loading}
+              onKeyDown={(e) => {
+                if (
+                  e.key === "Enter" &&
+                  searchTerm.length >= MIN_CHARS &&
+                  !loading
+                ) {
+                  e.preventDefault();
+                  handleManualSearch();
+                }
+              }}
+              onBlur={handleInputBlur}
+              description={
+                searchTerm.length > 0 && searchTerm.length < MIN_CHARS
+                  ? `En az ${MIN_CHARS} karakter girmelisiniz (${
+                      MIN_CHARS - searchTerm.length
+                    } karakter daha)`
+                  : "Enter tuşuna basarak arama yapabilirsiniz."
+              }
             />
           </div>
 
-          {/* Sonuçlar */}
+          {/* Sonuçlar Bölümü */}
           <div className="mt-4">
-            {searchTerm && filteredPosts.length === 0 && (
-              <p className="text-gray-500 text-center py-4">Sonuç bulunamadı</p>
+            {/* Yükleniyor Durumu */}
+            {loading && (
+              <div className="flex justify-center items-center py-8">
+                <Spinner color="primary" size="lg" />
+                <p className="ml-3 text-gray-600 font-medium">
+                  Arama yapılıyor...
+                </p>
+              </div>
             )}
-            {filteredPosts.map((post) => (
-              <Link
-                key={post._id}
-                to={`/blog/post/${post._id}`}
-                onClick={handlePostClick}
-                className="block"
-              >
-                <div className="border rounded-md p-2 sm:p-3 mb-3 hover:bg-gray-50 transition-colors">
-                  <h3 className="font-semibold text-base sm:text-lg text-blue-800 line-clamp-2">
-                    {post.title}
-                  </h3>
 
-                  <div className="flex flex-wrap gap-1 sm:gap-2 mt-1 mb-1 sm:mb-2">
-                    {post.category && (
-                      <Tooltip
-                        content={`Kategori: ${slugToReadable(post.category)}`}
-                        delay={500}
-                      >
-                        <Link
-                          to={`/blog/category/${post.category}`}
-                          onClick={handleCategoryClick}
-                          className="cursor-pointer"
-                        >
-                          <Chip
-                            size="sm"
-                            color="primary"
-                            variant="flat"
-                            startContent={
-                              <Icon
-                                icon="material-symbols:category"
-                                width="16"
-                              />
-                            }
-                          >
-                            {slugToReadable(post.category)}
-                          </Chip>
-                        </Link>
-                      </Tooltip>
-                    )}
+            {/* Hata Durumu */}
+            {!loading && error && (
+              <div className="text-center py-4 border border-red-200 rounded-lg bg-red-50 shadow-sm">
+                <Icon
+                  icon="material-symbols:error"
+                  className="w-10 h-10 mx-auto text-red-500 mb-2"
+                />
+                <p className="text-red-700 font-medium">{error}</p>
+                <Button
+                  color="primary"
+                  size="sm"
+                  className="mt-3"
+                  onClick={handleButtonClick(handleManualSearch)}
+                >
+                  Tekrar Dene
+                </Button>
+              </div>
+            )}
 
-                    {post.author?.name && (
-                      <Chip
+            {/* Yönlendirme Mesajları */}
+            {!loading && !error && (
+              <>
+                {searchTerm && searchTerm.length < MIN_CHARS && (
+                  <p className="text-gray-500 text-center py-4">
+                    Arama için en az {MIN_CHARS} karakter girin
+                  </p>
+                )}
+
+                {searchTerm &&
+                  searchTerm.length >= MIN_CHARS &&
+                  searched &&
+                  results.length === 0 && (
+                    <div className="text-center py-6 border border-gray-200 rounded-lg bg-gray-50 shadow-sm">
+                      <Icon
+                        icon="material-symbols:search-off"
+                        className="w-12 h-12 mx-auto text-gray-400 mb-3"
+                      />
+                      <p className="text-gray-700 font-medium mb-2">
+                        Aradığınız içerik bulunamadı
+                      </p>
+                      <p className="text-gray-500 text-sm px-4 mb-3">
+                        Farklı anahtar kelimeler kullanarak yeniden arama
+                        yapabilirsiniz.
+                      </p>
+                      <Button
+                        color="primary"
                         size="sm"
-                        color="secondary"
-                        variant="flat"
-                        startContent={<Icon icon="mdi:account" width="16" />}
+                        onClick={handleButtonClick(handleManualSearch)}
+                        startContent={
+                          <Icon icon="material-symbols:search" width="16" />
+                        }
                       >
-                        {post.author.name}
-                      </Chip>
-                    )}
-                  </div>
-
-                  <div className="text-xs sm:text-sm text-gray-600 my-1 sm:my-2 line-clamp-2 sm:line-clamp-3">
-                    {truncateText(
-                      post.summary || post.content,
-                      window.innerWidth < 640 ? 100 : 150
-                    )}
-                  </div>
-
-                  {post.createdAt && (
-                    <div className="text-xs text-gray-500 flex items-center mt-1 sm:mt-2">
-                      <Icon icon="mdi:calendar" className="mr-1" width="14" />
-                      {formatDate(post.createdAt)}
+                        Tekrar Ara
+                      </Button>
                     </div>
                   )}
-                </div>
-              </Link>
-            ))}
+              </>
+            )}
+
+            {/* Sonuç Listesi */}
+            {results.length > 0 && (
+              <div className="mt-2">
+                {results.map((post) => (
+                  <Link
+                    key={post._id}
+                    to={`/blog/post/${post._id}`}
+                    onClick={onClose}
+                    className="block"
+                  >
+                    <div className="border rounded-md p-2 sm:p-3 mb-3 hover:bg-gray-50 transition-colors">
+                      {/* Post Başlığı */}
+                      <h3 className="font-semibold text-base sm:text-lg text-blue-800 line-clamp-2">
+                        {post.title}
+                      </h3>
+
+                      {/* Kategori ve Yazar */}
+                      <div className="flex flex-wrap gap-1 sm:gap-2 mt-1 mb-1 sm:mb-2">
+                        {post.category && (
+                          <Tooltip
+                            content={`Kategori: ${slugToReadable(
+                              post.category
+                            )}`}
+                          >
+                            <Button
+                              size="sm"
+                              color="primary"
+                              variant="flat"
+                              onClick={(e) => goToCategory(e, post.category)}
+                              className="cursor-pointer min-w-0 h-6 px-2"
+                              startContent={
+                                <Icon
+                                  icon="material-symbols:category"
+                                  width="16"
+                                />
+                              }
+                            >
+                              {slugToReadable(post.category)}
+                            </Button>
+                          </Tooltip>
+                        )}
+
+                        {post.author?.name && (
+                          <Chip
+                            size="sm"
+                            color="secondary"
+                            variant="flat"
+                            startContent={
+                              <Icon icon="mdi:account" width="16" />
+                            }
+                          >
+                            {post.author.name}
+                          </Chip>
+                        )}
+                      </div>
+
+                      {/* İçerik Özeti */}
+                      <div className="text-xs sm:text-sm text-gray-600 my-1 sm:my-2 line-clamp-2 sm:line-clamp-3">
+                        {truncateText(post.summary || post.content, 150)}
+                      </div>
+
+                      {/* Tarih */}
+                      {post.createdAt && (
+                        <div className="text-xs text-gray-500 flex items-center mt-1">
+                          <Icon
+                            icon="mdi:calendar"
+                            className="mr-1"
+                            width="14"
+                          />
+                          {formatDate(post.createdAt)}
+                        </div>
+                      )}
+                    </div>
+                  </Link>
+                ))}
+              </div>
+            )}
           </div>
         </ModalBody>
-
-        {/* Footer */}
-        <ModalFooter>
-          <Button
-            color="primary"
-            onPress={onClose}
-            className="rounded-full"
-            size="sm"
-            variant="flat"
-          >
-            Kapat
-          </Button>
-        </ModalFooter>
       </ModalContent>
     </Modal>
   );

@@ -21,4 +21,51 @@
     -webkit-overflow-scrolling: touch;
     scroll-behavior: smooth;
   }
+
+  /* Mobil cihazlarda form elemanları için zoom engelleme */
+  @media (max-width: 768px) {
+    input,
+    textarea,
+    select,
+    .nextui-input-wrapper,
+    [contenteditable="true"] {
+      font-size: 14px !important; /* Minimum 14px font büyüklüğü ile mobil zoom engellenir */
+      max-height: none !important;
+      line-height: normal !important;
+    }
+
+    /* NextUI özel form elemanları */
+    .nextui-c-iWjDFM {
+      /* NextUI input container */
+      font-size: 16px !important;
+    }
+
+    .nextui-c-PJLV-ikzDMcp-css {
+      /* NextUI input wrapper */
+      transform: none !important;
+    }
+
+    /* Select ve multi-select için */
+    .nextui-c-hkKjww {
+      font-size: 16px !important;
+    }
+
+    /* NextUI için diğer form elemanları */
+    [class*="nextui-"][class*="input"],
+    [class*="nextui-"][class*="select"],
+    [class*="nextui-"][class*="textarea"] {
+      font-size: 16px !important;
+    }
+  }
+}
+
+/* Mobil zoom sorununu çözmek için özel stiller */
+.mobile-input-fix {
+  transform: scale(1);
+  transform-origin: left top;
+}
+
+/* Input için focus/blur animasyonlarını düzeltme */
+.focus-fix {
+  transition: none !important;
 }

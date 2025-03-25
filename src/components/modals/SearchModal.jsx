@@ -1,5 +1,5 @@
 // src/components/modals/SearchModal.jsx
-import React, { useState, useEffect, useRef, useCallback } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import {
   Modal,
   ModalContent,
@@ -13,266 +13,72 @@ import {
 } from "@nextui-org/react";
 import { Icon } from "@iconify/react";
 import { Link, useNavigate } from "react-router-dom";
-import axios from "../../api";
 import {
   slugToReadable,
   truncateText,
   formatDate,
 } from "../../utils/formatters";
 
-// Custom hook for debounced search
-function useDebounce(value, delay = 500) {
-  const [debouncedValue, setDebouncedValue] = useState(value);
+// Custom hooks
+import useDebounce from "../../hooks/useDebounce";
+import useSearch from "../../hooks/useSearch";
+import useFocus from "../../hooks/useFocus";
 
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      setDebouncedValue(value);
-    }, delay);
-
-    return () => {
-      clearTimeout(timer);
-    };
-  }, [value, delay]);
-
-  return debouncedValue;
-}
-
-// Custom hook for search functionality
-function useSearch(searchTerm, minChars = 3) {
-  const [state, setState] = useState({
-    results: [],
-    loading: false,
-    error: null,
-    searched: false,
-  });
-
-  const abortControllerRef = useRef(null);
-
-  // Search function - memoized with useCallback
-  const performSearch = useCallback(
-    async (manualSearch = false) => {
-      // Don't search if term is too short
-      if (!searchTerm || searchTerm.length < minChars) {
-        setState((prev) => ({
-          ...prev,
-          results: [],
-          loading: false,
-          error: null,
-        }));
-        return;
-      }
-
-      // Cancel previous request
-      if (abortControllerRef.current) {
-        abortControllerRef.current.abort();
-      }
-
-      // Create new abort controller
-      abortControllerRef.current = new AbortController();
-
-      // Set loading state
-      setState((prev) => ({ ...prev, loading: true, error: null }));
-
-      try {
-        const { data } = await axios.get("/posts/search", {
-          params: { query: searchTerm, limit: 20 },
-          signal: abortControllerRef.current.signal,
-        });
-
-        // Update state with results
-        setState({
-          results: data?.success ? data.data : [],
-          loading: false,
-          error: null,
-          searched: true,
-        });
-      } catch (error) {
-        // Ignore aborted requests
-        if (error.name === "AbortError" || error.code === "ERR_CANCELED") {
-          return;
-        }
-
-        // Handle network errors
-        if (error.isNetworkError) {
-          setState((prev) => ({
-            ...prev,
-            loading: false,
-            error:
-              "Bağlantı hatası. Lütfen internet bağlantınızı kontrol edin.",
-            searched: true,
-          }));
-          return;
-        }
-
-        // Handle other errors
-        setState((prev) => ({
-          ...prev,
-          loading: false,
-          error:
-            "Arama yapılırken bir hata oluştu. Lütfen daha sonra tekrar deneyin.",
-          results: [],
-          searched: true,
-        }));
-
-        console.error("Arama hatası:", error);
-      }
-    },
-    [searchTerm, minChars]
-  ); // Memoize this function with its dependencies
-
-  // Reset search - memoized with useCallback
-  const resetSearch = useCallback(() => {
-    if (abortControllerRef.current) {
-      abortControllerRef.current.abort();
-    }
-    setState({
-      results: [],
-      loading: false,
-      error: null,
-      searched: false,
-    });
-  }, []); // This function doesn't depend on any props or state
-
-  // Clean up on unmount
-  useEffect(() => {
-    return () => {
-      if (abortControllerRef.current) {
-        abortControllerRef.current.abort();
-      }
-    };
-  }, []);
-
-  return { ...state, performSearch, resetSearch };
-}
-
+/**
+ * Arama modalı bileşeni
+ * @param {boolean} isOpen - Modalın açık olup olmadığı
+ * @param {function} onClose - Modal kapatma fonksiyonu
+ */
 export default function SearchModal({ isOpen, onClose }) {
   const navigate = useNavigate();
-  const inputRef = useRef(null);
-  const focusTimeoutRef = useRef(null);
-  const modalRef = useRef(null);
-
   const [searchTerm, setSearchTerm] = useState("");
   const debouncedSearchTerm = useDebounce(searchTerm, 500);
-
   const MIN_CHARS = 3;
 
+  // Custom hook'ları kullan
   const { results, loading, error, searched, performSearch, resetSearch } =
     useSearch(debouncedSearchTerm, MIN_CHARS);
 
-  // Basit bir fokus fonksiyonu oluşturalım
-  const focusSearchInput = useCallback(() => {
-    if (inputRef.current) {
-      // Önce mevcut timeout'u temizleyelim
-      if (focusTimeoutRef.current) {
-        clearTimeout(focusTimeoutRef.current);
-      }
+  const {
+    inputRef,
+    focusInput,
+    setupFocusHandlers,
+    handleInputBlur,
+    handleButtonClick,
+  } = useFocus();
 
-      // Yeni bir timeout ile focus yapalım (daha güvenilir)
-      focusTimeoutRef.current = setTimeout(() => {
-        try {
-          inputRef.current.focus();
-        } catch (e) {
-          console.error("Focus error:", e);
-        }
-      }, 10); // Daha hızlı cevap vermesi için 10ms'ye düşürdüm
-    }
-  }, []);
-
-  // Handle manual search - memoized to prevent recreation on each render
+  // Arama ve temizleme işlemleri
   const handleManualSearch = useCallback(() => {
     performSearch(true);
-    focusSearchInput(); // Aramadan sonra odaklan
-  }, [performSearch, focusSearchInput]);
+    focusInput();
+  }, [performSearch, focusInput]);
 
-  // Clear search - memoized to prevent recreation on each render
   const clearSearch = useCallback(() => {
     setSearchTerm("");
     resetSearch();
-    focusSearchInput(); // Temizledikten sonra odaklan
-  }, [resetSearch, focusSearchInput]);
+    focusInput();
+  }, [resetSearch, focusInput]);
 
-  // Arama input'una sürekli fokuslanmayı sağla
+  // Modal açık/kapalı durum kontrolü ve focus yönetimi
   useEffect(() => {
+    // Modal kapandığında arama işlemini sıfırla
     if (!isOpen) {
-      // Modal kapalıyken işlem yapma
       setSearchTerm("");
       resetSearch();
-
-      // Timeout'u temizle
-      if (focusTimeoutRef.current) {
-        clearTimeout(focusTimeoutRef.current);
-      }
-      return;
     }
 
-    // Modal açıldığında hemen focus yap
-    focusSearchInput();
+    // Focus yönetimi için kurulumu yap
+    return setupFocusHandlers(isOpen);
+  }, [isOpen, resetSearch, setupFocusHandlers]);
 
-    // Herhangi bir yere tıklandığında fokus'u input'a geri getir
-    const handleDocumentClick = (e) => {
-      // Eğer tıklanan öğe input değilse ve modal açıksa
-      if (inputRef.current && e.target !== inputRef.current) {
-        // Ancak tıklanan element bir buton ise ve link içeriyor mu kontrol et
-        const isButton = e.target.closest("button");
-        const isLink = e.target.closest("a");
-
-        if (!isButton && !isLink) {
-          e.preventDefault(); // Diğer etkileşimleri engelle
-          focusSearchInput();
-        } else {
-          // İşlem tamamlandıktan sonra tekrar focus yap
-          setTimeout(focusSearchInput, 100);
-        }
-      }
-    };
-
-    // Herhangi bir tuşa basıldığında fokus'u kontrol et
-    const handleKeyDown = () => {
-      // Input'a odaklanmamışsa odaklan
-      if (document.activeElement !== inputRef.current) {
-        focusSearchInput();
-      }
-    };
-
-    // Otomatik arama sırasında fokus kaybolmasın
-    const preventFocusLoss = () => {
-      if (inputRef.current && document.activeElement !== inputRef.current) {
-        focusSearchInput();
-      }
-    };
-
-    // Olay dinleyicilerini ekle
-    document.addEventListener("click", handleDocumentClick);
-    document.addEventListener("keydown", handleKeyDown);
-
-    // Periyodik olarak fokus kontrolü yap
-    const focusInterval = setInterval(preventFocusLoss, 100);
-
-    // Cleanup
-    return () => {
-      document.removeEventListener("click", handleDocumentClick);
-      document.removeEventListener("keydown", handleKeyDown);
-      clearInterval(focusInterval);
-
-      if (focusTimeoutRef.current) {
-        clearTimeout(focusTimeoutRef.current);
-      }
-    };
-  }, [isOpen, resetSearch, focusSearchInput]);
-
-  // Modal içeriğine referans ayarla
-  const handleModalContentRef = (ref) => {
-    modalRef.current = ref;
-  };
-
-  // Listen for debounced search term changes
+  // Debouce'lu arama terimini izle
   useEffect(() => {
     if (debouncedSearchTerm && debouncedSearchTerm.length >= MIN_CHARS) {
       performSearch();
     }
-  }, [debouncedSearchTerm, performSearch]);
+  }, [debouncedSearchTerm, performSearch, MIN_CHARS]);
 
-  // Handle category navigation
+  // Kategori sayfasına yönlendirme
   const goToCategory = (e, category) => {
     e.stopPropagation();
     onClose();
@@ -290,13 +96,13 @@ export default function SearchModal({ isOpen, onClose }) {
         base: "max-h-[90vh] sm:max-h-[80vh] max-w-full sm:max-w-[75%] md:max-w-[70%] lg:max-w-[65%]",
       }}
     >
-      <ModalContent ref={handleModalContentRef}>
+      <ModalContent>
         <ModalHeader>
           <h2 className="text-xl font-bold">Arama</h2>
         </ModalHeader>
 
         <ModalBody>
-          {/* Search Input */}
+          {/* Arama Input'u */}
           <div className="w-full">
             <Input
               ref={inputRef}
@@ -321,12 +127,7 @@ export default function SearchModal({ isOpen, onClose }) {
                         variant="flat"
                         color="primary"
                         isIconOnly
-                        onClick={(e) => {
-                          handleManualSearch();
-                          // Buton tıklaması sonrası input fokusunu koru
-                          setTimeout(focusSearchInput, 0);
-                          e.stopPropagation();
-                        }}
+                        onClick={handleButtonClick(handleManualSearch)}
                         isDisabled={loading}
                       >
                         <Icon icon="material-symbols:search" width="18" />
@@ -336,12 +137,7 @@ export default function SearchModal({ isOpen, onClose }) {
                       isIconOnly
                       size="sm"
                       variant="light"
-                      onClick={(e) => {
-                        clearSearch();
-                        // Buton tıklaması sonrası input fokusunu koru
-                        setTimeout(focusSearchInput, 0);
-                        e.stopPropagation();
-                      }}
+                      onClick={handleButtonClick(clearSearch)}
                     >
                       <Icon icon="material-symbols:close" width="18" />
                     </Button>
@@ -359,10 +155,7 @@ export default function SearchModal({ isOpen, onClose }) {
                   handleManualSearch();
                 }
               }}
-              onBlur={(e) => {
-                // Input'tan focus çıkarsa, hemen geri getir
-                setTimeout(focusSearchInput, 0);
-              }}
+              onBlur={handleInputBlur}
               description={
                 searchTerm.length > 0 && searchTerm.length < MIN_CHARS
                   ? `En az ${MIN_CHARS} karakter girmelisiniz (${
@@ -373,9 +166,9 @@ export default function SearchModal({ isOpen, onClose }) {
             />
           </div>
 
-          {/* Results Container */}
+          {/* Sonuçlar Bölümü */}
           <div className="mt-4">
-            {/* Loading State */}
+            {/* Yükleniyor Durumu */}
             {loading && (
               <div className="flex justify-center items-center py-8">
                 <Spinner color="primary" size="lg" />
@@ -385,7 +178,7 @@ export default function SearchModal({ isOpen, onClose }) {
               </div>
             )}
 
-            {/* Error State */}
+            {/* Hata Durumu */}
             {!loading && error && (
               <div className="text-center py-4 border border-red-200 rounded-lg bg-red-50 shadow-sm">
                 <Icon
@@ -397,14 +190,14 @@ export default function SearchModal({ isOpen, onClose }) {
                   color="primary"
                   size="sm"
                   className="mt-3"
-                  onClick={handleManualSearch}
+                  onClick={handleButtonClick(handleManualSearch)}
                 >
                   Tekrar Dene
                 </Button>
               </div>
             )}
 
-            {/* Guidance Messages */}
+            {/* Yönlendirme Mesajları */}
             {!loading && !error && (
               <>
                 {searchTerm && searchTerm.length < MIN_CHARS && (
@@ -432,7 +225,7 @@ export default function SearchModal({ isOpen, onClose }) {
                       <Button
                         color="primary"
                         size="sm"
-                        onClick={handleManualSearch}
+                        onClick={handleButtonClick(handleManualSearch)}
                         startContent={
                           <Icon icon="material-symbols:search" width="16" />
                         }
@@ -444,7 +237,7 @@ export default function SearchModal({ isOpen, onClose }) {
               </>
             )}
 
-            {/* Results List */}
+            {/* Sonuç Listesi */}
             {results.length > 0 && (
               <div className="mt-2">
                 {results.map((post) => (
@@ -455,12 +248,12 @@ export default function SearchModal({ isOpen, onClose }) {
                     className="block"
                   >
                     <div className="border rounded-md p-2 sm:p-3 mb-3 hover:bg-gray-50 transition-colors">
-                      {/* Post Title */}
+                      {/* Post Başlığı */}
                       <h3 className="font-semibold text-base sm:text-lg text-blue-800 line-clamp-2">
                         {post.title}
                       </h3>
 
-                      {/* Category and Author */}
+                      {/* Kategori ve Yazar */}
                       <div className="flex flex-wrap gap-1 sm:gap-2 mt-1 mb-1 sm:mb-2">
                         {post.category && (
                           <Tooltip
@@ -500,12 +293,12 @@ export default function SearchModal({ isOpen, onClose }) {
                         )}
                       </div>
 
-                      {/* Content Summary */}
+                      {/* İçerik Özeti */}
                       <div className="text-xs sm:text-sm text-gray-600 my-1 sm:my-2 line-clamp-2 sm:line-clamp-3">
                         {truncateText(post.summary || post.content, 150)}
                       </div>
 
-                      {/* Date */}
+                      {/* Tarih */}
                       {post.createdAt && (
                         <div className="text-xs text-gray-500 flex items-center mt-1">
                           <Icon

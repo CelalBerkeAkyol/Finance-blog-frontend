@@ -149,6 +149,7 @@ export default function SearchModal({ isOpen, onClose }) {
   const navigate = useNavigate();
   const inputRef = useRef(null);
   const focusTimeoutRef = useRef(null);
+  const modalRef = useRef(null);
 
   const [searchTerm, setSearchTerm] = useState("");
   const debouncedSearchTerm = useDebounce(searchTerm, 500);
@@ -173,52 +174,27 @@ export default function SearchModal({ isOpen, onClose }) {
         } catch (e) {
           console.error("Focus error:", e);
         }
-      }, 50);
+      }, 10); // Daha hızlı cevap vermesi için 10ms'ye düşürdüm
     }
   }, []);
 
   // Handle manual search - memoized to prevent recreation on each render
   const handleManualSearch = useCallback(() => {
     performSearch(true);
-    focusSearchInput();
+    focusSearchInput(); // Aramadan sonra odaklan
   }, [performSearch, focusSearchInput]);
 
   // Clear search - memoized to prevent recreation on each render
   const clearSearch = useCallback(() => {
     setSearchTerm("");
     resetSearch();
-    focusSearchInput();
+    focusSearchInput(); // Temizledikten sonra odaklan
   }, [resetSearch, focusSearchInput]);
 
-  // Focus input when modal opens and keep focus in search input
+  // Arama input'una sürekli fokuslanmayı sağla
   useEffect(() => {
-    // Modal açıldığında focus yapalım
-    if (isOpen) {
-      focusSearchInput();
-
-      // Focus'u modalda tutmak için olay dinleyicisi
-      const handleFocusOut = () => {
-        // Aktif öğe modalın içinde değilse, input'a tekrar odaklan
-        const modalContent = document.querySelector(".nextui-modal-content");
-        if (modalContent && !modalContent.contains(document.activeElement)) {
-          focusSearchInput();
-        }
-      };
-
-      // Focus'u izle
-      document.addEventListener("focusin", handleFocusOut);
-
-      return () => {
-        // Temizlik
-        document.removeEventListener("focusin", handleFocusOut);
-        if (focusTimeoutRef.current) {
-          clearTimeout(focusTimeoutRef.current);
-        }
-      };
-    }
-
-    // Modal kapandığında
     if (!isOpen) {
+      // Modal kapalıyken işlem yapma
       setSearchTerm("");
       resetSearch();
 
@@ -226,8 +202,68 @@ export default function SearchModal({ isOpen, onClose }) {
       if (focusTimeoutRef.current) {
         clearTimeout(focusTimeoutRef.current);
       }
+      return;
     }
+
+    // Modal açıldığında hemen focus yap
+    focusSearchInput();
+
+    // Herhangi bir yere tıklandığında fokus'u input'a geri getir
+    const handleDocumentClick = (e) => {
+      // Eğer tıklanan öğe input değilse ve modal açıksa
+      if (inputRef.current && e.target !== inputRef.current) {
+        // Ancak tıklanan element bir buton ise ve link içeriyor mu kontrol et
+        const isButton = e.target.closest("button");
+        const isLink = e.target.closest("a");
+
+        if (!isButton && !isLink) {
+          e.preventDefault(); // Diğer etkileşimleri engelle
+          focusSearchInput();
+        } else {
+          // İşlem tamamlandıktan sonra tekrar focus yap
+          setTimeout(focusSearchInput, 100);
+        }
+      }
+    };
+
+    // Herhangi bir tuşa basıldığında fokus'u kontrol et
+    const handleKeyDown = () => {
+      // Input'a odaklanmamışsa odaklan
+      if (document.activeElement !== inputRef.current) {
+        focusSearchInput();
+      }
+    };
+
+    // Otomatik arama sırasında fokus kaybolmasın
+    const preventFocusLoss = () => {
+      if (inputRef.current && document.activeElement !== inputRef.current) {
+        focusSearchInput();
+      }
+    };
+
+    // Olay dinleyicilerini ekle
+    document.addEventListener("click", handleDocumentClick);
+    document.addEventListener("keydown", handleKeyDown);
+
+    // Periyodik olarak fokus kontrolü yap
+    const focusInterval = setInterval(preventFocusLoss, 100);
+
+    // Cleanup
+    return () => {
+      document.removeEventListener("click", handleDocumentClick);
+      document.removeEventListener("keydown", handleKeyDown);
+      clearInterval(focusInterval);
+
+      if (focusTimeoutRef.current) {
+        clearTimeout(focusTimeoutRef.current);
+      }
+    };
   }, [isOpen, resetSearch, focusSearchInput]);
+
+  // Modal içeriğine referans ayarla
+  const handleModalContentRef = (ref) => {
+    modalRef.current = ref;
+  };
 
   // Listen for debounced search term changes
   useEffect(() => {
@@ -254,7 +290,7 @@ export default function SearchModal({ isOpen, onClose }) {
         base: "max-h-[90vh] sm:max-h-[80vh] max-w-full sm:max-w-[75%] md:max-w-[70%] lg:max-w-[65%]",
       }}
     >
-      <ModalContent>
+      <ModalContent ref={handleModalContentRef}>
         <ModalHeader>
           <h2 className="text-xl font-bold">Arama</h2>
         </ModalHeader>
@@ -285,7 +321,12 @@ export default function SearchModal({ isOpen, onClose }) {
                         variant="flat"
                         color="primary"
                         isIconOnly
-                        onClick={handleManualSearch}
+                        onClick={(e) => {
+                          handleManualSearch();
+                          // Buton tıklaması sonrası input fokusunu koru
+                          setTimeout(focusSearchInput, 0);
+                          e.stopPropagation();
+                        }}
                         isDisabled={loading}
                       >
                         <Icon icon="material-symbols:search" width="18" />
@@ -295,7 +336,12 @@ export default function SearchModal({ isOpen, onClose }) {
                       isIconOnly
                       size="sm"
                       variant="light"
-                      onClick={clearSearch}
+                      onClick={(e) => {
+                        clearSearch();
+                        // Buton tıklaması sonrası input fokusunu koru
+                        setTimeout(focusSearchInput, 0);
+                        e.stopPropagation();
+                      }}
                     >
                       <Icon icon="material-symbols:close" width="18" />
                     </Button>
@@ -312,6 +358,10 @@ export default function SearchModal({ isOpen, onClose }) {
                   e.preventDefault();
                   handleManualSearch();
                 }
+              }}
+              onBlur={(e) => {
+                // Input'tan focus çıkarsa, hemen geri getir
+                setTimeout(focusSearchInput, 0);
               }}
               description={
                 searchTerm.length > 0 && searchTerm.length < MIN_CHARS

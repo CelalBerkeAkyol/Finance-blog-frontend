@@ -266,7 +266,13 @@ const ProfileComponent = () => {
       <ProfileSummaryCard userInfo={userInfo} onEditClick={handleStartEdit} />
 
       {/* Profil Düzenleme Modalı */}
-      <Modal isOpen={isOpen && editMode} onClose={onClose} size="2xl">
+      <Modal
+        isOpen={isOpen && editMode}
+        onClose={onClose}
+        size="2xl"
+        scrollBehavior="inside"
+        placement="center"
+      >
         <ModalContent>
           {(onClose) => (
             <>

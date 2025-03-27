@@ -98,7 +98,18 @@ function BlogPostPage() {
           {isLoading ? (
             <BlogPostSkeleton />
           ) : post ? (
-            <BlogPostComponent post={post} />
+            <>
+              <BlogPostComponent post={post} />
+
+              {/* Mobil için önerilen yazılar - blog post altında göster */}
+              <div className="mt-8 md:hidden">
+                <div className="border-t pt-4">
+                  {!isLoading && post && posts.length > 0 && (
+                    <RightSideBar post={post} />
+                  )}
+                </div>
+              </div>
+            </>
           ) : null}
         </div>
 

@@ -51,7 +51,7 @@ const RelatedPostsComponent = ({ currentPostId, category }) => {
 
   return (
     <div className="w-full text-left">
-      <h3 className="text-lg font-bold mb-4 text-gray-800 border-b pb-2 text-left">
+      <h3 className="text-2xl font-bold mb-4 ml-2 text-gray-800 border-b pb-2 text-left">
         Önerilen Yazılar
       </h3>
       <div className="flex flex-col gap-4">

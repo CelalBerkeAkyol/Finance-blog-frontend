@@ -334,103 +334,151 @@ function GalleryPage() {
       <div className="flex-1 p-4 md:p-6 overflow-x-auto">
         {/* Üst Butonlar */}
         <div className="mb-4">
-          <div className="flex flex-wrap gap-2 justify-between items-center mb-2">
-            <div className="flex items-center gap-2">
-              <Button
-                variant="flat"
-                color={selectMode ? "primary" : "default"}
-                startContent={
-                  <Icon
-                    icon={
-                      selectMode
-                        ? "material-symbols:check-box-outline"
-                        : "material-symbols:check-box-outline-blank"
-                    }
-                  />
-                }
-                onPress={toggleSelectMode}
-              >
-                {selectMode ? "Seçim Modunu Kapat" : "Çoklu Seçim Modu"}
-              </Button>
+          {/* Küçük ekranlarda esnek düzen için iyileştirilmiş buton alanı */}
+          <div className="flex flex-col gap-3">
+            {/* Üst kontrol grubu - mobil ekranlarda tek satır ya da dikey düzen */}
+            <div className="flex flex-wrap justify-between items-center">
+              {/* Seçim butonları - mobil için optimize edilmiş */}
+              <div className="flex flex-wrap items-center gap-1 mb-2 sm:mb-0">
+                <Button
+                  variant="flat"
+                  color={selectMode ? "primary" : "default"}
+                  size="sm"
+                  startContent={
+                    <Icon
+                      icon={
+                        selectMode
+                          ? "material-symbols:check-box-outline"
+                          : "material-symbols:check-box-outline-blank"
+                      }
+                    />
+                  }
+                  onPress={toggleSelectMode}
+                  className="min-w-0 sm:min-w-[120px]"
+                >
+                  <span className="hidden sm:inline">
+                    {selectMode ? "Seçim Modunu Kapat" : "Çoklu Seçim"}
+                  </span>
+                  <span className="sm:hidden">
+                    {selectMode ? "Seçim Kapalı" : "Seçim"}
+                  </span>
+                </Button>
 
-              {selectMode && (
+                {selectMode && (
+                  <Button
+                    variant="flat"
+                    color="default"
+                    size="sm"
+                    onPress={handleSelectAll}
+                    className="min-w-0 sm:min-w-[100px]"
+                  >
+                    <span className="hidden sm:inline">
+                      {selectedImageIds.length === images.length
+                        ? "Tümünü Kaldır"
+                        : "Tümünü Seç"}
+                    </span>
+                    <span className="sm:hidden">
+                      {selectedImageIds.length === images.length
+                        ? "Kaldır"
+                        : "Tümü"}
+                    </span>
+                  </Button>
+                )}
+
+                {Object.keys(loadErrors).length > 0 && (
+                  <Button
+                    variant="flat"
+                    color="warning"
+                    size="sm"
+                    onPress={handleDeleteErrorImages}
+                    className="min-w-0"
+                  >
+                    <span className="hidden sm:inline">
+                      Erişilemeyen Görselleri Sil
+                    </span>
+                    <span className="sm:hidden">Hataları Sil</span>
+                  </Button>
+                )}
+              </div>
+
+              {/* İşlem butonları - mobil için optimize edilmiş */}
+              <div className="flex flex-wrap gap-1 items-center">
                 <Button
                   variant="flat"
                   color="default"
-                  onPress={handleSelectAll}
+                  size="sm"
+                  startContent={<Icon icon="material-symbols:refresh" />}
+                  onPress={handleReload}
+                  className="min-w-0 px-2 sm:px-3"
                 >
-                  {selectedImageIds.length === images.length
-                    ? "Tümünün Seçimini Kaldır"
-                    : "Tümünü Seç"}
+                  <span className="hidden sm:inline">Yenile</span>
                 </Button>
-              )}
 
-              {Object.keys(loadErrors).length > 0 && (
                 <Button
                   variant="flat"
-                  color="warning"
-                  onPress={handleDeleteErrorImages}
+                  color="default"
+                  size="sm"
+                  onPress={handleCopy}
+                  isDisabled={selectedImageIds.length !== 1}
+                  className="min-w-0 px-2 sm:px-3"
+                  startContent={<Icon icon="material-symbols:content-copy" />}
                 >
-                  Erişilemeyen Görselleri Sil
+                  <span className="hidden sm:inline">Kopyala</span>
                 </Button>
-              )}
+
+                <Button
+                  variant="flat"
+                  color="danger"
+                  size="sm"
+                  onPress={
+                    selectedImageIds.length > 1
+                      ? handleBulkDelete
+                      : handleDelete
+                  }
+                  isDisabled={selectedImageIds.length === 0}
+                  className="min-w-0 px-2 sm:px-3"
+                  startContent={<Icon icon="material-symbols:delete" />}
+                >
+                  <span className="hidden sm:inline">
+                    {selectedImageIds.length > 1
+                      ? `${selectedImageIds.length} Sil`
+                      : "Sil"}
+                  </span>
+                </Button>
+
+                <Button
+                  variant="flat"
+                  color="primary"
+                  size="sm"
+                  onPress={handleAddImage}
+                  className="min-w-0 px-2 sm:px-3"
+                  startContent={<Icon icon="material-symbols:add" />}
+                >
+                  <span className="hidden sm:inline">Görsel Ekle</span>
+                  <span className="sm:hidden">Ekle</span>
+                </Button>
+              </div>
             </div>
 
-            <div className="flex flex-wrap gap-2">
-              <Button
-                variant="flat"
-                color="default"
-                startContent={<Icon icon="material-symbols:refresh" />}
-                onPress={handleReload}
-              >
-                Yeniden Yükle
-              </Button>
-
-              <Button
-                variant="flat"
-                color="default"
-                onPress={handleCopy}
-                isDisabled={selectedImageIds.length !== 1}
-              >
-                Kopyala
-              </Button>
-
-              <Button
-                variant="flat"
-                color="danger"
-                onPress={
-                  selectedImageIds.length > 1 ? handleBulkDelete : handleDelete
-                }
-                isDisabled={selectedImageIds.length === 0}
-              >
-                {selectedImageIds.length > 1
-                  ? `${selectedImageIds.length} Görseli Sil`
-                  : "Sil"}
-              </Button>
-
-              <Button variant="flat" color="primary" onPress={handleAddImage}>
-                Görsel Ekle
-              </Button>
-            </div>
+            {/* Seçim bilgisi - mobil ekranlarda da görünür kalması için */}
+            {selectedImageIds.length > 0 && (
+              <div className="text-xs sm:text-sm text-blue-600 mt-1">
+                {selectedImageIds.length} görsel seçildi
+              </div>
+            )}
           </div>
-
-          {selectedImageIds.length > 0 && (
-            <div className="text-sm text-blue-600 mt-2">
-              {selectedImageIds.length} görsel seçildi
-            </div>
-          )}
         </div>
 
         {/* İçerik */}
         {loading && (
           <div className="flex justify-center items-center py-4">
-            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500"></div>
-            <span className="ml-2">Yükleniyor...</span>
+            <div className="animate-spin rounded-full h-6 w-6 sm:h-8 sm:w-8 border-b-2 border-blue-500"></div>
+            <span className="ml-2 text-sm sm:text-base">Yükleniyor...</span>
           </div>
         )}
 
-        {/* Responsive Grid: Küçük ekran = 2 sütun, orta = 3, büyük = 4, daha büyük = 5 */}
-        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
+        {/* Grid düzenini daha uyumlu hale getir */}
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-2 sm:gap-4">
           {Array.isArray(images) && images.length > 0 ? (
             images.map((img) => {
               const isSelected = selectedImageIds.includes(img._id);
@@ -453,11 +501,12 @@ function GalleryPage() {
                       <Checkbox
                         isSelected={isSelected}
                         color="primary"
+                        size="sm"
                         className="bg-white bg-opacity-80 rounded"
                       />
                     </div>
                   )}
-                  <div className="relative w-full h-36">
+                  <div className="relative w-full h-24 sm:h-36">
                     <img
                       src={img.url}
                       alt={img.altText || "Görsel"}
@@ -470,7 +519,8 @@ function GalleryPage() {
                     {hasError && (
                       <div className="absolute inset-0 flex items-center justify-center">
                         <span className="bg-red-100 text-red-800 text-xs px-2 py-1 rounded">
-                          Erişilemiyor (Silinmeli)
+                          <span className="hidden sm:inline">Erişilemiyor</span>
+                          <span className="sm:hidden">Hata</span>
                         </span>
                       </div>
                     )}
@@ -479,23 +529,26 @@ function GalleryPage() {
               );
             })
           ) : (
-            <div className="col-span-full text-center py-8">
-              <p className="text-gray-500">Görüntülenecek görsel bulunamadı.</p>
+            <div className="col-span-full text-center py-4 sm:py-8">
+              <p className="text-gray-500 text-sm sm:text-base">
+                Görüntülenecek görsel bulunamadı.
+              </p>
             </div>
           )}
         </div>
 
-        {/* Sayfalama - NextUI Pagination kullanarak */}
-        <div className="mt-6 flex justify-center flex-col items-center gap-2">
+        {/* Sayfalama - NextUI Pagination - mobil optimizasyonu */}
+        <div className="mt-4 sm:mt-6 flex justify-center flex-col items-center">
           <Pagination
             total={totalPages || 1}
             initialPage={1}
             page={currentPage}
             onChange={handlePageChange}
             color="primary"
+            size="sm"
             showControls
             classNames={{
-              wrapper: "gap-0 overflow-visible",
+              wrapper: "gap-0 overflow-visible scale-90 sm:scale-100",
             }}
           />
         </div>

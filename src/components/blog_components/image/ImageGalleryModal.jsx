@@ -348,41 +348,47 @@ const ImageGalleryModal = ({ isOpen, onClose, onSelectImage }) => {
         >
           {/* Üst kısım: Başlık ve Butonlar */}
           <div className="flex flex-col gap-2 mb-4">
-            <div className="flex justify-between items-center">
-              <h2 className="text-2xl font-bold">Görseller</h2>
-              <div className="flex items-center space-x-2">
+            {/* Başlık ve üst butonlar - mobil ekranlarda daha esnek hale getirildi */}
+            <div className="flex flex-wrap justify-between items-center gap-2">
+              <h2 className="text-xl sm:text-2xl font-bold">Görseller</h2>
+              <div className="flex flex-wrap items-center gap-1">
                 <Button
                   variant="flat"
                   color="default"
-                  radius="md"
+                  size="sm"
                   startContent={<Icon icon="material-symbols:refresh" />}
                   onPress={handleReload}
+                  className="min-w-0 px-2 sm:px-3"
                 >
-                  Yeniden Yükle
+                  <span className="hidden sm:inline">Yenile</span>
                 </Button>
 
                 <Button
                   variant="flat"
                   color="primary"
-                  radius="md"
+                  size="sm"
+                  startContent={<Icon icon="material-symbols:add" />}
                   onPress={() => setIsUploaderOpen(true)}
+                  className="min-w-0 px-2 sm:px-3"
                 >
-                  Görsel Ekle
+                  <span className="hidden sm:inline">Ekle</span>
                 </Button>
 
                 <Button
                   variant="flat"
                   color="danger"
-                  radius="md"
+                  size="sm"
+                  startContent={<Icon icon="material-symbols:close" />}
                   onPress={onClose}
+                  className="min-w-0 px-2 sm:px-3"
                 >
-                  Kapat
+                  <span className="hidden sm:inline">Kapat</span>
                 </Button>
               </div>
             </div>
 
-            {/* Seçim Kontrolleri */}
-            <div className="flex items-center gap-2">
+            {/* Seçim Kontrolleri - mobil ekranlarda optimizasyon */}
+            <div className="flex flex-wrap items-center gap-1">
               <Button
                 variant="flat"
                 color={selectMode ? "primary" : "default"}
@@ -397,8 +403,14 @@ const ImageGalleryModal = ({ isOpen, onClose, onSelectImage }) => {
                   />
                 }
                 onPress={toggleSelectMode}
+                className="min-w-0 sm:min-w-[120px]"
               >
-                {selectMode ? "Seçim Modunu Kapat" : "Çoklu Seçim Modu"}
+                <span className="hidden sm:inline">
+                  {selectMode ? "Seçimi Kapat" : "Çoklu Seçim"}
+                </span>
+                <span className="sm:hidden">
+                  {selectMode ? "Kapalı" : "Seçim"}
+                </span>
               </Button>
 
               {selectMode && (
@@ -407,10 +419,18 @@ const ImageGalleryModal = ({ isOpen, onClose, onSelectImage }) => {
                   color="default"
                   size="sm"
                   onPress={handleSelectAll}
+                  className="min-w-0 sm:min-w-[100px]"
                 >
-                  {selectedImageIds.length === images.length
-                    ? "Tümünün Seçimini Kaldır"
-                    : "Tümünü Seç"}
+                  <span className="hidden sm:inline">
+                    {selectedImageIds.length === images.length
+                      ? "Tümünü Kaldır"
+                      : "Tümünü Seç"}
+                  </span>
+                  <span className="sm:hidden">
+                    {selectedImageIds.length === images.length
+                      ? "Kaldır"
+                      : "Tümü"}
+                  </span>
                 </Button>
               )}
 
@@ -420,14 +440,18 @@ const ImageGalleryModal = ({ isOpen, onClose, onSelectImage }) => {
                   color="warning"
                   size="sm"
                   onPress={handleDeleteErrorImages}
+                  className="min-w-0"
                 >
-                  Erişilemeyen Görselleri Sil
+                  <span className="hidden sm:inline">
+                    Erişilemeyen Görselleri Sil
+                  </span>
+                  <span className="sm:hidden">Hataları Sil</span>
                 </Button>
               )}
 
               {selectedImageIds.length > 0 && (
-                <span className="text-sm text-blue-600 ml-2">
-                  {selectedImageIds.length} görsel seçildi
+                <span className="text-xs sm:text-sm text-blue-600 ml-1">
+                  {selectedImageIds.length} seçili
                 </span>
               )}
             </div>
@@ -435,15 +459,15 @@ const ImageGalleryModal = ({ isOpen, onClose, onSelectImage }) => {
 
           {/* Yükleniyor */}
           {loading && (
-            <div className="flex justify-center items-center py-4">
-              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500"></div>
-              <span className="ml-2">Yükleniyor...</span>
+            <div className="flex justify-center items-center py-3">
+              <div className="animate-spin rounded-full h-6 w-6 sm:h-8 sm:w-8 border-b-2 border-blue-500"></div>
+              <span className="ml-2 text-sm sm:text-base">Yükleniyor...</span>
             </div>
           )}
-          {error && <p className="text-red-500">{error}</p>}
+          {error && <p className="text-red-500 text-sm">{error}</p>}
 
-          {/* Görsel Galeri */}
-          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 xl:grid-cols-5 gap-4">
+          {/* Görsel Galeri - mobil optimizasyonu */}
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 xl:grid-cols-5 gap-2 sm:gap-4">
             {images.length > 0 ? (
               images.map((image) => {
                 const isSelected = selectedImageIds.includes(image._id);
@@ -452,7 +476,7 @@ const ImageGalleryModal = ({ isOpen, onClose, onSelectImage }) => {
                 return (
                   <div
                     key={image._id}
-                    className={`border p-2 cursor-pointer ${
+                    className={`border p-1 sm:p-2 cursor-pointer ${
                       isSelected
                         ? "border-blue-500 bg-blue-50"
                         : "border-gray-200"
@@ -466,11 +490,12 @@ const ImageGalleryModal = ({ isOpen, onClose, onSelectImage }) => {
                         <Checkbox
                           isSelected={isSelected}
                           color="primary"
+                          size="sm"
                           className="bg-white bg-opacity-80 rounded"
                         />
                       </div>
                     )}
-                    <div className="relative w-full h-24">
+                    <div className="relative w-full h-20 sm:h-24">
                       <img
                         src={image.url}
                         alt={image.altText || "Görsel"}
@@ -482,69 +507,86 @@ const ImageGalleryModal = ({ isOpen, onClose, onSelectImage }) => {
                       />
                       {hasError && (
                         <div className="absolute inset-0 flex items-center justify-center">
-                          <span className="bg-red-100 text-red-800 text-xs px-2 py-1 rounded">
-                            Erişilemiyor
+                          <span className="bg-red-100 text-red-800 text-xs px-1 py-0.5 sm:px-2 sm:py-1 rounded">
+                            <span className="hidden sm:inline">
+                              Erişilemiyor
+                            </span>
+                            <span className="sm:hidden">Hata</span>
                           </span>
                         </div>
                       )}
                     </div>
-                    <p className="mt-2 text-sm text-gray-700 text-center font-medium truncate w-full">
-                      {image.filename || image.name || "İsimsiz Görsel"}
+                    <p className="mt-1 sm:mt-2 text-xs sm:text-sm text-gray-700 text-center font-medium truncate w-full">
+                      {(image.filename || image.name || "Görsel").substring(
+                        0,
+                        12
+                      )}
+                      {(image.filename || image.name || "").length > 12
+                        ? "..."
+                        : ""}
                       {hasError && " (Silinmeli)"}
                     </p>
                   </div>
                 );
               })
             ) : (
-              <div className="col-span-full text-center py-8">
-                <p className="text-gray-500">
+              <div className="col-span-full text-center py-4 sm:py-8">
+                <p className="text-gray-500 text-sm">
                   Görüntülenecek görsel bulunamadı.
                 </p>
               </div>
             )}
           </div>
 
-          {/* Alt kısım: Butonlar ve Sayfalama */}
-          <div className="mt-6 flex flex-col items-center space-y-4">
+          {/* Alt kısım: Butonlar ve Sayfalama - mobil optimizasyonu */}
+          <div className="mt-4 sm:mt-6 flex flex-col items-center space-y-3">
             {/* Kopyala / Sil / Kullan Butonları */}
-            <div className="flex gap-2">
+            <div className="flex flex-wrap justify-center gap-1">
               <Button
                 variant="flat"
                 color="default"
-                radius="md"
+                size="sm"
+                startContent={<Icon icon="material-symbols:content-copy" />}
                 onPress={handleCopy}
                 isDisabled={selectedImageIds.length !== 1}
+                className="min-w-0"
               >
-                Kopyala
+                <span className="hidden sm:inline">Kopyala</span>
               </Button>
               {onSelectImage && (
                 <Button
                   variant="flat"
                   color="primary"
-                  radius="md"
+                  size="sm"
+                  startContent={<Icon icon="material-symbols:check" />}
                   onPress={handleUseImage}
                   isDisabled={selectedImageIds.length !== 1}
+                  className="min-w-0"
                 >
-                  Kullan
+                  <span className="hidden sm:inline">Kullan</span>
                 </Button>
               )}
               <Button
                 variant="flat"
                 color="danger"
-                radius="md"
+                size="sm"
+                startContent={<Icon icon="material-symbols:delete" />}
                 onPress={
                   selectedImageIds.length > 1 ? handleBulkDelete : handleDelete
                 }
                 isDisabled={selectedImageIds.length === 0}
+                className="min-w-0"
               >
-                {selectedImageIds.length > 1
-                  ? `${selectedImageIds.length} Görseli Sil`
-                  : "Sil"}
+                <span className="hidden sm:inline">
+                  {selectedImageIds.length > 1
+                    ? `${selectedImageIds.length} Sil`
+                    : "Sil"}
+                </span>
               </Button>
             </div>
 
             {/* NextUI Pagination */}
-            <div className="w-full flex justify-center flex-col items-center gap-1">
+            <div className="w-full flex justify-center">
               <Pagination
                 total={totalPages || 1}
                 page={currentPage}
@@ -553,7 +595,7 @@ const ImageGalleryModal = ({ isOpen, onClose, onSelectImage }) => {
                 size="sm"
                 showControls
                 classNames={{
-                  wrapper: "gap-0 overflow-visible",
+                  wrapper: "gap-0 overflow-visible scale-90 sm:scale-100",
                 }}
               />
             </div>

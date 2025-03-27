@@ -54,7 +54,7 @@ export default {
               fontWeight: "bold",
               color: theme("colors.gray.900"),
               marginBottom: "1.5rem",
-              marginTop: "2rem",
+              marginTop: "1.25rem",
               lineHeight: "1.3",
               scrollMarginTop: "5rem",
             },

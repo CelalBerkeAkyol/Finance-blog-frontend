@@ -56,25 +56,22 @@ const BlogPostComponent = ({ post }) => {
 
   return (
     <div className="prose p-2 sm:p-3 md:p-4 text-start w-full max-w-full md:max-w-3xl mx-auto">
-      {/* Başlık - Boyutu ayarlandı */}
-      <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold mb-3 sm:mb-4 md:mb-6 leading-tight">
+      {/* Başlık - Boyutu ayarlandı ve büyütüldü */}
+      <h1 className="text-3xl sm:text-4xl md:text-4xl font-bold mb-3 sm:mb-4 md:mb-6 leading-tight">
         {post.title}
       </h1>
 
       {/* Blog meta bilgileri - Mobil için daha düzenli */}
-      <div
-        id="blog-meta"
-        className="mb-4 sm:mb-6 pb-4 border-b border-gray-100"
-      >
-        {/* Yazar bilgisi - Avatar içeren kart görünümü */}
+      <div id="blog-meta" className="pb-4 border-b border-gray-100">
+        {/* Yazar bilgisi - Avatar içeren kart görünümü - Profil resmi büyütüldü */}
         <div className="flex items-center mb-3 sm:mb-4">
           <Avatar
             size="md"
+            radius="full"
             src={getAvatarUrl()}
             name={authorName.substring(0, 2).toUpperCase()}
-            color="primary"
-            isBordered
-            className="mr-3"
+            color="default"
+            className="mr-3 sm:h-14 sm:w-14 md:h-16 md:w-16"
           />
           <div>
             <div className="flex flex-col">

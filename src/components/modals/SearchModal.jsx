@@ -10,6 +10,7 @@ import { slugToReadable, formatDate } from "../../utils/formatters";
 import useDebounce from "../../hooks/useDebounce";
 import useSearch from "../../hooks/useSearch";
 import { useOnClickOutside } from "../../hooks/useOnClickOutside";
+import useFocus from "../../hooks/useFocus";
 
 /**
  * Özel Arama bileşeni
@@ -19,8 +20,16 @@ export default function SearchModal({ isOpen, onClose }) {
   const [searchTerm, setSearchTerm] = useState("");
   const debouncedSearchTerm = useDebounce(searchTerm, 500);
   const MIN_CHARS = 3;
-  const inputRef = useRef(null);
   const modalRef = useRef(null);
+
+  // useFocus hook'unu kullan
+  const {
+    inputRef,
+    focusInput,
+    setupFocusHandlers,
+    handleInputBlur,
+    handleButtonClick,
+  } = useFocus();
 
   // Dışarı tıklandığında kapatma
   useOnClickOutside(modalRef, onClose);
@@ -29,25 +38,24 @@ export default function SearchModal({ isOpen, onClose }) {
   const { results, loading, error, searched, performSearch, resetSearch } =
     useSearch(debouncedSearchTerm, MIN_CHARS);
 
-  // Body scroll'u kilitle
+  // Body scroll'u kilitle ve focus handlers'ı ayarla
   useEffect(() => {
     const originalStyle = window.getComputedStyle(document.body).overflow;
+    let cleanupFn = () => {};
 
     if (isOpen) {
       document.body.style.overflow = "hidden";
-
+      // Modal açıkken focus işleyicilerini kur
+      cleanupFn = setupFocusHandlers(isOpen);
       // Modal açıldığında input'a odaklan
-      setTimeout(() => {
-        if (inputRef.current) {
-          inputRef.current.focus();
-        }
-      }, 100);
+      setTimeout(focusInput, 100);
     }
 
     return () => {
       document.body.style.overflow = originalStyle;
+      cleanupFn(); // Focus işleyicilerini temizle
     };
-  }, [isOpen]);
+  }, [isOpen, setupFocusHandlers, focusInput]);
 
   // Arama ve temizleme işlemleri
   const handleManualSearch = useCallback(() => {
@@ -83,6 +91,23 @@ export default function SearchModal({ isOpen, onClose }) {
     navigate(`/blog/category/${category}`);
   };
 
+  // Yeni kategori fonksiyonu (focus için)
+  const handleCategoryClick = useCallback(
+    (category) => {
+      return (e) => {
+        goToCategory(e, category);
+      };
+    },
+    [navigate, onClose]
+  );
+
+  // Link tıklama işleyicisi
+  const handleLinkClick = useCallback(() => {
+    return (e) => {
+      onClose();
+    };
+  }, [onClose]);
+
   if (!isOpen) return null;
 
   // Portal ile body sonuna render et
@@ -103,7 +128,7 @@ export default function SearchModal({ isOpen, onClose }) {
             isIconOnly
             variant="light"
             size="sm"
-            onPress={onClose}
+            onPress={handleButtonClick(onClose)}
             className="hover:bg-gray-100"
           >
             <Icon icon="material-symbols:close" width={20} />
@@ -119,7 +144,7 @@ export default function SearchModal({ isOpen, onClose }) {
               placeholder={`En az ${MIN_CHARS} karakter girin...`}
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              autoFocus
+              onBlur={handleInputBlur}
               className="w-full"
               startContent={
                 <Icon
@@ -137,7 +162,7 @@ export default function SearchModal({ isOpen, onClose }) {
                         variant="flat"
                         color="primary"
                         isIconOnly
-                        onClick={handleManualSearch}
+                        onClick={handleButtonClick(handleManualSearch)}
                         isDisabled={loading}
                       >
                         <Icon icon="material-symbols:search" width="18" />
@@ -147,7 +172,7 @@ export default function SearchModal({ isOpen, onClose }) {
                       isIconOnly
                       size="sm"
                       variant="light"
-                      onClick={clearSearch}
+                      onClick={handleButtonClick(clearSearch)}
                     >
                       <Icon icon="material-symbols:close" width="18" />
                     </Button>
@@ -199,7 +224,7 @@ export default function SearchModal({ isOpen, onClose }) {
                   color="primary"
                   size="sm"
                   className="mt-3"
-                  onClick={handleManualSearch}
+                  onClick={handleButtonClick(handleManualSearch)}
                 >
                   Tekrar Dene
                 </Button>
@@ -234,7 +259,7 @@ export default function SearchModal({ isOpen, onClose }) {
                       <Button
                         color="primary"
                         size="sm"
-                        onClick={handleManualSearch}
+                        onClick={handleButtonClick(handleManualSearch)}
                         startContent={
                           <Icon icon="material-symbols:search" width="16" />
                         }
@@ -253,7 +278,7 @@ export default function SearchModal({ isOpen, onClose }) {
                   <Link
                     key={post._id}
                     to={`/blog/post/${post._id}`}
-                    onClick={onClose}
+                    onClick={handleLinkClick()}
                     className="block"
                   >
                     <div className="border rounded-md p-3 mb-3 hover:bg-gray-50 transition-colors">
@@ -276,7 +301,7 @@ export default function SearchModal({ isOpen, onClose }) {
                               variant="flat"
                               radius="sm"
                               className="cursor-pointer"
-                              onClick={(e) => goToCategory(e, post.category)}
+                              onClick={handleCategoryClick(post.category)}
                             >
                               {slugToReadable(post.category)}
                             </Chip>

@@ -7,7 +7,6 @@ import { useNavigate } from "react-router-dom";
 import { Button, Chip, Avatar } from "@nextui-org/react";
 import ShareButtons from "../../buttons/ShareButtons";
 import VoteButtons from "../../buttons/VoteButton";
-import ScrollToTopButton from "../../buttons/ScrollToTopButton";
 import { Icon } from "@iconify/react";
 
 // Kategori isimlerini okunabilir hale getiriyor
@@ -126,7 +125,7 @@ const BlogPostComponent = ({ post }) => {
         </ReactMarkdown>
       </div>
 
-      {/* Upvote & Downvote ve Yukarı Çık Butonu */}
+      {/* Upvote & Downvote Buttons */}
       <div className="flex justify-between items-center w-full mt-2 pt-3 md:pt-4 border-t-1">
         {/* Beğeni Butonları (Sol Tarafta) */}
         <VoteButtons postId={post._id} />
@@ -136,9 +135,6 @@ const BlogPostComponent = ({ post }) => {
           <ShareButtons url={currentURL} />
         </div>
       </div>
-
-      {/* Yukarı Çık Butonu */}
-      <ScrollToTopButton />
     </div>
   );
 };

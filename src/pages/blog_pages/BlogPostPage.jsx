@@ -13,6 +13,7 @@ import CustomNavbar from "../../components/header/CustomNavbar";
 import BlogPostSkeleton from "../../components/blog_components/blog/BlogPostSkeleton";
 import TableSkeleton from "../../components/blog_components/blog/TableSkeleton";
 import RightSideBar from "../../components/blog_components/blog/RightSideBar";
+import FloatingActionButtons from "../../components/buttons/FloatingActionButtons";
 
 function BlogPostPage() {
   const { id } = useParams();
@@ -77,22 +78,6 @@ function BlogPostPage() {
           </div>
         </div>
 
-        {/* Mobil için içeriğin üzerinde Table of Contents */}
-        <div className="w-full md:hidden mb-3 bg-gray-50 rounded-lg p-2 shadow-sm">
-          <details className="w-full">
-            <summary className="text-sm font-medium text-gray-700 cursor-pointer py-2 touch-manipulation">
-              İçindekiler 📑
-            </summary>
-            <div className="mt-2 border-t pt-2 px-1">
-              {isLoading ? (
-                <TableSkeleton />
-              ) : post ? (
-                <TableOfContents content={post.content} />
-              ) : null}
-            </div>
-          </details>
-        </div>
-
         {/* Blog İçeriği */}
         <div className="w-full md:w-[57%] lg:w-[57%] mx-auto">
           {isLoading ? (
@@ -128,6 +113,9 @@ function BlogPostPage() {
           )}
         </div>
       </div>
+
+      {/* Floating Action Buttons */}
+      {!isLoading && post && <FloatingActionButtons content={post.content} />}
     </div>
   );
 }

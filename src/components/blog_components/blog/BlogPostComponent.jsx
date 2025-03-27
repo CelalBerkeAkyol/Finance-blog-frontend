@@ -73,12 +73,6 @@ const BlogPostComponent = ({ post }) => {
             </span>
           </p>
         </div>
-
-        {/* Paylaşım Butonları - Ayrı satırda */}
-        <div className="flex items-center gap-2 justify-start">
-          <span className=" font-bold text-gray-600 mr-1">Paylaş:</span>
-          <ShareButtons url={currentURL} />
-        </div>
       </div>
 
       {/* Blog İçeriği */}
@@ -97,7 +91,7 @@ const BlogPostComponent = ({ post }) => {
         <VoteButtons postId={post._id} />
 
         {/* Paylaşım Butonları (Sağ Tarafta) */}
-        <div className="flex items-center gap-2 algin-middle">
+        <div className="flex items-center gap-2 align-middle">
           <ShareButtons url={currentURL} />
         </div>
       </div>

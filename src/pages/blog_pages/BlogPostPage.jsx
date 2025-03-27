@@ -103,20 +103,18 @@ function BlogPostPage() {
         </div>
 
         {/* Sağ Kenar Çubuğu - Önerilen Yazılar */}
-        <div className="md:w-[25%] lg:w-[20%] hidden md:block pl-2 md:pl-4 border-l">
-          <div className="sticky top-20 max-h-[calc(100vh-8rem)] overflow-y-auto">
-            {!isLoading && post && posts.length > 0 && (
-              <>
-                <RightSideBar post={post} />
-                {console.log(
-                  "Rendering sidebar with post:",
-                  post.title,
-                  "and total posts:",
-                  posts.length
-                )}
-              </>
-            )}
-          </div>
+        <div
+          className="md:w-[25%] lg:w-[20%] hidden md:block pl-2 md:pl-4 border-l pt-4"
+          style={{
+            position: "sticky",
+            top: "5rem",
+            maxHeight: "calc(100vh - 8rem)",
+            overflowY: "auto",
+          }}
+        >
+          {!isLoading && post && posts.length > 0 && (
+            <RightSideBar post={post} />
+          )}
         </div>
       </div>
     </div>

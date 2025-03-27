@@ -6,17 +6,7 @@ const RightSideBar = ({ post }) => {
   if (!post) return null;
 
   return (
-    <div className="w-full">
-      <div className="w-full flex flex-col gap-6 py-4">
-        {/* Related Posts Section */}
-        <RelatedPostsComponent
-          currentPostId={post._id}
-          category={post.category}
-        />
-
-        {/* Additional sidebar components can be added here */}
-      </div>
-    </div>
+    <RelatedPostsComponent currentPostId={post._id} category={post.category} />
   );
 };
 

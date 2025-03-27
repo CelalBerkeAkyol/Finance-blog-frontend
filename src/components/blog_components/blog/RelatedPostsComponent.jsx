@@ -25,9 +25,25 @@ const RelatedPostsComponent = ({ currentPostId, category }) => {
   const { posts } = useSelector((state) => state.posts);
 
   // Find related posts (same category, excluding current post)
-  const relatedPosts = posts
-    .filter((post) => post.category === category && post._id !== currentPostId)
-    .slice(0, 3); // Limit to 3 related posts
+  const sameCategory = posts.filter(
+    (post) => post.category === category && post._id !== currentPostId
+  );
+
+  // If we don't have 10 posts in the same category, add posts from other categories
+  let relatedPosts = [...sameCategory];
+
+  if (relatedPosts.length < 10) {
+    const otherPosts = posts
+      .filter(
+        (post) => post.category !== category && post._id !== currentPostId
+      )
+      .slice(0, 10 - relatedPosts.length);
+
+    relatedPosts = [...relatedPosts, ...otherPosts];
+  }
+
+  // Limit to 10 posts
+  relatedPosts = relatedPosts.slice(0, 10);
 
   if (relatedPosts.length === 0) {
     return null;

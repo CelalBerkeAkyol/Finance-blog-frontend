@@ -11,6 +11,7 @@ import BannerComponent from "../../components/header/BannerComponent";
 import CustomNavbar from "../../components/header/CustomNavbar";
 import BlogPostSkeleton from "../../components/blog_components/blog/BlogPostSkeleton";
 import TableSkeleton from "../../components/blog_components/blog/TableSkeleton";
+import RightSideBar from "../../components/blog_components/blog/RightSideBar";
 
 function BlogPostPage() {
   const { id } = useParams();
@@ -47,9 +48,9 @@ function BlogPostPage() {
     <div className="flex flex-col">
       <BannerComponent />
       <CustomNavbar />
-      <div className="flex flex-col md:flex-row gap-4 md:gap-8 py-6 md:py-8 container mx-auto ">
+      <div className="flex flex-col md:flex-row gap-4 md:gap-6 py-6 md:py-8 container mx-auto">
         {/* Masaüstü için Table of Contents */}
-        <div className="md:w-[20%] w-full md:border-r min-w-[180px] hidden md:block">
+        <div className="md:w-[15%] w-full md:border-r min-w-[180px] hidden md:block">
           <div className="sticky top-20 max-h-[calc(100vh-8rem)] overflow-y-auto py-4 pr-2">
             {isLoading ? (
               <TableSkeleton />
@@ -75,13 +76,18 @@ function BlogPostPage() {
           </details>
         </div>
 
-        {/* Blog İçeriği - Sağdan boşluk ile */}
-        <div className="w-full md:w-[75%] lg:w-[70%] mx-auto md:pr-4 lg:pr-8">
+        {/* Blog İçeriği */}
+        <div className="w-full md:w-[60%] lg:w-[60%] mx-auto">
           {isLoading ? (
             <BlogPostSkeleton />
           ) : post ? (
             <BlogPostComponent post={post} />
           ) : null}
+        </div>
+
+        {/* Sağ Kenar Çubuğu - Önerilen Yazılar */}
+        <div className="md:w-[25%] lg:w-[20%] hidden md:block pl-2 md:pl-4 border-l">
+          {!isLoading && post && <RightSideBar post={post} />}
         </div>
       </div>
     </div>

@@ -11,6 +11,8 @@ import ImageUploaderModal from "../../components/blog_components/image/ImageUplo
 import BlogSidebarComponent from "../../components/blog_components/blog_dashboard/BlogSidebarComponent";
 import ErrorBoundary from "../../components/Error/ErrorBoundary";
 import { useFeedback } from "../../context/FeedbackContext";
+import useScrollToTop from "../../hooks/useScrollToTop";
+import { scrollToTop } from "../../utils/scrollHelpers";
 
 function GalleryPage() {
   const dispatch = useDispatch();
@@ -22,6 +24,9 @@ function GalleryPage() {
   const [selectedImageId, setSelectedImageId] = useState(null);
   const [isUploaderOpen, setIsUploaderOpen] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
+
+  // Page değiştiğinde sayfayı en üste kaydır
+  useScrollToTop(currentPage, { behavior: "auto", delay: 100 });
 
   // İlk yükelemede 20 görseli çek
   useEffect(() => {
@@ -91,9 +96,10 @@ function GalleryPage() {
 
   // Sayfalama
   const handlePageChange = (newPage) => {
+    // Önce sayfayı tam olarak en üste kaydır, sonra sayfa değişimini gerçekleştir
+    scrollToTop({ behavior: "instant", delay: 0 });
     setCurrentPage(newPage);
     setSelectedImageId(null);
-    window.scrollTo(0, 0);
   };
 
   const handleReload = () => {

@@ -21,6 +21,15 @@ function BlogPostPage() {
   // Local state flag to ensure the view is incremented only once
   const [hasIncremented, setHasIncremented] = useState(false);
 
+  // Sayfa yüklendiğinde en üste scroll et
+  useEffect(() => {
+    window.scrollTo({
+      top: 0,
+      left: 0,
+      behavior: "auto",
+    });
+  }, [id]); // id değiştiğinde (farklı bir blog post açıldığında) scroll'u sıfırla
+
   useEffect(() => {
     if (id) {
       dispatch(fetchPostById(id));

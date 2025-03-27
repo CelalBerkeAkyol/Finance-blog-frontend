@@ -5,11 +5,16 @@ import PostCardComponent from "./PostCardComponent";
 import BlogsSkeleton from "./BlogsSkeleton";
 import ErrorComponent from "../../error/ErrorComponent";
 import { Pagination } from "@nextui-org/react";
+import useScrollToTop from "../../../hooks/useScrollToTop";
+import { scrollToTop } from "../../../utils/scrollHelpers";
 
 export default function BlogsComponent() {
   const dispatch = useDispatch();
   const [page, setPage] = useState(1);
   const limit = 20;
+
+  // Page değiştiğinde sayfayı en üste kaydır - delay ekleyerek
+  useScrollToTop(page, { behavior: "auto", delay: 100 });
 
   const { posts, isLoading, isError, errorMessage, errorCode, pagination } =
     useSelector((state) => state.posts);
@@ -19,8 +24,9 @@ export default function BlogsComponent() {
   }, [dispatch, page, limit]);
 
   const handlePageChange = (newPage) => {
+    // Önce sayfayı tam olarak en üste kaydır, sonra sayfa değişimini gerçekleştir
+    scrollToTop({ behavior: "instant", delay: 0 });
     setPage(newPage);
-    window.scrollTo(0, 0);
   };
 
   if (isLoading) {
@@ -36,7 +42,7 @@ export default function BlogsComponent() {
   }
 
   return (
-    <div className="bg-white py-2 mb-12 min-h-full">
+    <div className="bg-white py-2 mb-12 min-h-full" id="blog-list-top">
       <div className="mx-auto max-w-7xl px-3 sm:px-6 lg:px-8">
         <div className="mx-auto my-4 sm:my-6 text-start bg-gradient-to-r from-gray-800 to-gray-700 text-white py-4 px-4 rounded-lg shadow-lg">
           <h1 className="text-2xl sm:text-3xl font-bold">Blog</h1>

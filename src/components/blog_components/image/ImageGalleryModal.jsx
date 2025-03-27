@@ -1,5 +1,5 @@
 // src/app/components/ImageGalleryModal.jsx
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import {
   fetchImages,
@@ -9,6 +9,7 @@ import { Button, Pagination } from "@nextui-org/react";
 import { Icon } from "@iconify/react";
 import { useFeedback } from "../../../context/FeedbackContext";
 import ImageUploaderModal from "./ImageUploaderModal";
+import { scrollToTop } from "../../../utils/scrollHelpers";
 
 const ImageGalleryModal = ({ isOpen, onClose, onSelectImage }) => {
   const dispatch = useDispatch();
@@ -20,6 +21,9 @@ const ImageGalleryModal = ({ isOpen, onClose, onSelectImage }) => {
   const [selectedImageId, setSelectedImageId] = useState(null);
   const [isUploaderOpen, setIsUploaderOpen] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
+
+  // Modal içeriğini en üste kaydırmak için ref kullanımı
+  const modalContentRef = useRef(null);
 
   useEffect(() => {
     if (isOpen) {
@@ -82,6 +86,14 @@ const ImageGalleryModal = ({ isOpen, onClose, onSelectImage }) => {
   const handlePageChange = (newPage) => {
     setCurrentPage(newPage);
     setSelectedImageId(null);
+
+    // Modal içeriğini en üste kaydır - scrollToTop fonksiyonunu kullanarak
+    if (modalContentRef.current) {
+      scrollToTop({
+        behavior: "instant",
+        element: modalContentRef.current,
+      });
+    }
   };
 
   const handleReload = () => {
@@ -113,7 +125,10 @@ const ImageGalleryModal = ({ isOpen, onClose, onSelectImage }) => {
       {/* Arka plan karartma */}
       <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
         {/* Modal kutusu: yüksekliği %90 ve dikey scroll*/}
-        <div className="bg-white rounded max-w-6xl w-full max-h-[90vh] overflow-y-auto flex flex-col p-6">
+        <div
+          ref={modalContentRef}
+          className="bg-white rounded max-w-6xl w-full max-h-[90vh] overflow-y-auto flex flex-col p-6 modal-gallery-content"
+        >
           {/* Üst Başlık ve Butonlar */}
           <div className="flex justify-between items-center mb-4">
             <h2 className="text-2xl font-bold">Görseller</h2>

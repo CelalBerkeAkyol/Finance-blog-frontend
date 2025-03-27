@@ -25,6 +25,8 @@ import { capitalize } from "../../../../utils/capitalize";
 import { useNavigate } from "react-router-dom";
 import { useFeedback } from "../../../../context/FeedbackContext";
 import { Icon } from "@iconify/react";
+import useScrollToTop from "../../../../hooks/useScrollToTop";
+import { scrollToTop } from "../../../../utils/scrollHelpers";
 
 const columns = [
   { name: "Başlık", uid: "title" },
@@ -60,6 +62,9 @@ const BlogsTable = () => {
   const limit = 20;
   const navigate = useNavigate();
   const errorShownRef = useRef(false);
+
+  // Page değiştiğinde sayfayı en üste kaydır
+  useScrollToTop(page, { behavior: "auto", delay: 100 });
 
   // Postları getirme
   useEffect(() => {
@@ -119,8 +124,9 @@ const BlogsTable = () => {
   };
 
   const handlePageChange = (newPage) => {
+    // Önce sayfayı tam olarak en üste kaydır, sonra sayfa değişimini gerçekleştir
+    scrollToTop({ behavior: "instant", delay: 0 });
     setPage(newPage);
-    window.scrollTo(0, 0);
   };
 
   const handleAddPostClick = () => {

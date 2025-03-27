@@ -83,7 +83,7 @@ const RelatedPostsComponent = ({ currentPostId, category }) => {
               key={post._id}
               isPressable
               onPress={() => navigate(`/blog/post/${post._id}`)}
-              className="hover:bg-gray-50 transition-colors duration-200 text-left shadow-none"
+              className="hover:bg-gray-50 transition-colors duration-200 text-left border border-gray-100 rounded-lg shadow-sm"
             >
               <CardBody className="p-0 overflow-hidden">
                 {post.coverImage && (
@@ -98,11 +98,11 @@ const RelatedPostsComponent = ({ currentPostId, category }) => {
                 <h4 className="text-sm font-semibold line-clamp-2 mb-2 text-left w-full">
                   {post.title}
                 </h4>
-                <p className="text-xs text-gray-600 mb-2 line-clamp-2 text-left w-full">
+                <p className="text-xs text-gray-600 mb-4 line-clamp-2 text-left w-full">
                   {summary}
                 </p>
 
-                <div className="flex items-center justify-start w-full mb-2">
+                <div className="flex items-center justify-start w-full mb-2 mt-1">
                   <Avatar
                     size="sm"
                     src={avatarUrl}

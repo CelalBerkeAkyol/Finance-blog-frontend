@@ -5,7 +5,7 @@ import {
   fetchImages,
   deleteImage,
 } from "../../../app/features/image/imageGallerySlice";
-import { Button } from "@nextui-org/react";
+import { Button, Pagination } from "@nextui-org/react";
 import { Icon } from "@iconify/react";
 import { useFeedback } from "../../../context/FeedbackContext";
 import ImageUploaderModal from "./ImageUploaderModal";
@@ -19,12 +19,20 @@ const ImageGalleryModal = ({ isOpen, onClose, onSelectImage }) => {
 
   const [selectedImageId, setSelectedImageId] = useState(null);
   const [isUploaderOpen, setIsUploaderOpen] = useState(false);
+  const [currentPage, setCurrentPage] = useState(1);
 
   useEffect(() => {
     if (isOpen) {
-      dispatch(fetchImages({ page: 1, limit: 15 }));
+      dispatch(fetchImages({ page: currentPage, limit: 20 }));
     }
-  }, [isOpen, dispatch]);
+  }, [isOpen, dispatch, currentPage]);
+
+  // Modal açıldığında sayfa 1'e resetle
+  useEffect(() => {
+    if (isOpen) {
+      setCurrentPage(1);
+    }
+  }, [isOpen]);
 
   const handleSelectImage = (id) => {
     setSelectedImageId(id === selectedImageId ? null : id);
@@ -61,7 +69,7 @@ const ImageGalleryModal = ({ isOpen, onClose, onSelectImage }) => {
     dispatch(deleteImage(selectedImageId))
       .unwrap()
       .then(() => {
-        dispatch(fetchImages({ page, limit: 15 }));
+        dispatch(fetchImages({ page: currentPage, limit: 20 }));
         setSelectedImageId(null);
         success("Görsel başarıyla silindi!");
       })
@@ -71,22 +79,13 @@ const ImageGalleryModal = ({ isOpen, onClose, onSelectImage }) => {
       });
   };
 
-  const handleNextPage = () => {
-    if (page < totalPages) {
-      dispatch(fetchImages({ page: page + 1, limit: 15 }));
-      setSelectedImageId(null);
-    }
-  };
-
-  const handlePrevPage = () => {
-    if (page > 1) {
-      dispatch(fetchImages({ page: page - 1, limit: 15 }));
-      setSelectedImageId(null);
-    }
+  const handlePageChange = (newPage) => {
+    setCurrentPage(newPage);
+    setSelectedImageId(null);
   };
 
   const handleReload = () => {
-    dispatch(fetchImages({ page: 1, limit: 15 }));
+    dispatch(fetchImages({ page: currentPage, limit: 20 }));
     setSelectedImageId(null);
     success("Görseller yenilendi!");
   };
@@ -114,7 +113,7 @@ const ImageGalleryModal = ({ isOpen, onClose, onSelectImage }) => {
       {/* Arka plan karartma */}
       <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
         {/* Modal kutusu: yüksekliği %90 ve dikey scroll*/}
-        <div className="bg-white rounded max-w-6xl w-full max-h-[100vh] overflow-y-auto flex flex-col p-6">
+        <div className="bg-white rounded max-w-6xl w-full max-h-[90vh] overflow-y-auto flex flex-col p-6">
           {/* Üst Başlık ve Butonlar */}
           <div className="flex justify-between items-center mb-4">
             <h2 className="text-2xl font-bold">Görseller</h2>
@@ -150,32 +149,50 @@ const ImageGalleryModal = ({ isOpen, onClose, onSelectImage }) => {
           </div>
 
           {/* İçerik alanı */}
-          {loading && <p>Yükleniyor...</p>}
+          {loading && (
+            <div className="flex justify-center items-center py-4">
+              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500"></div>
+              <span className="ml-2">Yükleniyor...</span>
+            </div>
+          )}
           {error && <p className="text-red-500">{error}</p>}
 
           {/* Görsel Galeri */}
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 xl:grid-cols-5 gap-4">
-            {images.map((image) => {
-              const isSelected = image._id === selectedImageId;
-              return (
-                <div
-                  key={image._id}
-                  className={`border p-2 cursor-pointer ${
-                    isSelected ? "border-blue-500" : "border-gray-200"
-                  } hover:shadow-md flex flex-col items-center`}
-                  onClick={() => handleSelectImage(image._id)}
-                >
-                  <img
-                    src={image.url}
-                    alt={image.altText || "Görsel"}
-                    className="w-full h-24 object-cover"
-                  />
-                  <p className="mt-2 text-sm text-gray-700 text-center font-medium">
-                    {image.filename || image.name || "İsimsiz Görsel"}
-                  </p>
-                </div>
-              );
-            })}
+            {images.length > 0 ? (
+              images.map((image) => {
+                const isSelected = image._id === selectedImageId;
+                return (
+                  <div
+                    key={image._id}
+                    className={`border p-2 cursor-pointer ${
+                      isSelected ? "border-blue-500" : "border-gray-200"
+                    } hover:shadow-md hover:border-blue-300 transition-all flex flex-col items-center`}
+                    onClick={() => handleSelectImage(image._id)}
+                  >
+                    <img
+                      src={image.url}
+                      alt={image.altText || "Görsel"}
+                      className="w-full h-24 object-cover"
+                      onError={(e) => {
+                        e.target.onerror = null;
+                        e.target.src =
+                          "https://via.placeholder.com/150?text=Görsel+Yüklenemedi";
+                      }}
+                    />
+                    <p className="mt-2 text-sm text-gray-700 text-center font-medium truncate w-full">
+                      {image.filename || image.name || "İsimsiz Görsel"}
+                    </p>
+                  </div>
+                );
+              })
+            ) : (
+              <div className="col-span-full text-center py-8">
+                <p className="text-gray-500">
+                  Görüntülenecek görsel bulunamadı.
+                </p>
+              </div>
+            )}
           </div>
 
           {/* Alt kısım: Butonlar ve Sayfalama */}
@@ -210,29 +227,19 @@ const ImageGalleryModal = ({ isOpen, onClose, onSelectImage }) => {
               </Button>
             </div>
 
-            {/* Sayfa kontrolü */}
-            <div className="flex justify-between items-center w-full max-w-sm">
-              <Button
-                variant="flat"
-                color="default"
-                radius="md"
-                isDisabled={page <= 1}
-                onPress={handlePrevPage}
-              >
-                Önceki
-              </Button>
-              <span>
-                {page} / {totalPages}
-              </span>
-              <Button
-                variant="flat"
-                color="default"
-                radius="md"
-                isDisabled={page >= totalPages}
-                onPress={handleNextPage}
-              >
-                Sonraki
-              </Button>
+            {/* NextUI Pagination */}
+            <div className="w-full flex justify-center flex-col items-center gap-1">
+              <Pagination
+                total={totalPages || 1}
+                page={currentPage}
+                onChange={handlePageChange}
+                color="primary"
+                size="sm"
+                showControls
+                classNames={{
+                  wrapper: "gap-0 overflow-visible",
+                }}
+              />
             </div>
           </div>
         </div>
@@ -245,7 +252,8 @@ const ImageGalleryModal = ({ isOpen, onClose, onSelectImage }) => {
           onSuccess={() => {
             setIsUploaderOpen(false);
             success("Görsel başarıyla yüklendi!");
-            dispatch(fetchImages({ page: 1, limit: 15 }));
+            setCurrentPage(1);
+            dispatch(fetchImages({ page: 1, limit: 20 }));
           }}
         />
       )}

@@ -1,26 +1,33 @@
 // Kategorilere özel kategori sayfası
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { useSelector, useDispatch } from "react-redux";
 import { useParams } from "react-router-dom";
 import { fetchPostsByCategory } from "../../../app/features/blogs/postsSlice";
 import BlogsSkeleton from "./BlogsSkeleton";
 import PostCardComponent from "./PostCardComponent";
 import ErrorComponent from "../../error/ErrorComponent";
+import { Pagination } from "@nextui-org/react";
 
 export default function CategoryBasePosts() {
   const dispatch = useDispatch();
   const { category } = useParams(); // URL'den kategori parametresi alınıyor
+  const [page, setPage] = useState(1);
+  const limit = 20;
 
   // Redux'tan postları alın
-  const { posts, isLoading, isError, errorMessage, errorCode } = useSelector(
-    (state) => state.posts
-  );
+  const { posts, isLoading, isError, errorMessage, errorCode, pagination } =
+    useSelector((state) => state.posts);
 
   useEffect(() => {
     if (category) {
-      dispatch(fetchPostsByCategory(category));
+      dispatch(fetchPostsByCategory({ category, page, limit }));
     }
-  }, [dispatch, category]);
+  }, [dispatch, category, page, limit]);
+
+  const handlePageChange = (newPage) => {
+    setPage(newPage);
+    window.scrollTo(0, 0);
+  };
 
   if (isLoading) {
     return <BlogsSkeleton />;
@@ -62,13 +69,27 @@ export default function CategoryBasePosts() {
         {/* Blog yazıları listesi */}
         <div className="border-t border-gray-200 pt-4">
           <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-3 sm:gap-4 md:gap-5">
-            {posts.map((post) => (
-              <div key={post._id} className="flex">
-                <PostCardComponent post={post} />
-              </div>
-            ))}
+            {posts &&
+              posts.map((post) => (
+                <div key={post._id} className="flex">
+                  <PostCardComponent post={post} />
+                </div>
+              ))}
           </div>
         </div>
+
+        {/* Pagination */}
+        {pagination && pagination.totalPages > 1 && (
+          <div className="flex justify-center mt-8 mb-4">
+            <Pagination
+              total={pagination.totalPages}
+              page={page}
+              onChange={handlePageChange}
+              color="primary"
+              showControls
+            />
+          </div>
+        )}
       </div>
     </div>
   );

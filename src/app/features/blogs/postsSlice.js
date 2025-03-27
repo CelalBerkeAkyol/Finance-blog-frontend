@@ -112,9 +112,11 @@ export const downvotePost = createAsyncThunk(
 
 export const fetchPostsByCategory = createAsyncThunk(
   "posts/fetchPostsByCategory",
-  async (category, thunkAPI) => {
+  async ({ category, page = 1, limit = 20 }, thunkAPI) => {
     try {
-      const response = await axios.get(`/category/${category}`);
+      const response = await axios.get(`/category/${category}`, {
+        params: { page, limit },
+      });
       return response.data.data;
     } catch (error) {
       return thunkAPI.rejectWithValue({
@@ -311,12 +313,20 @@ const postsSlice = createSlice({
       // fetchPostsByCategory
       .addCase(fetchPostsByCategory.pending, handlePending)
       .addCase(fetchPostsByCategory.fulfilled, (state, action) => {
-        logInfo(
-          "✅ Kategori",
-          `${action.payload?.length || 0} post kategoriye göre getirildi`
-        );
+        logInfo("✅ Kategori", `Kategori postları başarıyla getirildi`);
         state.isLoading = false;
-        state.posts = action.payload;
+        state.isSuccess = true;
+        if (action.payload && action.payload.posts) {
+          state.posts = action.payload.posts;
+          state.pagination = action.payload.pagination || {
+            next: null,
+            total: 0,
+            count: 0,
+          };
+        } else {
+          state.posts = action.payload || [];
+          state.pagination = { next: null, total: 0, count: 0 };
+        }
       })
       .addCase(fetchPostsByCategory.rejected, (state, action) =>
         handleRejected(state, action, "Postları getirirken hata oluştu.")

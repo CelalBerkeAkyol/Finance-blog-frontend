@@ -1,19 +1,27 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { useSelector, useDispatch } from "react-redux";
 import { fetchPosts } from "../../../app/features/blogs/postsSlice";
 import PostCardComponent from "./PostCardComponent";
 import BlogsSkeleton from "./BlogsSkeleton";
 import ErrorComponent from "../../error/ErrorComponent";
+import { Pagination } from "@nextui-org/react";
 
 export default function BlogsComponent() {
   const dispatch = useDispatch();
-  const { posts, isLoading, isError, errorMessage, errorCode } = useSelector(
-    (state) => state.posts
-  );
+  const [page, setPage] = useState(1);
+  const limit = 20;
+
+  const { posts, isLoading, isError, errorMessage, errorCode, pagination } =
+    useSelector((state) => state.posts);
 
   useEffect(() => {
-    dispatch(fetchPosts({}));
-  }, [dispatch]);
+    dispatch(fetchPosts({ page, limit }));
+  }, [dispatch, page, limit]);
+
+  const handlePageChange = (newPage) => {
+    setPage(newPage);
+    window.scrollTo(0, 0);
+  };
 
   if (isLoading) {
     return <BlogsSkeleton />;
@@ -38,13 +46,27 @@ export default function BlogsComponent() {
         </div>
         <div className="border-t border-gray-200 pt-4">
           <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-3 sm:gap-4 md:gap-5">
-            {posts.map((post, index) => (
-              <div key={post._id || index} className="flex">
-                <PostCardComponent post={post} />
-              </div>
-            ))}
+            {posts &&
+              posts.map((post, index) => (
+                <div key={post._id || index} className="flex">
+                  <PostCardComponent post={post} />
+                </div>
+              ))}
           </div>
         </div>
+
+        {/* Pagination */}
+        {pagination && pagination.totalPages > 1 && (
+          <div className="flex justify-center mt-8 mb-4">
+            <Pagination
+              total={pagination.totalPages}
+              page={page}
+              onChange={handlePageChange}
+              color="primary"
+              showControls
+            />
+          </div>
+        )}
       </div>
     </div>
   );

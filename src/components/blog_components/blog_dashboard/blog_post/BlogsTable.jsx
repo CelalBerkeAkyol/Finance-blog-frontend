@@ -46,9 +46,8 @@ const statusOptions = [
 
 const BlogsTable = () => {
   const dispatch = useDispatch();
-  const { posts, status, error, total, isError, errorMessage } = useSelector(
-    (state) => state.posts
-  );
+  const { posts, status, error, isError, errorMessage, pagination } =
+    useSelector((state) => state.posts);
   const { success, error: showError } = useFeedback();
   // filtreleme işlemleri
   const [filterValue, setFilterValue] = useState("");
@@ -119,6 +118,11 @@ const BlogsTable = () => {
     setPage(1);
   };
 
+  const handlePageChange = (newPage) => {
+    setPage(newPage);
+    window.scrollTo(0, 0);
+  };
+
   const handleAddPostClick = () => {
     navigate("/dashboard/post/new");
   };
@@ -126,6 +130,13 @@ const BlogsTable = () => {
   const handleRefresh = () => {
     dispatch(fetchPosts({ page, limit }));
     success("Postlar yenilendi.");
+  };
+
+  // Clear filters function
+  const clearFilters = () => {
+    setFilterValue("");
+    setStatusFilter("all");
+    setPage(1);
   };
 
   // Veri yükleme durumunda veya hata durumunda içerik
@@ -138,6 +149,15 @@ const BlogsTable = () => {
         </div>
       );
     }
+
+    // Filtre uygulandığında veya uygulanmadığında pagination gösterme mantığı
+    const isFiltering = filterValue || statusFilter !== "all";
+    const paginationInfo = isFiltering
+      ? {
+          // Filtreleme yapılıyorsa, toplam filtrelenmiş sonuç sayısı üzerinden sayfalama
+          totalPages: Math.max(1, Math.ceil(sortedBlogs.length / limit)),
+        }
+      : pagination;
 
     return (
       <>
@@ -185,17 +205,28 @@ const BlogsTable = () => {
             </TableBody>
           </Table>
         </div>
-        <div className="flex justify-center sm:justify-between align-center items-center mt-4 flex-wrap gap-2">
-          <Pagination
-            total={Math.ceil((total || 0) / limit)}
-            initialPage={1}
-            page={page}
-            onChange={(p) => setPage(p)}
-            size="sm"
-            showControls
-            className="mx-auto sm:mx-0"
-          />
-        </div>
+
+        {/* Pagination her zaman gösterilir, ancak filtreleme durumuna göre farklı değerlerle */}
+        {paginationInfo && paginationInfo.totalPages > 1 && (
+          <div className="flex justify-center sm:justify-between align-center items-center mt-4 flex-wrap gap-2">
+            <Pagination
+              total={paginationInfo.totalPages}
+              initialPage={1}
+              page={isFiltering ? 1 : page} // Filtreleme durumunda hep ilk sayfa gösterilir
+              onChange={isFiltering ? undefined : handlePageChange} // Filtreleme durumunda sayfa değişimine izin verilmez
+              size="sm"
+              showControls
+              isDisabled={isFiltering} // Filtreleme durumunda pagination devre dışı bırakılır
+              className="mx-auto sm:mx-0"
+            />
+            {isFiltering && (
+              <span className="text-xs text-gray-500 ml-2">
+                Filtreleme yaparken sayfalama devre dışıdır. Sayfaları görmek
+                için filtreleri temizleyin.
+              </span>
+            )}
+          </div>
+        )}
       </>
     );
   };
@@ -246,6 +277,18 @@ const BlogsTable = () => {
           </DropdownMenu>
         </Dropdown>
         <div className="flex items-center gap-1 sm:gap-2 ml-auto">
+          {(filterValue || statusFilter !== "all") && (
+            <Button
+              color="default"
+              variant="flat"
+              size="sm"
+              onPress={clearFilters}
+              startContent={<Icon icon="mdi:filter-off" width="18" />}
+              className="min-w-0"
+            >
+              Filtreleri Temizle
+            </Button>
+          )}
           <Tooltip content="Yenile">
             <Button
               color="default"
@@ -277,6 +320,19 @@ const BlogsTable = () => {
       </div>
 
       <div className="overflow-x-auto overflow-y-hidden">{renderContent()}</div>
+
+      {/* Filtreleme sonucu bilgisi */}
+      {(filterValue || statusFilter !== "all") && (
+        <div className="mt-3 text-sm text-gray-500 text-center">
+          <span>
+            {filterValue ? `"${filterValue}" araması için ` : ""}
+            {statusFilter !== "all"
+              ? `"${capitalize(statusFilter)}" durumunda `
+              : ""}
+            {sortedBlogs.length} sonuç bulundu
+          </span>
+        </div>
+      )}
     </div>
   );
 };

@@ -1,77 +1,75 @@
 // src/components/modals/SearchModal.jsx
-import React, { useState, useEffect, useCallback } from "react";
-import {
-  Modal,
-  ModalContent,
-  ModalHeader,
-  ModalBody,
-  Input,
-  Button,
-  Chip,
-  Tooltip,
-  Spinner,
-} from "@nextui-org/react";
+import React, { useState, useEffect, useCallback, useRef } from "react";
+import { Input, Button, Chip, Tooltip, Spinner } from "@nextui-org/react";
 import { Icon } from "@iconify/react";
 import { Link, useNavigate } from "react-router-dom";
-import {
-  slugToReadable,
-  truncateText,
-  formatDate,
-} from "../../utils/formatters";
+import { createPortal } from "react-dom";
+import { slugToReadable, formatDate } from "../../utils/formatters";
 
 // Custom hooks
 import useDebounce from "../../hooks/useDebounce";
 import useSearch from "../../hooks/useSearch";
-import useFocus from "../../hooks/useFocus";
+import { useOnClickOutside } from "../../hooks/useOnClickOutside";
 
 /**
- * Arama modalı bileşeni
- * @param {boolean} isOpen - Modalın açık olup olmadığı
- * @param {function} onClose - Modal kapatma fonksiyonu
+ * Özel Arama bileşeni
  */
 export default function SearchModal({ isOpen, onClose }) {
   const navigate = useNavigate();
   const [searchTerm, setSearchTerm] = useState("");
   const debouncedSearchTerm = useDebounce(searchTerm, 500);
   const MIN_CHARS = 3;
+  const inputRef = useRef(null);
+  const modalRef = useRef(null);
+
+  // Dışarı tıklandığında kapatma
+  useOnClickOutside(modalRef, onClose);
 
   // Custom hook'ları kullan
   const { results, loading, error, searched, performSearch, resetSearch } =
     useSearch(debouncedSearchTerm, MIN_CHARS);
 
-  const {
-    inputRef,
-    focusInput,
-    setupFocusHandlers,
-    handleInputBlur,
-    handleButtonClick,
-  } = useFocus();
+  // Body scroll'u kilitle
+  useEffect(() => {
+    const originalStyle = window.getComputedStyle(document.body).overflow;
+
+    if (isOpen) {
+      document.body.style.overflow = "hidden";
+
+      // Modal açıldığında input'a odaklan
+      setTimeout(() => {
+        if (inputRef.current) {
+          inputRef.current.focus();
+        }
+      }, 100);
+    }
+
+    return () => {
+      document.body.style.overflow = originalStyle;
+    };
+  }, [isOpen]);
 
   // Arama ve temizleme işlemleri
   const handleManualSearch = useCallback(() => {
-    performSearch(true);
-    focusInput();
-  }, [performSearch, focusInput]);
+    if (searchTerm.length >= MIN_CHARS) {
+      performSearch(true);
+    }
+  }, [performSearch, searchTerm]);
 
   const clearSearch = useCallback(() => {
     setSearchTerm("");
     resetSearch();
-    focusInput();
-  }, [resetSearch, focusInput]);
+  }, [resetSearch]);
 
-  // Modal açık/kapalı durum kontrolü ve focus yönetimi
+  // Modal kapatıldığında temizle
   useEffect(() => {
-    // Modal kapandığında arama işlemini sıfırla
     if (!isOpen) {
       setSearchTerm("");
       resetSearch();
     }
+  }, [isOpen, resetSearch]);
 
-    // Focus yönetimi için kurulumu yap
-    return setupFocusHandlers(isOpen);
-  }, [isOpen, resetSearch, setupFocusHandlers]);
-
-  // Debouce'lu arama terimini izle
+  // Arama terimini izle
   useEffect(() => {
     if (debouncedSearchTerm && debouncedSearchTerm.length >= MIN_CHARS) {
       performSearch();
@@ -85,25 +83,37 @@ export default function SearchModal({ isOpen, onClose }) {
     navigate(`/blog/category/${category}`);
   };
 
-  return (
-    <Modal
-      isOpen={isOpen}
-      onOpenChange={onClose}
-      size={{ "@initial": "full", "@sm": "3xl", "@md": "4xl", "@lg": "5xl" }}
-      scrollBehavior="inside"
-      classNames={{
-        body: "p-3 md:p-5",
-        base: "max-h-[90vh] sm:max-h-[80vh] max-w-full sm:max-w-[75%] md:max-w-[70%] lg:max-w-[65%]",
-      }}
-    >
-      <ModalContent>
-        <ModalHeader>
-          <h2 className="text-xl font-bold">Arama</h2>
-        </ModalHeader>
+  if (!isOpen) return null;
 
-        <ModalBody>
+  // Portal ile body sonuna render et
+  return createPortal(
+    <div className="fixed inset-0 z-50 bg-black/50 backdrop-blur-sm flex items-start justify-center overflow-hidden">
+      <div
+        ref={modalRef}
+        className="bg-white rounded-lg shadow-xl w-full max-w-[90%] sm:max-w-[75%] md:max-w-[70%] lg:max-w-[65%] max-h-[90vh] mt-16 flex flex-col overflow-hidden animate-fade-in-down"
+        style={{
+          animation: "0.2s ease-out 0s 1 normal forwards running fadeInDown",
+          maxHeight: "calc(100vh - 120px)",
+        }}
+      >
+        {/* Header */}
+        <div className="p-4 border-b flex justify-between items-center sticky top-0 bg-white z-10">
+          <h2 className="text-xl font-bold">Arama</h2>
+          <Button
+            isIconOnly
+            variant="light"
+            size="sm"
+            onPress={onClose}
+            className="hover:bg-gray-100"
+          >
+            <Icon icon="material-symbols:close" width={20} />
+          </Button>
+        </div>
+
+        {/* Body */}
+        <div className="flex-1 overflow-y-auto p-4">
           {/* Arama Input'u */}
-          <div className="w-full">
+          <div className="w-full sticky top-0 bg-white pt-2 pb-3 z-10">
             <Input
               ref={inputRef}
               placeholder={`En az ${MIN_CHARS} karakter girin...`}
@@ -127,7 +137,7 @@ export default function SearchModal({ isOpen, onClose }) {
                         variant="flat"
                         color="primary"
                         isIconOnly
-                        onClick={handleButtonClick(handleManualSearch)}
+                        onClick={handleManualSearch}
                         isDisabled={loading}
                       >
                         <Icon icon="material-symbols:search" width="18" />
@@ -137,7 +147,7 @@ export default function SearchModal({ isOpen, onClose }) {
                       isIconOnly
                       size="sm"
                       variant="light"
-                      onClick={handleButtonClick(clearSearch)}
+                      onClick={clearSearch}
                     >
                       <Icon icon="material-symbols:close" width="18" />
                     </Button>
@@ -155,7 +165,6 @@ export default function SearchModal({ isOpen, onClose }) {
                   handleManualSearch();
                 }
               }}
-              onBlur={handleInputBlur}
               description={
                 searchTerm.length > 0 && searchTerm.length < MIN_CHARS
                   ? `En az ${MIN_CHARS} karakter girmelisiniz (${
@@ -167,7 +176,7 @@ export default function SearchModal({ isOpen, onClose }) {
           </div>
 
           {/* Sonuçlar Bölümü */}
-          <div className="mt-4">
+          <div className="mt-2">
             {/* Yükleniyor Durumu */}
             {loading && (
               <div className="flex justify-center items-center py-8">
@@ -190,7 +199,7 @@ export default function SearchModal({ isOpen, onClose }) {
                   color="primary"
                   size="sm"
                   className="mt-3"
-                  onClick={handleButtonClick(handleManualSearch)}
+                  onClick={handleManualSearch}
                 >
                   Tekrar Dene
                 </Button>
@@ -225,7 +234,7 @@ export default function SearchModal({ isOpen, onClose }) {
                       <Button
                         color="primary"
                         size="sm"
-                        onClick={handleButtonClick(handleManualSearch)}
+                        onClick={handleManualSearch}
                         startContent={
                           <Icon icon="material-symbols:search" width="16" />
                         }
@@ -247,76 +256,63 @@ export default function SearchModal({ isOpen, onClose }) {
                     onClick={onClose}
                     className="block"
                   >
-                    <div className="border rounded-md p-2 sm:p-3 mb-3 hover:bg-gray-50 transition-colors">
+                    <div className="border rounded-md p-3 mb-3 hover:bg-gray-50 transition-colors">
                       {/* Post Başlığı */}
                       <h3 className="font-semibold text-base sm:text-lg text-blue-800 line-clamp-2">
                         {post.title}
                       </h3>
 
                       {/* Kategori ve Yazar */}
-                      <div className="flex flex-wrap gap-1 sm:gap-2 mt-1 mb-1 sm:mb-2">
+                      <div className="flex flex-wrap gap-2 mt-2 mb-2">
                         {post.category && (
                           <Tooltip
                             content={`Kategori: ${slugToReadable(
                               post.category
                             )}`}
                           >
-                            <Button
+                            <Chip
                               size="sm"
                               color="primary"
                               variant="flat"
+                              radius="sm"
+                              className="cursor-pointer"
                               onClick={(e) => goToCategory(e, post.category)}
-                              className="cursor-pointer min-w-0 h-6 px-2"
-                              startContent={
-                                <Icon
-                                  icon="material-symbols:category"
-                                  width="16"
-                                />
-                              }
                             >
                               {slugToReadable(post.category)}
-                            </Button>
+                            </Chip>
                           </Tooltip>
                         )}
 
-                        {post.author?.name && (
-                          <Chip
-                            size="sm"
-                            color="secondary"
-                            variant="flat"
-                            startContent={
-                              <Icon icon="mdi:account" width="16" />
-                            }
-                          >
-                            {post.author.name}
-                          </Chip>
+                        {post.author && post.author.name && (
+                          <Tooltip content="Yazar">
+                            <Chip size="sm" variant="flat" radius="sm">
+                              {post.author.name}
+                            </Chip>
+                          </Tooltip>
+                        )}
+
+                        {post.publishedAt && (
+                          <Tooltip content="Yayınlanma Tarihi">
+                            <Chip size="sm" variant="flat" radius="sm">
+                              {formatDate(post.publishedAt)}
+                            </Chip>
+                          </Tooltip>
                         )}
                       </div>
 
-                      {/* İçerik Özeti */}
-                      <div className="text-xs sm:text-sm text-gray-600 my-1 sm:my-2 line-clamp-2 sm:line-clamp-3">
-                        {truncateText(post.summary || post.content, 150)}
-                      </div>
-
-                      {/* Tarih */}
-                      {post.createdAt && (
-                        <div className="text-xs text-gray-500 flex items-center mt-1">
-                          <Icon
-                            icon="mdi:calendar"
-                            className="mr-1"
-                            width="14"
-                          />
-                          {formatDate(post.createdAt)}
-                        </div>
-                      )}
+                      {/* İçerik Önizleme */}
+                      <p className="text-gray-600 text-sm line-clamp-2">
+                        {post.summary}
+                      </p>
                     </div>
                   </Link>
                 ))}
               </div>
             )}
           </div>
-        </ModalBody>
-      </ModalContent>
-    </Modal>
+        </div>
+      </div>
+    </div>,
+    document.body
   );
 }

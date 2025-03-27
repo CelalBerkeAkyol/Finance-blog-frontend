@@ -13,6 +13,7 @@ import CustomNavbar from "../../components/header/CustomNavbar";
 import BlogPostSkeleton from "../../components/blog_components/blog/BlogPostSkeleton";
 import TableSkeleton from "../../components/blog_components/blog/TableSkeleton";
 import RightSideBar from "../../components/blog_components/blog/RightSideBar";
+import RightSideBarSkeleton from "../../components/blog_components/blog/RightSideBarSkeleton";
 import FloatingActionButtons from "../../components/buttons/FloatingActionButtons";
 
 function BlogPostPage() {
@@ -89,8 +90,10 @@ function BlogPostPage() {
               {/* Mobil için önerilen yazılar - blog post altında göster */}
               <div className="mt-8 md:hidden">
                 <div className="border-t pt-4">
-                  {!isLoading && post && posts.length > 0 && (
+                  {!isLoading && post && posts.length > 0 ? (
                     <RightSideBar post={post} />
+                  ) : (
+                    <RightSideBarSkeleton />
                   )}
                 </div>
               </div>
@@ -108,8 +111,10 @@ function BlogPostPage() {
             overflowY: "auto",
           }}
         >
-          {!isLoading && post && posts.length > 0 && (
+          {!isLoading && post && posts.length > 0 ? (
             <RightSideBar post={post} />
+          ) : (
+            <RightSideBarSkeleton />
           )}
         </div>
       </div>

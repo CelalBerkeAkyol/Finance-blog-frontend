@@ -5,7 +5,7 @@ import {
   deleteImage,
   clearImageErrors,
 } from "../../app/features/image/imageGallerySlice";
-import { Button, Pagination } from "@nextui-org/react";
+import { Button, Pagination, Checkbox } from "@nextui-org/react";
 import { Icon } from "@iconify/react";
 import ImageUploaderModal from "../../components/blog_components/image/ImageUploaderModal";
 import BlogSidebarComponent from "../../components/blog_components/blog_dashboard/BlogSidebarComponent";
@@ -25,12 +25,14 @@ function GalleryPage() {
   );
   const { showToast, success, error: showError, warning } = useFeedback();
 
-  const [selectedImageId, setSelectedImageId] = useState(null);
+  // Tek görsel seçim yerine çoklu seçim için array kullanıyoruz
+  const [selectedImageIds, setSelectedImageIds] = useState([]);
   const [isUploaderOpen, setIsUploaderOpen] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
   const [loadErrors, setLoadErrors] = useState({});
-  // Hata bildirimi gösterildi mi durumu
   const [errorNotified, setErrorNotified] = useState(false);
+  // Toplu seçim modu
+  const [selectMode, setSelectMode] = useState(false);
 
   // Page değiştiğinde sayfayı en üste kaydır
   useScrollToTop(currentPage, { behavior: "auto", delay: 100 });
@@ -70,18 +72,116 @@ function GalleryPage() {
     }
   }, [loadErrors, warning, errorNotified]);
 
-  // Bir görseli seçme
+  // Çoklu görsel seçim işlemi
   const handleSelectImage = (id) => {
-    setSelectedImageId(id === selectedImageId ? null : id);
+    if (selectMode) {
+      // Çoklu seçim modu açıksa
+      setSelectedImageIds((prev) => {
+        if (prev.includes(id)) {
+          // Görsel zaten seçiliyse kaldır
+          return prev.filter((imageId) => imageId !== id);
+        } else {
+          // Görsel seçili değilse ekle
+          return [...prev, id];
+        }
+      });
+    } else {
+      // Tek seçim modu - eski davranış
+      setSelectedImageIds((prev) => {
+        if (prev.length === 1 && prev[0] === id) {
+          // Seçili görsele tekrar tıklanırsa seçimi kaldır
+          return [];
+        } else {
+          // Yeni görsel seç
+          return [id];
+        }
+      });
+    }
+  };
+
+  // Tüm görselleri seç/seçimi kaldır
+  const handleSelectAll = () => {
+    if (selectedImageIds.length === images.length) {
+      // Tüm görseller seçiliyse seçimleri kaldır
+      setSelectedImageIds([]);
+    } else {
+      // Tüm görselleri seç
+      setSelectedImageIds(images.map((img) => img._id));
+    }
+  };
+
+  // Seçili tüm öğeleri sil
+  const handleBulkDelete = () => {
+    if (selectedImageIds.length === 0) {
+      warning("Lütfen silmek için en az bir görsel seçin.");
+      return;
+    }
+
+    if (
+      !window.confirm(
+        `${selectedImageIds.length} görseli silmek istediğinize emin misiniz?`
+      )
+    )
+      return;
+
+    // Silme işlemleri için sayaç
+    let successCount = 0;
+    let errorCount = 0;
+    let totalToDelete = selectedImageIds.length;
+
+    // Her bir görsel için silme işlemi gerçekleştir
+    const deletePromises = selectedImageIds.map((id) => {
+      return dispatch(deleteImage(id))
+        .unwrap()
+        .then(() => {
+          // Başarılı silme
+          successCount++;
+          // Hata listesinden kaldır
+          setLoadErrors((prev) => {
+            const newErrors = { ...prev };
+            delete newErrors[id];
+            return newErrors;
+          });
+        })
+        .catch((err) => {
+          console.error(`Görsel silme hatası (ID: ${id}):`, err);
+          errorCount++;
+        });
+    });
+
+    // Tüm silme işlemleri tamamlandığında
+    Promise.all(deletePromises)
+      .then(() => {
+        // Silme sonuçlarını göster
+        if (successCount > 0) {
+          success(`${successCount} görsel başarıyla silindi.`);
+        }
+        if (errorCount > 0) {
+          showError(`${errorCount} görsel silinirken hata oluştu.`);
+        }
+
+        // Silinen görselleri seçim listesinden kaldır
+        setSelectedImageIds([]);
+        // Sayfayı yenile
+        dispatch(fetchImages({ page: currentPage, limit: 20 }));
+      })
+      .catch((err) => {
+        console.error("Toplu silme hatası:", err);
+        showError("Görseller silinirken bir hata oluştu.");
+      });
   };
 
   // Kopyalama
   const handleCopy = () => {
-    if (!selectedImageId) {
+    if (selectedImageIds.length === 0) {
       warning("Lütfen bir görsel seçin.");
       return;
     }
-    const foundImage = images.find((img) => img._id === selectedImageId);
+
+    // Çoklu seçimde sadece ilk görseli kopyala
+    const selectedId = selectedImageIds[0];
+    const foundImage = images.find((img) => img._id === selectedId);
+
     if (!foundImage) {
       showError("Seçilen görsel bulunamadı.");
       return;
@@ -105,25 +205,33 @@ function GalleryPage() {
       });
   };
 
-  // Silme
+  // Tek görsel silme
   const handleDelete = () => {
-    if (!selectedImageId) {
+    if (selectedImageIds.length === 0) {
       warning("Lütfen silmek için bir görsel seçin.");
       return;
     }
+
+    // Çoklu seçimde birden fazla görsel varsa toplu silme fonksiyonunu kullan
+    if (selectedImageIds.length > 1) {
+      handleBulkDelete();
+      return;
+    }
+
+    // Tek görsel silme işlemi
+    const selectedId = selectedImageIds[0];
     if (!window.confirm("Bu görseli silmek istediğinize emin misiniz?")) return;
 
     // Görsel zaten erişilemez durumdaysa, doğrudan veritabanından silme işlemi yap
-    const isErrorImage = loadErrors[selectedImageId];
+    const isErrorImage = loadErrors[selectedId];
 
-    dispatch(deleteImage(selectedImageId))
+    dispatch(deleteImage(selectedId))
       .unwrap()
       .then((result) => {
-        setSelectedImageId(null);
         // Hata listesinden görsel ID'sini sil
         setLoadErrors((prev) => {
           const newErrors = { ...prev };
-          delete newErrors[selectedImageId];
+          delete newErrors[selectedId];
           return newErrors;
         });
 
@@ -133,6 +241,8 @@ function GalleryPage() {
           success("Görsel başarıyla silindi.");
         }
 
+        // Seçimi temizle ve görüntüyü yenile
+        setSelectedImageIds([]);
         dispatch(fetchImages({ page: currentPage, limit: 20 }));
       })
       .catch((err) => {
@@ -146,14 +256,14 @@ function GalleryPage() {
     // Önce sayfayı tam olarak en üste kaydır, sonra sayfa değişimini gerçekleştir
     scrollToTop({ behavior: "instant", delay: 0 });
     setCurrentPage(newPage);
-    setSelectedImageId(null);
+    setSelectedImageIds([]);
     setLoadErrors({}); // Sayfa değiştiğinde hataları sıfırla
     setErrorNotified(false); // Bildirim durumunu sıfırla
   };
 
   const handleReload = () => {
     dispatch(fetchImages({ page: currentPage, limit: 20 }));
-    setSelectedImageId(null);
+    setSelectedImageIds([]);
     setLoadErrors({}); // Yeniden yüklerken hataları sıfırla
     setErrorNotified(false); // Bildirim durumunu sıfırla
     success("Görseller yenilendi.");
@@ -162,6 +272,12 @@ function GalleryPage() {
   // "Görsel Ekle" butonu: modal aç
   const handleAddImage = () => {
     setIsUploaderOpen(true);
+  };
+
+  // Çoklu seçim modunu değiştir
+  const toggleSelectMode = () => {
+    setSelectMode(!selectMode);
+    setSelectedImageIds([]); // Seçimi sıfırla
   };
 
   // Görsel yüklenme hatası durumunda
@@ -183,6 +299,32 @@ function GalleryPage() {
     }
   };
 
+  // Seçili hatalı görselleri sil
+  const handleDeleteErrorImages = () => {
+    // Hatalı görselleri bul
+    const errorImageIds = Object.keys(loadErrors);
+
+    if (errorImageIds.length === 0) {
+      warning("Silinecek erişilemeyen görsel bulunamadı.");
+      return;
+    }
+
+    if (
+      !window.confirm(
+        `${errorImageIds.length} erişilemeyen görseli silmek istediğinize emin misiniz?`
+      )
+    )
+      return;
+
+    // Tüm hatalı görselleri seç ve sil
+    setSelectedImageIds(errorImageIds);
+
+    // setTimeout kullanarak state güncellemesinin tamamlanmasını bekle
+    setTimeout(() => {
+      handleBulkDelete();
+    }, 100);
+  };
+
   return (
     <div className="flex min-h-screen w-full">
       {/* Sidebar solda sabit */}
@@ -191,27 +333,92 @@ function GalleryPage() {
       {/* İçerik */}
       <div className="flex-1 p-4 md:p-6 overflow-x-auto">
         {/* Üst Butonlar */}
-        <div className="mb-4 flex flex-wrap gap-2 justify-end">
-          <Button
-            variant="flat"
-            color="default"
-            startContent={<Icon icon="material-symbols:refresh" />}
-            onPress={handleReload}
-          >
-            Yeniden Yükle
-          </Button>
+        <div className="mb-4">
+          <div className="flex flex-wrap gap-2 justify-between items-center mb-2">
+            <div className="flex items-center gap-2">
+              <Button
+                variant="flat"
+                color={selectMode ? "primary" : "default"}
+                startContent={
+                  <Icon
+                    icon={
+                      selectMode
+                        ? "material-symbols:check-box-outline"
+                        : "material-symbols:check-box-outline-blank"
+                    }
+                  />
+                }
+                onPress={toggleSelectMode}
+              >
+                {selectMode ? "Seçim Modunu Kapat" : "Çoklu Seçim Modu"}
+              </Button>
 
-          <Button variant="flat" color="default" onPress={handleCopy}>
-            Kopyala
-          </Button>
+              {selectMode && (
+                <Button
+                  variant="flat"
+                  color="default"
+                  onPress={handleSelectAll}
+                >
+                  {selectedImageIds.length === images.length
+                    ? "Tümünün Seçimini Kaldır"
+                    : "Tümünü Seç"}
+                </Button>
+              )}
 
-          <Button variant="flat" color="danger" onPress={handleDelete}>
-            Sil
-          </Button>
+              {Object.keys(loadErrors).length > 0 && (
+                <Button
+                  variant="flat"
+                  color="warning"
+                  onPress={handleDeleteErrorImages}
+                >
+                  Erişilemeyen Görselleri Sil
+                </Button>
+              )}
+            </div>
 
-          <Button variant="flat" color="primary" onPress={handleAddImage}>
-            Görsel Ekle
-          </Button>
+            <div className="flex flex-wrap gap-2">
+              <Button
+                variant="flat"
+                color="default"
+                startContent={<Icon icon="material-symbols:refresh" />}
+                onPress={handleReload}
+              >
+                Yeniden Yükle
+              </Button>
+
+              <Button
+                variant="flat"
+                color="default"
+                onPress={handleCopy}
+                isDisabled={selectedImageIds.length !== 1}
+              >
+                Kopyala
+              </Button>
+
+              <Button
+                variant="flat"
+                color="danger"
+                onPress={
+                  selectedImageIds.length > 1 ? handleBulkDelete : handleDelete
+                }
+                isDisabled={selectedImageIds.length === 0}
+              >
+                {selectedImageIds.length > 1
+                  ? `${selectedImageIds.length} Görseli Sil`
+                  : "Sil"}
+              </Button>
+
+              <Button variant="flat" color="primary" onPress={handleAddImage}>
+                Görsel Ekle
+              </Button>
+            </div>
+          </div>
+
+          {selectedImageIds.length > 0 && (
+            <div className="text-sm text-blue-600 mt-2">
+              {selectedImageIds.length} görsel seçildi
+            </div>
+          )}
         </div>
 
         {/* İçerik */}
@@ -226,7 +433,7 @@ function GalleryPage() {
         <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
           {Array.isArray(images) && images.length > 0 ? (
             images.map((img) => {
-              const isSelected = selectedImageId === img._id;
+              const isSelected = selectedImageIds.includes(img._id);
               const hasError = loadErrors[img._id];
 
               return (
@@ -234,18 +441,29 @@ function GalleryPage() {
                   key={img._id}
                   onClick={() => handleSelectImage(img._id)}
                   className={`cursor-pointer border p-1 ${
-                    isSelected ? "border-blue-500" : "border-gray-200"
+                    isSelected
+                      ? "border-blue-500 bg-blue-50"
+                      : "border-gray-200"
                   } ${
                     hasError ? "bg-red-50" : ""
-                  } hover:border-blue-300 transition-colors`}
+                  } hover:border-blue-300 transition-colors relative`}
                 >
+                  {selectMode && (
+                    <div className="absolute top-1 left-1 z-10">
+                      <Checkbox
+                        isSelected={isSelected}
+                        color="primary"
+                        className="bg-white bg-opacity-80 rounded"
+                      />
+                    </div>
+                  )}
                   <div className="relative w-full h-36">
                     <img
                       src={img.url}
                       alt={img.altText || "Görsel"}
                       className={`w-full h-full object-cover ${
                         hasError ? "opacity-40" : ""
-                      }`}
+                      } ${isSelected ? "opacity-90" : ""}`}
                       data-image-id={img._id}
                       onError={(e) => handleImageError(img._id, e)}
                     />

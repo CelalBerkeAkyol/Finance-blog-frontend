@@ -67,7 +67,7 @@ const RelatedPostsComponent = ({ currentPostId, category }) => {
               key={post._id}
               isPressable
               onPress={() => navigate(`/blog/post/${post._id}`)}
-              className="shadow-sm hover:shadow-md transition-shadow duration-200 text-left"
+              className="hover:bg-gray-50 transition-colors duration-200 text-left shadow-none"
             >
               <CardBody className="p-0 overflow-hidden">
                 {post.coverImage && (

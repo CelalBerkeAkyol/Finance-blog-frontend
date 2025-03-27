@@ -4,6 +4,7 @@ import { useDispatch, useSelector } from "react-redux";
 import {
   fetchPostById,
   incrementPostView,
+  fetchPosts,
 } from "../../app/features/blogs/postsSlice";
 import BlogPostComponent from "../../components/blog_components/blog/BlogPostComponent";
 import TableOfContents from "../../components/blog_components/blog/TableOfContents";
@@ -35,7 +36,12 @@ function BlogPostPage() {
     if (id) {
       dispatch(fetchPostById(id));
     }
-  }, [id, dispatch]);
+
+    // Ensure we have posts data for the related posts sidebar
+    if (posts.length === 0) {
+      dispatch(fetchPosts());
+    }
+  }, [id, dispatch, posts.length]);
 
   useEffect(() => {
     if (post && !hasIncremented) {
@@ -51,7 +57,7 @@ function BlogPostPage() {
       <div className="flex flex-col md:flex-row gap-4 md:gap-6 py-6 md:py-8 container mx-auto">
         {/* Masaüstü için Table of Contents */}
         <div className="md:w-[15%] w-full md:border-r min-w-[180px] hidden md:block">
-          <div className="sticky top-20 max-h-[calc(100vh-8rem)] overflow-y-auto py-4 pr-2">
+          <div className="sticky top-20 max-h-[calc(100vh-8rem)] overflow-y-auto py-2">
             {isLoading ? (
               <TableSkeleton />
             ) : post ? (
@@ -66,7 +72,7 @@ function BlogPostPage() {
             <summary className="text-sm font-medium text-gray-700 cursor-pointer py-2 touch-manipulation">
               İçindekiler 📑
             </summary>
-            <div className="mt-2 border-t pt-2">
+            <div className="mt-2 border-t pt-2 px-1">
               {isLoading ? (
                 <TableSkeleton />
               ) : post ? (
@@ -87,7 +93,9 @@ function BlogPostPage() {
 
         {/* Sağ Kenar Çubuğu - Önerilen Yazılar */}
         <div className="md:w-[25%] lg:w-[20%] hidden md:block pl-2 md:pl-4 border-l">
-          {!isLoading && post && <RightSideBar post={post} />}
+          <div className="sticky top-20 max-h-[calc(100vh-8rem)] overflow-y-auto">
+            {!isLoading && post && <RightSideBar post={post} />}
+          </div>
         </div>
       </div>
     </div>

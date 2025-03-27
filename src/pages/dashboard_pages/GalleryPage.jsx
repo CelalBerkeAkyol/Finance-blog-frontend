@@ -5,12 +5,14 @@ import {
   deleteImage,
   clearImageErrors,
 } from "../../app/features/image/imageGallerySlice";
-import { Button } from "@nextui-org/react";
+import { Button, Pagination } from "@nextui-org/react";
 import { Icon } from "@iconify/react";
 import ImageUploaderModal from "../../components/blog_components/image/ImageUploaderModal";
 import BlogSidebarComponent from "../../components/blog_components/blog_dashboard/BlogSidebarComponent";
 import ErrorBoundary from "../../components/Error/ErrorBoundary";
 import { useFeedback } from "../../context/FeedbackContext";
+import useScrollToTop from "../../hooks/useScrollToTop";
+import { scrollToTop } from "../../utils/scrollHelpers";
 
 function GalleryPage() {
   const dispatch = useDispatch();
@@ -21,11 +23,15 @@ function GalleryPage() {
 
   const [selectedImageId, setSelectedImageId] = useState(null);
   const [isUploaderOpen, setIsUploaderOpen] = useState(false);
+  const [currentPage, setCurrentPage] = useState(1);
+
+  // Page değiştiğinde sayfayı en üste kaydır
+  useScrollToTop(currentPage, { behavior: "auto", delay: 100 });
 
   // İlk yükelemede 20 görseli çek
   useEffect(() => {
-    dispatch(fetchImages({ page: 1, limit: 20 }));
-  }, [dispatch]);
+    dispatch(fetchImages({ page: currentPage, limit: 20 }));
+  }, [dispatch, currentPage]);
 
   // Hata mesajı varsa bildirim göster
   useEffect(() => {
@@ -80,6 +86,7 @@ function GalleryPage() {
       .then((result) => {
         setSelectedImageId(null);
         success("Görsel başarıyla silindi.");
+        dispatch(fetchImages({ page: currentPage, limit: 20 }));
       })
       .catch((err) => {
         console.error("Silme hatası:", err);
@@ -88,22 +95,15 @@ function GalleryPage() {
   };
 
   // Sayfalama
-  const handlePrevPage = () => {
-    if (page > 1) {
-      dispatch(fetchImages({ page: page - 1, limit: 20 }));
-      setSelectedImageId(null);
-    }
-  };
-
-  const handleNextPage = () => {
-    if (page < totalPages) {
-      dispatch(fetchImages({ page: page + 1, limit: 20 }));
-      setSelectedImageId(null);
-    }
+  const handlePageChange = (newPage) => {
+    // Önce sayfayı tam olarak en üste kaydır, sonra sayfa değişimini gerçekleştir
+    scrollToTop({ behavior: "instant", delay: 0 });
+    setCurrentPage(newPage);
+    setSelectedImageId(null);
   };
 
   const handleReload = () => {
-    dispatch(fetchImages({ page: 1, limit: 20 }));
+    dispatch(fetchImages({ page: currentPage, limit: 20 }));
     setSelectedImageId(null);
     success("Görseller yenilendi.");
   };
@@ -160,10 +160,10 @@ function GalleryPage() {
               return (
                 <div
                   key={img._id}
-                  onPress={() => handleSelectImage(img._id)}
+                  onClick={() => handleSelectImage(img._id)}
                   className={`cursor-pointer border p-1 ${
                     isSelected ? "border-blue-500" : "border-gray-200"
-                  }`}
+                  } hover:border-blue-300 transition-colors`}
                 >
                   <img
                     src={img.url}
@@ -185,27 +185,19 @@ function GalleryPage() {
           )}
         </div>
 
-        {/* Sayfalama */}
-        <div className="mt-6 flex justify-between items-center">
-          <Button
-            variant="flat"
-            color="default"
-            isDisabled={page <= 1}
-            onPress={handlePrevPage}
-          >
-            Önceki
-          </Button>
-          <span>
-            Sayfa: {page} / {totalPages}
-          </span>
-          <Button
-            variant="flat"
-            color="default"
-            isDisabled={page >= totalPages}
-            onPress={handleNextPage}
-          >
-            Sonraki
-          </Button>
+        {/* Sayfalama - NextUI Pagination kullanarak */}
+        <div className="mt-6 flex justify-center flex-col items-center gap-2">
+          <Pagination
+            total={totalPages || 1}
+            initialPage={1}
+            page={currentPage}
+            onChange={handlePageChange}
+            color="primary"
+            showControls
+            classNames={{
+              wrapper: "gap-0 overflow-visible",
+            }}
+          />
         </div>
 
         {/* Yükleme Modalı */}
@@ -215,6 +207,8 @@ function GalleryPage() {
             onSuccess={() => {
               setIsUploaderOpen(false);
               success("Görsel başarıyla yüklendi.");
+              // Görsel eklendikten sonra ilk sayfaya dön ve yenile
+              setCurrentPage(1);
               dispatch(fetchImages({ page: 1, limit: 20 }));
             }}
           />

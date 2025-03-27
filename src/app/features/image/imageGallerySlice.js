@@ -10,7 +10,7 @@ import { logInfo } from "../../../utils/logger";
 // Sayfalı görsel listeleme thunk'ı
 export const fetchImages = createAsyncThunk(
   "imageGallery/fetchImages",
-  async ({ page = 1, limit = 9 }, thunkAPI) => {
+  async ({ page = 1, limit = 20 }, thunkAPI) => {
     try {
       // API isteğinde page ve limit'i kullan
       const response = await api.get(`/images?page=${page}&limit=${limit}`);
@@ -80,10 +80,19 @@ const imageGallerySlice = createSlice({
           `${action.payload.images?.length || 0} görsel başarıyla getirildi`
         );
         state.loading = false;
-        state.images = action.payload.images;
-        state.page = action.payload.page;
-        state.totalPages = action.payload.totalPages;
-        state.total = action.payload.total;
+        state.images = action.payload.images || [];
+
+        // Pagination bilgilerini doğru şekilde al
+        if (action.payload.pagination) {
+          state.page = action.payload.pagination.currentPage || 1;
+          state.totalPages = action.payload.pagination.totalPages || 1;
+          state.total = action.payload.pagination.totalItems || 0;
+        } else {
+          // Pagination bilgisi yoksa varsayılan değerler
+          state.page = 1;
+          state.totalPages = 1;
+          state.total = state.images.length;
+        }
       })
       .addCase(fetchImages.rejected, (state, action) => {
         logInfo(

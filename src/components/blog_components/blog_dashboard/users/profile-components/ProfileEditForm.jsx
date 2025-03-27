@@ -11,6 +11,11 @@ const ProfileEditForm = ({ formData, handleChange }) => (
       onChange={handleChange}
       variant="bordered"
       isDisabled
+      classNames={{
+        inputWrapper:
+          "group-data-[focus-visible=true]:ring-2 group-data-[focus-visible=true]:ring-offset-0 focus:border-primary",
+        input: "focus:outline-none",
+      }}
     />
     <Input
       label="Tam Ad"
@@ -18,6 +23,11 @@ const ProfileEditForm = ({ formData, handleChange }) => (
       value={formData.fullName}
       onChange={handleChange}
       variant="bordered"
+      classNames={{
+        inputWrapper:
+          "group-data-[focus-visible=true]:ring-2 group-data-[focus-visible=true]:ring-offset-0 focus:border-primary",
+        input: "focus:outline-none",
+      }}
     />
     <Input
       label="E-posta"
@@ -26,6 +36,11 @@ const ProfileEditForm = ({ formData, handleChange }) => (
       onChange={handleChange}
       variant="bordered"
       isDisabled
+      classNames={{
+        inputWrapper:
+          "group-data-[focus-visible=true]:ring-2 group-data-[focus-visible=true]:ring-offset-0 focus:border-primary",
+        input: "focus:outline-none",
+      }}
     />
     <Input
       label="Meslek"
@@ -33,6 +48,11 @@ const ProfileEditForm = ({ formData, handleChange }) => (
       value={formData.occupation}
       onChange={handleChange}
       variant="bordered"
+      classNames={{
+        inputWrapper:
+          "group-data-[focus-visible=true]:ring-2 group-data-[focus-visible=true]:ring-offset-0 focus:border-primary",
+        input: "focus:outline-none",
+      }}
     />
     <Input
       label="Web Sitesi"
@@ -40,6 +60,11 @@ const ProfileEditForm = ({ formData, handleChange }) => (
       value={formData.website}
       onChange={handleChange}
       variant="bordered"
+      classNames={{
+        inputWrapper:
+          "group-data-[focus-visible=true]:ring-2 group-data-[focus-visible=true]:ring-offset-0 focus:border-primary",
+        input: "focus:outline-none",
+      }}
     />
     <Input
       label="Twitter"
@@ -47,6 +72,11 @@ const ProfileEditForm = ({ formData, handleChange }) => (
       value={formData.socialLinks?.twitter}
       onChange={handleChange}
       variant="bordered"
+      classNames={{
+        inputWrapper:
+          "group-data-[focus-visible=true]:ring-2 group-data-[focus-visible=true]:ring-offset-0 focus:border-primary",
+        input: "focus:outline-none",
+      }}
     />
     <Input
       label="LinkedIn"
@@ -54,6 +84,11 @@ const ProfileEditForm = ({ formData, handleChange }) => (
       value={formData.socialLinks?.linkedin}
       onChange={handleChange}
       variant="bordered"
+      classNames={{
+        inputWrapper:
+          "group-data-[focus-visible=true]:ring-2 group-data-[focus-visible=true]:ring-offset-0 focus:border-primary",
+        input: "focus:outline-none",
+      }}
     />
     <Input
       label="GitHub"
@@ -61,6 +96,11 @@ const ProfileEditForm = ({ formData, handleChange }) => (
       value={formData.socialLinks?.github}
       onChange={handleChange}
       variant="bordered"
+      classNames={{
+        inputWrapper:
+          "group-data-[focus-visible=true]:ring-2 group-data-[focus-visible=true]:ring-offset-0 focus:border-primary",
+        input: "focus:outline-none",
+      }}
     />
     <Textarea
       label="Biyografi"
@@ -70,6 +110,11 @@ const ProfileEditForm = ({ formData, handleChange }) => (
       variant="bordered"
       className="col-span-1 md:col-span-2"
       maxLength={500}
+      classNames={{
+        inputWrapper:
+          "group-data-[focus-visible=true]:ring-2 group-data-[focus-visible=true]:ring-offset-0 focus:border-primary",
+        input: "focus:outline-none",
+      }}
     />
   </div>
 );

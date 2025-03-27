@@ -22,6 +22,7 @@ function BlogPostPage() {
 
   // Local state flag to ensure the view is incremented only once
   const [hasIncremented, setHasIncremented] = useState(false);
+  const [loadedPosts, setLoadedPosts] = useState(false);
 
   // Sayfa yüklendiğinde en üste scroll et
   useEffect(() => {
@@ -32,16 +33,26 @@ function BlogPostPage() {
     });
   }, [id]); // id değiştiğinde (farklı bir blog post açıldığında) scroll'u sıfırla
 
+  // Load all posts only once when component mounts
+  useEffect(() => {
+    console.log("Fetching all posts for related posts sidebar");
+    // The fetchPosts action expects an object with page and limit properties
+    dispatch(fetchPosts({ page: 1, limit: 100 }))
+      .then((response) => {
+        console.log("Fetched posts response:", response);
+        setLoadedPosts(true);
+      })
+      .catch((error) => {
+        console.error("Error fetching posts:", error);
+      });
+  }, [dispatch]);
+
+  // Load specific post when ID changes
   useEffect(() => {
     if (id) {
       dispatch(fetchPostById(id));
     }
-
-    // Ensure we have posts data for the related posts sidebar
-    if (posts.length === 0) {
-      dispatch(fetchPosts());
-    }
-  }, [id, dispatch, posts.length]);
+  }, [id, dispatch]);
 
   useEffect(() => {
     if (post && !hasIncremented) {
@@ -94,7 +105,17 @@ function BlogPostPage() {
         {/* Sağ Kenar Çubuğu - Önerilen Yazılar */}
         <div className="md:w-[25%] lg:w-[20%] hidden md:block pl-2 md:pl-4 border-l">
           <div className="sticky top-20 max-h-[calc(100vh-8rem)] overflow-y-auto">
-            {!isLoading && post && <RightSideBar post={post} />}
+            {!isLoading && post && posts.length > 0 && (
+              <>
+                <RightSideBar post={post} />
+                {console.log(
+                  "Rendering sidebar with post:",
+                  post.title,
+                  "and total posts:",
+                  posts.length
+                )}
+              </>
+            )}
           </div>
         </div>
       </div>

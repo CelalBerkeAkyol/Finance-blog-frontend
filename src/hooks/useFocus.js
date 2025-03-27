@@ -107,7 +107,10 @@ function useFocus() {
       return (e) => {
         if (callback) callback();
         setTimeout(focusInput, 0);
-        e.stopPropagation();
+        // Event nesnesinin varlığını kontrol et
+        if (e && e.stopPropagation) {
+          e.stopPropagation();
+        }
       };
     },
     [focusInput]

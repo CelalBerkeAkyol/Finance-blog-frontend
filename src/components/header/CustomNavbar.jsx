@@ -223,13 +223,13 @@ function CustomNavbar() {
         </NavbarContent>
 
         {/* Mobil ve tablet menü */}
-        <NavbarMenu className="pt-4 lg:hidden overflow-y-auto max-h-[85vh]">
-          <div className="flex flex-col gap-2">
+        <NavbarMenu className="pt-4 lg:hidden overflow-y-auto h-[100vh]">
+          <div className="flex flex-col gap-2 py-6">
             {navbarLinks.map((item, index) => (
               <NavbarMenuItem key={index}>
                 <button
                   onClick={() => handleNavigate(item.path)}
-                  className="w-full text-left py-3 hover:text-primary touch-manipulation"
+                  className="w-full text-left py-4 hover:text-primary touch-manipulation"
                   style={navTextStyle}
                 >
                   {item.name}
@@ -238,16 +238,16 @@ function CustomNavbar() {
             ))}
 
             <NavbarMenuItem>
-              <div className="py-2">
-                <p className="font-semibold mb-2" style={navTextStyle}>
+              <div className="py-4">
+                <p className="font-semibold mb-3" style={navTextStyle}>
                   Ekonomi & Finans
                 </p>
-                <div className="flex flex-col gap-1 pl-2">
+                <div className="flex flex-col gap-2 pl-2">
                   {categories.map((item, index) => (
                     <button
                       key={index}
                       onClick={() => handleNavigate(item.path)}
-                      className="w-full text-left py-2 hover:text-primary touch-manipulation"
+                      className="w-full text-left py-3 hover:text-primary touch-manipulation"
                       style={navTextStyle}
                     >
                       {item.name}
@@ -255,7 +255,7 @@ function CustomNavbar() {
                   ))}
                   <button
                     onClick={() => handleNavigate("/blog/categories")}
-                    className="w-full text-left py-2 text-primary font-medium touch-manipulation flex items-center"
+                    className="w-full text-left py-3 text-primary font-medium touch-manipulation flex items-center"
                     style={navTextStyle}
                   >
                     <Icon icon="mdi:view-grid" className="mr-2" width="18" />
@@ -271,7 +271,7 @@ function CustomNavbar() {
                   <NavbarMenuItem>
                     <button
                       onClick={() => handleNavigate("/profile")}
-                      className="w-full text-left py-2 hover:text-primary"
+                      className="w-full text-left py-4 hover:text-primary"
                       style={navTextStyle}
                     >
                       Profile ({userName})
@@ -287,7 +287,7 @@ function CustomNavbar() {
                 <NavbarMenuItem>
                   <button
                     onClick={() => handleNavigate("/login")}
-                    className="w-full text-left py-2 hover:text-primary"
+                    className="w-full text-left py-4 hover:text-primary"
                     style={navTextStyle}
                   >
                     Login
@@ -296,7 +296,7 @@ function CustomNavbar() {
                 <NavbarMenuItem>
                   <button
                     onClick={() => handleNavigate("/register")}
-                    className="w-full text-left py-2 hover:text-primary"
+                    className="w-full text-left py-4 hover:text-primary"
                     style={navTextStyle}
                   >
                     Register

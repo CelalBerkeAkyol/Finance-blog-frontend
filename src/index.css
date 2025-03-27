@@ -21,4 +21,20 @@
     -webkit-overflow-scrolling: touch;
     scroll-behavior: smooth;
   }
+
+  /* Mobil cihazlarda form elemanları için zoom engelleme */
+  @media (max-width: 768px) {
+    input,
+    textarea,
+    select {
+      font-size: 16px !important; /* iOS'da 16px font minimum zoom engeller */
+    }
+  }
+}
+
+/* Safari ve iOS için özel düzeltmeler */
+@supports (-webkit-touch-callout: none) {
+  .nextui-modal-body {
+    -webkit-overflow-scrolling: touch;
+  }
 }

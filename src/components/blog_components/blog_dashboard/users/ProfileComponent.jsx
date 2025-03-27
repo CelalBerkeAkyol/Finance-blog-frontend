@@ -190,22 +190,29 @@ const ProfileComponent = () => {
 
   // Form değişikliklerini izleme
   const handleChange = (e) => {
+    // Olay nesnesinin ve hedefinin tanımlı olduğundan emin oluyoruz
+    if (!e || !e.target) return;
+
     const { name, value } = e.target;
 
+    if (!name) return;
+
+    // Derinlemesine nesne özellikleri için
     if (name.includes(".")) {
       const [parent, child] = name.split(".");
-      setFormData({
-        ...formData,
+      setFormData((prevData) => ({
+        ...prevData,
         [parent]: {
-          ...formData[parent],
+          ...(prevData[parent] || {}),
           [child]: value,
         },
-      });
+      }));
     } else {
-      setFormData({
-        ...formData,
+      // Basit özellikler için
+      setFormData((prevData) => ({
+        ...prevData,
         [name]: value,
-      });
+      }));
     }
   };
 
@@ -266,14 +273,47 @@ const ProfileComponent = () => {
       <ProfileSummaryCard userInfo={userInfo} onEditClick={handleStartEdit} />
 
       {/* Profil Düzenleme Modalı */}
-      <Modal isOpen={isOpen && editMode} onClose={onClose} size="2xl">
+      <Modal
+        isOpen={isOpen && editMode}
+        onClose={onClose}
+        size="2xl"
+        scrollBehavior="inside"
+        placement="center"
+        classNames={{
+          base: "sm:max-w-[80%] m-0 max-h-[90vh]",
+          header: "border-b-[1px] border-default-100",
+          footer: "border-t-[1px] border-default-100",
+          closeButton: "hover:bg-default-100 active:bg-default-200",
+        }}
+        shouldBlockScroll={true}
+        motionProps={{
+          variants: {
+            enter: {
+              y: 0,
+              opacity: 1,
+              transition: {
+                duration: 0.3,
+                ease: "easeOut",
+              },
+            },
+            exit: {
+              y: 20,
+              opacity: 0,
+              transition: {
+                duration: 0.2,
+                ease: "easeIn",
+              },
+            },
+          },
+        }}
+      >
         <ModalContent>
           {(onClose) => (
             <>
               <ModalHeader className="flex flex-col gap-1">
                 Profil Düzenle
               </ModalHeader>
-              <ModalBody>
+              <ModalBody className="pb-6">
                 <ProfileImageUploader
                   imagePreview={imagePreview}
                   selectedImage={selectedImage}

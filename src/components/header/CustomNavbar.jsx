@@ -1,4 +1,4 @@
-import React, { useState, useRef, useCallback, memo } from "react";
+import React, { useState, useRef, useCallback, memo, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Icon } from "@iconify/react";
 import {
@@ -56,6 +56,8 @@ function CustomNavbar() {
 
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [visible, setVisible] = useState(true);
+  const [lastScrollY, setLastScrollY] = useState(0);
   const navigate = useNavigate();
 
   // useSelector kullanımını optimize ediyoruz, her bir değeri ayrı ayrı seçerek
@@ -63,6 +65,32 @@ function CustomNavbar() {
   const isLoggedIn = useSelector(selectIsLoggedIn);
   const userInfo = useSelector(selectUserInfo);
   const isAdmin = useSelector(selectIsAdmin);
+
+  // Mobil cihazlarda scroll işlemi için
+  useEffect(() => {
+    const handleScroll = () => {
+      // Sadece mobil cihazlarda bu özelliği çalıştır
+      if (window.innerWidth <= 768) {
+        const currentScrollY = window.scrollY;
+
+        if (currentScrollY > lastScrollY && currentScrollY > 40) {
+          // Aşağı kaydırma
+          setVisible(false);
+        } else {
+          // Yukarı kaydırma
+          setVisible(true);
+        }
+
+        setLastScrollY(currentScrollY);
+      } else {
+        // Mobil olmayan cihazlarda her zaman görünür yap
+        setVisible(true);
+      }
+    };
+
+    window.addEventListener("scroll", handleScroll, { passive: true });
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, [lastScrollY]);
 
   const userName = userInfo?.username || userInfo?.userName || "Guest";
 
@@ -90,7 +118,9 @@ function CustomNavbar() {
   return (
     <>
       <Navbar
-        className="bg-gray-50 py-1"
+        className={`bg-gray-50 py-1 transition-transform duration-300 ${
+          !visible ? "-translate-y-full" : "translate-y-0"
+        }`}
         maxWidth="xl"
         isMenuOpen={isMenuOpen}
         onMenuOpenChange={setIsMenuOpen}

@@ -4,10 +4,11 @@ import remarkGfm from "remark-gfm";
 import rehypeRaw from "rehype-raw";
 import rehypeSlug from "rehype-slug";
 import { useNavigate } from "react-router-dom";
-import { Button } from "@nextui-org/react";
+import { Button, Chip, Avatar } from "@nextui-org/react";
 import ShareButtons from "../../buttons/ShareButtons";
 import VoteButtons from "../../buttons/VoteButton";
-import ScrollToTopButton from "../../buttons/ScrollToTopButton";
+import { Icon } from "@iconify/react";
+
 // Kategori isimlerini okunabilir hale getiriyor
 function slugToReadable(slug) {
   return slug
@@ -25,59 +26,92 @@ const BlogPostComponent = ({ post }) => {
     navigate("/team");
   };
 
+  // Tarih formatı
+  const formattedDate = new Date(post.createdAt).toLocaleDateString("tr-TR", {
+    year: "numeric",
+    month: "long",
+    day: "numeric",
+  });
+
+  // Yazar bilgileri
+  const authorName =
+    typeof post.author === "object" && post.author?.userName
+      ? post.author.userName
+      : "İsimsiz Yazar";
+
+  const authorOccupation =
+    typeof post.author === "object" && post.author?.occupation
+      ? post.author.occupation
+      : "Yazar";
+
+  // Avatar URL ve fallback işlemi
+  const getAvatarUrl = () => {
+    if (typeof post.author === "object" && post.author?.profileImage) {
+      return post.author.profileImage;
+    }
+    // Yazarın adının baş harflerini kullan (NextUI Avatar'ın text özelliği için)
+    return null;
+  };
+
   return (
     <div className="prose p-2 sm:p-3 md:p-4 text-start w-full max-w-full md:max-w-3xl mx-auto">
-      {/* Başlık */}
-      <h1 className="text-4xl sm:text-3xl md:text-4xl font-bold mb-6 md:mb-6">
+      {/* Başlık - Boyutu ayarlandı ve büyütüldü */}
+      <h1 className="text-3xl sm:text-4xl md:text-4xl font-bold mb-3 sm:mb-4 md:mb-6 leading-tight">
         {post.title}
       </h1>
 
-      {/* Blog detayları */}
-      <div
-        id="blog-details"
-        className="flex flex-col gap-3 md:gap-4 pb-3 md:pb-4 border-b"
-      >
-        {/* Sol Taraf: Kategori Butonu ve Post Bilgileri */}
-        <div className="flex flex-wrap gap-2 md:gap-4 text-xs sm:text-sm leading-tight">
-          <Button
-            color="primary"
-            variant="ghost"
-            radius="lg"
-            size="sm"
-            className="w-auto px-3 py-1"
-            onPress={() => navigate(`/blog/category/${post.category}`)}
-          >
-            {slugToReadable(post.category)}
-          </Button>
-          <p className="flex items-center gap-1">
-            🗓️{" "}
-            {new Date(post.createdAt).toLocaleDateString("tr-TR", {
-              year: "numeric",
-              month: "long",
-              day: "numeric",
-            })}
-          </p>
-
-          <p className="flex items-center gap-1">
-            👀 {post.views} Görüntülenme
-          </p>
-          <p className="flex items-center gap-1">
-            ✍️ Yazar:{" "}
-            <span
-              onClick={navigateToTeam}
-              className="cursor-pointer hover:text-primary transition-colors"
-            >
-              {typeof post.author === "object" && post.author?.userName
-                ? post.author.userName
-                : "İsimsiz Yazar"}
-            </span>
-          </p>
+      {/* Blog meta bilgileri - Mobil için daha düzenli */}
+      <div id="blog-meta" className="pb-4 border-b border-gray-100">
+        {/* Yazar bilgisi - Avatar içeren kart görünümü - Profil resmi büyütüldü */}
+        <div className="flex items-center mb-3 sm:mb-4">
+          <Avatar
+            size="md"
+            radius="full"
+            src={getAvatarUrl()}
+            name={authorName.substring(0, 2).toUpperCase()}
+            color="default"
+            className="mr-3 sm:h-14 sm:w-14 md:h-16 md:w-16"
+          />
+          <div>
+            <div className="flex flex-col">
+              <span
+                onClick={navigateToTeam}
+                className="text-sm font-medium leading-tight cursor-pointer hover:text-primary transition-colors"
+              >
+                {authorName}
+              </span>
+              {/* Meslek bilgisi - Kullanıcı adına daha yakın */}
+              <span className="text-xs text-gray-500 mt-0.5">
+                {authorOccupation}
+              </span>
+            </div>
+          </div>
         </div>
 
-        {/* Paylaşım Butonları - Ayrı satırda */}
-        <div className="flex items-center gap-2 justify-start">
-          <span className=" font-bold text-gray-600 mr-1">Paylaş:</span>
-          <ShareButtons url={currentURL} />
+        {/* Meta bilgileri (Kategori, Tarih, Görüntüleme) - Aynı satırda */}
+        <div className="flex flex-wrap items-center gap-x-3 gap-y-2 text-xs text-gray-500">
+          {/* Kategori */}
+          <div
+            className="flex items-center gap-1 cursor-pointer"
+            onClick={() => navigate(`/blog/category/${post.category}`)}
+          >
+            <Icon icon="mdi:folder-outline" width={16} />
+            <span className="hover:text-primary transition-colors">
+              {slugToReadable(post.category)}
+            </span>
+          </div>
+
+          {/* Tarih */}
+          <div className="flex items-center gap-1">
+            <Icon icon="mdi:calendar-outline" width={16} />
+            <span>{formattedDate}</span>
+          </div>
+
+          {/* Görüntülenme */}
+          <div className="flex items-center gap-1">
+            <Icon icon="mdi:eye-outline" width={16} />
+            <span>{post.views} görüntülenme</span>
+          </div>
         </div>
       </div>
 
@@ -91,19 +125,16 @@ const BlogPostComponent = ({ post }) => {
         </ReactMarkdown>
       </div>
 
-      {/* Upvote & Downvote ve Yukarı Çık Butonu */}
+      {/* Upvote & Downvote Buttons */}
       <div className="flex justify-between items-center w-full mt-2 pt-3 md:pt-4 border-t-1">
         {/* Beğeni Butonları (Sol Tarafta) */}
         <VoteButtons postId={post._id} />
 
         {/* Paylaşım Butonları (Sağ Tarafta) */}
-        <div className="flex items-center gap-2 algin-middle">
+        <div className="flex items-center gap-2 align-middle">
           <ShareButtons url={currentURL} />
         </div>
       </div>
-
-      {/* Yukarı Çık Butonu */}
-      <ScrollToTopButton />
     </div>
   );
 };

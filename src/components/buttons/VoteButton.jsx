@@ -10,12 +10,19 @@ const VoteButtons = ({ postId }) => {
 
   // This pulls the logged-in status from your user slice
   const isLoggedIn = useSelector((state) => state.user.isLoggedIn);
+  const currentUser = useSelector((state) => state.user.userInfo);
 
   // Get the post from Redux to display current likes
   const post = useSelector((state) =>
     state.posts.posts.find((p) => p._id === postId)
   );
   const likeCount = post?.likes ?? 0;
+
+  // Check if current user has liked or disliked this post
+  const hasLiked = post?.likedBy?.some((userId) => userId === currentUser?._id);
+  const hasDisliked = post?.dislikedBy?.some(
+    (userId) => userId === currentUser?._id
+  );
 
   const handleUpvote = () => {
     if (!postId) return;
@@ -47,14 +54,18 @@ const VoteButtons = ({ postId }) => {
     <div className="inline-flex items-center bg-gray-200 text-black rounded-full px-4 py-2 gap-2">
       <button
         onClick={handleUpvote}
-        className="hover:bg-gray-300 rounded-full p-1 transition-colors touch-fix"
+        className={`${
+          hasLiked ? "text-red-600" : ""
+        } hover:bg-gray-300 rounded-full p-1 transition-colors touch-fix`}
       >
         <Icon icon="mdi:thumb-up" width="20" />
       </button>
       <span className="text-sm font-semibold">{likeCount}</span>
       <button
         onClick={handleDownvote}
-        className="hover:bg-gray-300 rounded-full p-1 transition-colors touch-fix"
+        className={`${
+          hasDisliked ? "text-red-600" : ""
+        } hover:bg-gray-300 rounded-full p-1 transition-colors touch-fix`}
       >
         <Icon icon="mdi:thumb-down" width="20" />
       </button>

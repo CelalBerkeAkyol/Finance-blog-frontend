@@ -4,6 +4,7 @@ import { useDispatch, useSelector } from "react-redux";
 import {
   fetchPostById,
   incrementPostView,
+  fetchPosts,
 } from "../../app/features/blogs/postsSlice";
 import BlogPostComponent from "../../components/blog_components/blog/BlogPostComponent";
 import TableOfContents from "../../components/blog_components/blog/TableOfContents";
@@ -11,6 +12,9 @@ import BannerComponent from "../../components/header/BannerComponent";
 import CustomNavbar from "../../components/header/CustomNavbar";
 import BlogPostSkeleton from "../../components/blog_components/blog/BlogPostSkeleton";
 import TableSkeleton from "../../components/blog_components/blog/TableSkeleton";
+import RightSideBar from "../../components/blog_components/blog/RightSideBar";
+import RightSideBarSkeleton from "../../components/blog_components/blog/RightSideBarSkeleton";
+import FloatingActionButtons from "../../components/buttons/FloatingActionButtons";
 
 function BlogPostPage() {
   const { id } = useParams();
@@ -20,6 +24,7 @@ function BlogPostPage() {
 
   // Local state flag to ensure the view is incremented only once
   const [hasIncremented, setHasIncremented] = useState(false);
+  const [loadedPosts, setLoadedPosts] = useState(false);
 
   // Sayfa yüklendiğinde en üste scroll et
   useEffect(() => {
@@ -30,6 +35,21 @@ function BlogPostPage() {
     });
   }, [id]); // id değiştiğinde (farklı bir blog post açıldığında) scroll'u sıfırla
 
+  // Load all posts only once when component mounts
+  useEffect(() => {
+    console.log("Fetching all posts for related posts sidebar");
+    // The fetchPosts action expects an object with page and limit properties
+    dispatch(fetchPosts({ page: 1, limit: 100 }))
+      .then((response) => {
+        console.log("Fetched posts response:", response);
+        setLoadedPosts(true);
+      })
+      .catch((error) => {
+        console.error("Error fetching posts:", error);
+      });
+  }, [dispatch]);
+
+  // Load specific post when ID changes
   useEffect(() => {
     if (id) {
       dispatch(fetchPostById(id));
@@ -47,10 +67,10 @@ function BlogPostPage() {
     <div className="flex flex-col">
       <BannerComponent />
       <CustomNavbar />
-      <div className="flex flex-col md:flex-row gap-4 md:gap-8 py-6 md:py-8 container mx-auto ">
+      <div className="flex flex-col md:flex-row gap-4 md:gap-6 py-6 md:py-8 container mx-auto px-2 max-w-[1600px] w-full">
         {/* Masaüstü için Table of Contents */}
-        <div className="md:w-[20%] w-full md:border-r min-w-[180px] hidden md:block">
-          <div className="sticky top-20 max-h-[calc(100vh-8rem)] overflow-y-auto py-4 pr-2">
+        <div className="md:w-[18%] w-full md:border-r min-w-[200px] hidden md:block">
+          <div className="sticky top-20 max-h-[calc(100vh-8rem)] overflow-y-auto py-2">
             {isLoading ? (
               <TableSkeleton />
             ) : post ? (
@@ -59,31 +79,48 @@ function BlogPostPage() {
           </div>
         </div>
 
-        {/* Mobil için içeriğin üzerinde Table of Contents */}
-        <div className="w-full md:hidden mb-3 bg-gray-50 rounded-lg p-2 shadow-sm">
-          <details className="w-full">
-            <summary className="text-sm font-medium text-gray-700 cursor-pointer py-2 touch-manipulation">
-              İçindekiler 📑
-            </summary>
-            <div className="mt-2 border-t pt-2">
-              {isLoading ? (
-                <TableSkeleton />
-              ) : post ? (
-                <TableOfContents content={post.content} />
-              ) : null}
-            </div>
-          </details>
-        </div>
-
-        {/* Blog İçeriği - Sağdan boşluk ile */}
-        <div className="w-full md:w-[75%] lg:w-[70%] mx-auto md:pr-4 lg:pr-8">
+        {/* Blog İçeriği */}
+        <div className="w-full md:w-[57%] lg:w-[57%] mx-auto">
           {isLoading ? (
             <BlogPostSkeleton />
           ) : post ? (
-            <BlogPostComponent post={post} />
+            <>
+              <BlogPostComponent post={post} />
+
+              {/* Mobil için önerilen yazılar - blog post altında göster */}
+              <div className="mt-8 md:hidden">
+                <div className="border-t pt-4">
+                  {!isLoading && post && posts.length > 0 ? (
+                    <RightSideBar post={post} />
+                  ) : (
+                    <RightSideBarSkeleton />
+                  )}
+                </div>
+              </div>
+            </>
           ) : null}
         </div>
+
+        {/* Sağ Kenar Çubuğu - Önerilen Yazılar */}
+        <div
+          className="md:w-[25%] lg:w-[23%] hidden md:block pl-2 md:pl-4 border-l pt-4"
+          style={{
+            position: "sticky",
+            top: "5rem",
+            maxHeight: "calc(100vh - 8rem)",
+            overflowY: "auto",
+          }}
+        >
+          {!isLoading && post && posts.length > 0 ? (
+            <RightSideBar post={post} />
+          ) : (
+            <RightSideBarSkeleton />
+          )}
+        </div>
       </div>
+
+      {/* Floating Action Buttons */}
+      {!isLoading && post && <FloatingActionButtons content={post.content} />}
     </div>
   );
 }

@@ -15,28 +15,48 @@ import {
   useDisclosure,
 } from "@nextui-org/react";
 import { Icon } from "@iconify/react";
-import useUsers from "../../../../hooks/useUsers";
+import { useDispatch, useSelector } from "react-redux";
+import {
+  fetchUsers,
+  updateUserRole,
+  deleteUser,
+  removeUser,
+  updateUserInList,
+  startManualRefresh,
+  selectUserList,
+  selectIsUserListLoading,
+  selectIsUserListError,
+  selectUserListErrorMessage,
+  selectIsUserListFetched,
+} from "../../../../app/features/user/userListSlice";
+import { fetchTeamMembers } from "../../../../app/features/user/teamSlice";
+import { logoutUser } from "../../../../app/features/user/userSlice";
 import DeleteUserModal from "../../../modals/DeleteUserModal";
 import ChangeRoleModal from "../../../modals/ChangeRoleModal";
-import axios from "../../../../api";
 import { useFeedback } from "../../../../context/FeedbackContext";
 
+// MongoDB ObjectId validation helper function
+const isValidObjectId = (id) => {
+  return id && /^[0-9a-fA-F]{24}$/.test(id);
+};
+
 const UserListComponent = () => {
-  const {
-    users,
-    setUsers,
-    filteredUsers,
-    loading,
-    error,
-    searchTerm,
-    setSearchTerm,
-    rowsPerPage,
-    fetchUsers,
-  } = useUsers();
+  console.log("UserListComponent render edildi");
+
+  const dispatch = useDispatch();
+
+  // Redux state'lerini selektörlerle çek
+  const userList = useSelector(selectUserList);
+  const isLoading = useSelector(selectIsUserListLoading);
+  const isError = useSelector(selectIsUserListError);
+  const errorMessage = useSelector(selectUserListErrorMessage);
+  const isFetched = useSelector(selectIsUserListFetched);
 
   // Feedback context'i kullan
-  const { success, error: showError, warning } = useFeedback();
+  const { success, error: showError } = useFeedback();
 
+  // UI state'leri
+  const [searchTerm, setSearchTerm] = useState("");
   const [page, setPage] = useState(1);
 
   // Modal yönetimi
@@ -51,12 +71,21 @@ const UserListComponent = () => {
   const [roleUpdateLoading, setRoleUpdateLoading] = useState(false);
   const [roleUpdateError, setRoleUpdateError] = useState(null);
 
+  // Tek bir useEffect ile veri yükleme
+  useEffect(() => {
+    // Veri daha önce yüklenmediyse, yükle
+    if (!isFetched && !isLoading) {
+      console.log("🚀 Kullanıcı listesi ilk kez yükleniyor...");
+      dispatch(fetchUsers());
+    }
+  }, [dispatch, isFetched, isLoading]);
+
   // Hata durumunda bildirim göster
   useEffect(() => {
-    if (error) {
-      showError(error);
+    if (errorMessage) {
+      showError(errorMessage);
     }
-  }, [error, showError]);
+  }, [errorMessage, showError]);
 
   // deleteError durumunda bildirim göster
   useEffect(() => {
@@ -72,10 +101,34 @@ const UserListComponent = () => {
     }
   }, [roleUpdateError, showError]);
 
-  // Kullanıcıları ilk yükleme
-  useEffect(() => {
-    fetchUsers();
-  }, []);
+  // Tabloda görüntülenecek satır sayısı
+  const rowsPerPage = 10;
+
+  // Filtrelenmiş kullanıcılar (arama için)
+  const filteredUsers = useMemo(() => {
+    if (!userList) {
+      return [];
+    }
+
+    if (!searchTerm || searchTerm.trim() === "") {
+      return userList;
+    }
+
+    return userList.filter(
+      (user) =>
+        user.userName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        user.email?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        user.role?.toLowerCase().includes(searchTerm.toLowerCase())
+    );
+  }, [userList, searchTerm]);
+
+  // Sayfalanmış sonuçlar
+  const pages = Math.ceil((filteredUsers?.length || 0) / rowsPerPage);
+  const items = useMemo(() => {
+    if (!filteredUsers) return [];
+    const start = (page - 1) * rowsPerPage;
+    return filteredUsers.slice(start, start + rowsPerPage);
+  }, [page, filteredUsers, rowsPerPage]);
 
   // Arama
   const handleSearch = (e) => {
@@ -83,34 +136,55 @@ const UserListComponent = () => {
     setPage(1);
   };
 
-  // Sayfalanmış sonuçlar
-  const pages = Math.ceil(filteredUsers.length / rowsPerPage);
-  const items = useMemo(() => {
-    const start = (page - 1) * rowsPerPage;
-    return filteredUsers.slice(start, start + rowsPerPage);
-  }, [page, filteredUsers, rowsPerPage]);
-
   // Kullanıcı silme
   const openDeleteModal = (user) => {
     setSelectedUser(user);
     setDeleteError(null);
     onOpen();
   };
+
   const handleDeleteUser = async () => {
     if (!selectedUser) return;
     setDeleteLoading(true);
     setDeleteError(null);
 
     try {
-      await axios.delete(`/user/${selectedUser._id}`, {
-        withCredentials: true,
-      });
-      setUsers(users.filter((u) => u._id !== selectedUser._id));
-      onClose();
-      success(`${selectedUser.userName} kullanıcısı başarıyla silindi.`);
+      // Kullanıcı ID'sinin geçerliliğini kontrol et
+      if (!selectedUser._id || !isValidObjectId(selectedUser._id)) {
+        throw new Error("Geçersiz kullanıcı ID'si");
+      }
+
+      // Redux action ile kullanıcıyı sil
+      const result = await dispatch(
+        deleteUser({ userId: selectedUser._id })
+      ).unwrap();
+
+      // Silinen kullanıcı, oturum açmış kullanıcı mı kontrol et
+      if (result.data && result.data.isCurrentUser) {
+        onClose();
+        success("Hesabınız silindi, çıkış yapılıyor...");
+
+        // Kullanıcıya bildirim göstermek için kısa bir bekleme süresi
+        setTimeout(() => {
+          // Tüm kullanıcı oturumunu temizle
+          dispatch(logoutUser());
+          // Login sayfasına yönlendir
+          window.location.href = "/login";
+        }, 2000);
+      } else {
+        success(`${result.data?.userName || "Kullanıcı"} başarıyla silindi`);
+        // Modal'ı kapat
+        onClose();
+
+        // Kullanıcıyı UI'dan kaldır (fetchUsers() çağırmak yerine)
+        if (userList) {
+          // Redux store'dan silinen kullanıcıyı kaldır
+          dispatch(removeUser(selectedUser._id));
+        }
+      }
     } catch (err) {
       const errorMessage =
-        err.response?.data?.message || "Kullanıcı silinirken bir hata oluştu";
+        err.message || "Kullanıcı silinirken bir hata oluştu";
       setDeleteError(errorMessage);
       showError(errorMessage);
     } finally {
@@ -125,29 +199,39 @@ const UserListComponent = () => {
     setRoleModalOpen(true);
     setRoleUpdateError(null);
   };
+
   const handleUpdateRole = async () => {
     if (!selectedUser || !selectedRole) return;
     setRoleUpdateLoading(true);
 
     try {
-      await axios.patch(
-        `/user/${selectedUser._id}/role`,
-        { role: selectedRole },
-        { withCredentials: true }
-      );
-      setUsers(
-        users.map((u) =>
-          u._id === selectedUser._id ? { ...u, role: selectedRole } : u
-        )
-      );
+      // Redux action ile kullanıcı rolünü güncelle
+      const result = await dispatch(
+        updateUserRole({
+          userId: selectedUser._id,
+          role: selectedRole,
+        })
+      ).unwrap();
+
+      // Modal'ı kapat
       setRoleModalOpen(false);
       success(
         `${selectedUser.userName} kullanıcısının rolü "${selectedRole}" olarak güncellendi.`
       );
+
+      // UI'daki kullanıcı veriyi güncelle (fetchUsers() çağırmak yerine)
+      if (userList) {
+        // Redux store'daki kullanıcının rolünü güncelle
+        dispatch(
+          updateUserInList({
+            userId: selectedUser._id,
+            updates: { role: selectedRole },
+          })
+        );
+      }
     } catch (err) {
       const errorMessage =
-        err.response?.data?.message ||
-        "Kullanıcı rolü güncellenirken bir hata oluştu";
+        err.message || "Kullanıcı rolü güncellenirken bir hata oluştu";
       setRoleUpdateError(errorMessage);
       showError(errorMessage);
     } finally {
@@ -155,13 +239,47 @@ const UserListComponent = () => {
     }
   };
 
-  // Refresh users
+  // Kullanıcı listesini yenile - kullanıcı açıkça yenileme istediğinde
   const handleRefreshUsers = async () => {
     try {
-      await fetchUsers();
-      success("Kullanıcı listesi başarıyla yenilendi.");
+      console.log(
+        "UserListComponent manuel kullanıcı listesi yenileme başlatıldı"
+      );
+
+      // Önce userSlice'ın isLoading durumunu true'ya ayarla
+      dispatch(startManualRefresh());
+
+      // İki action'ı da çağır ama sonuçlarını bekle
+      const results = await Promise.all([
+        dispatch(fetchUsers()).unwrap(),
+        dispatch(fetchTeamMembers()).unwrap(),
+      ]);
+
+      // fetchUsers sonucu kontrolü
+      const userResult = results[0];
+      if (userResult && userResult.success) {
+        console.log(
+          `UserListComponent kullanıcı listesi yenilendi: ${
+            userResult.data?.length || 0
+          } kullanıcı`
+        );
+        success("Kullanıcı listesi başarıyla yenilendi.");
+      } else {
+        showError("Kullanıcı listesi yenilenirken bir sorun oluştu.");
+        console.error(
+          "UserListComponent kullanıcı listesi yenileme yanıtı:",
+          userResult
+        );
+      }
     } catch (err) {
-      showError("Kullanıcı listesi yenilenirken bir hata oluştu.");
+      console.error(
+        "UserListComponent kullanıcı listesi yenileme hatası:",
+        err
+      );
+      showError(
+        "Kullanıcı listesi yenilenirken bir hata oluştu: " +
+          (err.message || "Bilinmeyen hata")
+      );
     }
   };
 
@@ -234,7 +352,7 @@ const UserListComponent = () => {
   );
 
   // Yükleniyor
-  if (loading) {
+  if (isLoading) {
     return (
       <div className="flex justify-center items-center h-64">
         <Spinner size="lg" label="Kullanıcılar yükleniyor..." />
@@ -243,10 +361,10 @@ const UserListComponent = () => {
   }
 
   // Hata
-  if (error) {
+  if (isError) {
     return (
       <div className="flex justify-center items-center h-64 text-red-500">
-        <p>Hata: {error}</p>
+        <p>Hata: {errorMessage}</p>
       </div>
     );
   }
@@ -358,4 +476,4 @@ const UserListComponent = () => {
   );
 };
 
-export default UserListComponent;
+export default React.memo(UserListComponent);

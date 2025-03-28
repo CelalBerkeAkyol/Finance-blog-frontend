@@ -74,17 +74,6 @@ const handleFetchUserFulfilled = (state, action) => {
   state.isSuccess = true;
 };
 
-// FetchTeamMembers fulfilled: Yazarlar ve adminleri state'e aktarır
-const handleFetchTeamMembersFulfilled = (state, action) => {
-  logInfo(
-    "✅ Yazarlar ve Adminler",
-    `${action.payload.data.length} kişi alındı`
-  );
-  state.teamMembers = action.payload.data;
-  state.isTeamLoading = false;
-  state.isTeamSuccess = true;
-};
-
 // UpdateUserProfile fulfilled: Profil güncellemesi sonrası state'i günceller.
 const handleUpdateProfileFulfilled = (state, action) => {
   if (action.payload.success && action.payload.data) {
@@ -96,51 +85,6 @@ const handleUpdateProfileFulfilled = (state, action) => {
     state.isAuthor = user.role === "author" || user.role === "admin";
   } else {
     logInfo("⚠️ Profil", "Profil güncelleme başarılı ancak veri eksik");
-  }
-  state.isLoading = false;
-  state.isSuccess = true;
-};
-
-// Kullanıcı silme thunk'ı (admin için)
-export const deleteUser = createAsyncThunk(
-  "user/deleteUser",
-  async ({ userId }, thunkAPI) => {
-    try {
-      // Kullanıcı ID'si sağlanmalı
-      if (!userId) {
-        throw new Error("Kullanıcı ID'si gereklidir");
-      }
-
-      const response = await axios.delete(`/user/${userId}`, {
-        withCredentials: true,
-      });
-      return response.data;
-    } catch (error) {
-      const errMessage = error.message || "Kullanıcı silinemedi.";
-      const errCode = error.code || "UNKNOWN_ERROR";
-      return thunkAPI.rejectWithValue({ message: errMessage, code: errCode });
-    }
-  }
-);
-
-// Handle user deletion success
-const handleDeleteUserFulfilled = (state, action) => {
-  // If the admin deleted their own account or current logged in user
-  if (action.payload.data && action.payload.data.isCurrentUser) {
-    logInfo(
-      "✅ Silme",
-      "Admin kendi hesabını sildi veya giriş yapmış kullanıcı silindi - çıkış yapılıyor"
-    );
-    // Clear all user data
-    state.userInfo = null;
-    state.isLoggedIn = false;
-    state.isAdmin = false;
-    state.isAuthor = false;
-  } else {
-    logInfo(
-      "✅ Silme",
-      `${action.payload.data?.userName || "Kullanıcı"} silindi`
-    );
   }
   state.isLoading = false;
   state.isSuccess = true;
@@ -262,81 +206,6 @@ export const updateUserProfile = createAsyncThunk(
   }
 );
 
-// Kullanıcı rolü güncelleme thunk'ı
-export const updateUserRole = createAsyncThunk(
-  "user/updateUserRole",
-  async ({ userId, role }, thunkAPI) => {
-    try {
-      const response = await axios.patch(
-        `/user/${userId}/role`,
-        { role },
-        {
-          withCredentials: true,
-        }
-      );
-      return response.data;
-    } catch (error) {
-      const errMessage = error.message || "Kullanıcı rolü güncellenemedi.";
-      const errCode = error.code || "UNKNOWN_ERROR";
-      return thunkAPI.rejectWithValue({ message: errMessage, code: errCode });
-    }
-  }
-);
-
-// Yazarlar ve adminleri getirme thunk'ı
-export const fetchTeamMembers = createAsyncThunk(
-  "user/fetchTeamMembers",
-  async (_, thunkAPI) => {
-    try {
-      const response = await axios.get("/user/team");
-      if (!response.data.success) {
-        throw new Error("Yazarlar ve adminler alınamadı.");
-      }
-      return response.data;
-    } catch (error) {
-      const errMessage = error.message || "Yazarlar ve adminler alınamadı.";
-      const errCode = error.code || "UNKNOWN_ERROR";
-      return thunkAPI.rejectWithValue({ message: errMessage, code: errCode });
-    }
-  }
-);
-
-// Handle role update success
-const handleRoleUpdateFulfilled = (state, action) => {
-  if (action.payload.success && action.payload.data) {
-    const user = action.payload.data;
-    logInfo("✅ Rol Güncelleme", `${user.userName} rolü güncellendi`);
-  }
-  state.isLoading = false;
-  state.isSuccess = true;
-};
-
-// Tüm kullanıcıları getirme thunk'ı
-export const fetchUsers = createAsyncThunk(
-  "user/fetchUsers",
-  async (_, thunkAPI) => {
-    try {
-      const response = await axios.get("/user", { withCredentials: true });
-      if (!response.data.success) {
-        throw new Error("Kullanıcılar alınamadı.");
-      }
-      return response.data;
-    } catch (error) {
-      const errMessage = error.message || "Kullanıcılar alınamadı.";
-      const errCode = error.code || "UNKNOWN_ERROR";
-      return thunkAPI.rejectWithValue({ message: errMessage, code: errCode });
-    }
-  }
-);
-
-// Kullanıcı listesini getirme işlemi başarılı olduğunda
-const handleFetchUsersFulfilled = (state, action) => {
-  state.userList = action.payload.data;
-  state.isLoading = false;
-  state.isSuccess = true;
-  logInfo("✅ Kullanıcılar", `${action.payload.data.length} kullanıcı alındı`);
-};
-
 /* =====================
    Slice Tanımı
 ===================== */
@@ -353,12 +222,6 @@ const userSlice = createSlice({
     isError: false,
     errorMessage: "",
     errorCode: "",
-    teamMembers: [],
-    isTeamLoading: false,
-    isTeamSuccess: false,
-    isTeamError: false,
-    teamErrorMessage: "",
-    userList: [], // Tüm kullanıcılar listesi
   },
   reducers: {
     clearState: (state) => {
@@ -405,7 +268,7 @@ const userSlice = createSlice({
       .addCase(logoutUser.rejected, (state, action) =>
         handleRejected(state, action, "Çıkış yapılamadı.")
       )
-      // fetchUser
+      // fetchUser - Tekil kullanıcı bilgileri (oturum açmış kullanıcı)
       .addCase(fetchUser.pending, handlePending)
       .addCase(fetchUser.fulfilled, handleFetchUserFulfilled)
       .addCase(fetchUser.rejected, (state, action) =>
@@ -416,45 +279,9 @@ const userSlice = createSlice({
       .addCase(updateUserProfile.fulfilled, handleUpdateProfileFulfilled)
       .addCase(updateUserProfile.rejected, (state, action) =>
         handleRejected(state, action, "Profil güncellenemedi.")
-      )
-      // Fetch Team Members (authors and admins)
-      .addCase(fetchTeamMembers.pending, (state) => {
-        state.isTeamLoading = true;
-        state.isTeamError = false;
-        state.teamErrorMessage = "";
-      })
-      .addCase(fetchTeamMembers.fulfilled, handleFetchTeamMembersFulfilled)
-      .addCase(fetchTeamMembers.rejected, (state, action) => {
-        state.isTeamLoading = false;
-        state.isTeamError = true;
-        state.teamErrorMessage =
-          action.payload?.message || "Yazarlar ve adminler alınamadı.";
-      })
-      // updateUserRole
-      .addCase(updateUserRole.pending, handlePending)
-      .addCase(updateUserRole.fulfilled, handleRoleUpdateFulfilled)
-      .addCase(updateUserRole.rejected, (state, action) =>
-        handleRejected(state, action, "Kullanıcı rolü güncellenemedi.")
-      )
-      // deleteUser
-      .addCase(deleteUser.pending, handlePending)
-      .addCase(deleteUser.fulfilled, handleDeleteUserFulfilled)
-      .addCase(deleteUser.rejected, (state, action) =>
-        handleRejected(state, action, "Kullanıcı silinemedi.")
-      )
-      // fetchUsers
-      .addCase(fetchUsers.pending, handlePending)
-      .addCase(fetchUsers.fulfilled, handleFetchUsersFulfilled)
-      .addCase(fetchUsers.rejected, (state, action) =>
-        handleRejected(state, action, "Kullanıcılar getirilemedi.")
       );
   },
 });
 
 export const { clearState, clearUserState } = userSlice.actions;
 export default userSlice.reducer;
-
-// Selectors for easy access to team members
-export const selectTeamMembers = (state) => state.user.teamMembers;
-export const selectIsTeamLoading = (state) => state.user.isTeamLoading;
-export const selectIsTeamError = (state) => state.user.isTeamError;

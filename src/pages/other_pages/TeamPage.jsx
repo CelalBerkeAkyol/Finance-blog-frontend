@@ -9,7 +9,7 @@ import {
   selectTeamMembers,
   selectIsTeamLoading,
   selectIsTeamError,
-} from "../../app/features/user/userSlice";
+} from "../../app/features/user/teamSlice";
 
 const TeamPage = () => {
   const { error: showError } = useFeedback();
@@ -19,7 +19,7 @@ const TeamPage = () => {
   const teamMembers = useSelector(selectTeamMembers);
   const isTeamLoading = useSelector(selectIsTeamLoading);
   const isTeamError = useSelector(selectIsTeamError);
-  const teamErrorMessage = useSelector((state) => state.user.teamErrorMessage);
+  const teamErrorMessage = useSelector((state) => state.team.errorMessage);
 
   useEffect(() => {
     // Fetch team members using Redux thunk

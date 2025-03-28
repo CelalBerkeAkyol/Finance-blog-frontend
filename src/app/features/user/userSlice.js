@@ -101,6 +101,51 @@ const handleUpdateProfileFulfilled = (state, action) => {
   state.isSuccess = true;
 };
 
+// Kullanıcı silme thunk'ı (admin için)
+export const deleteUser = createAsyncThunk(
+  "user/deleteUser",
+  async ({ userId }, thunkAPI) => {
+    try {
+      // Kullanıcı ID'si sağlanmalı
+      if (!userId) {
+        throw new Error("Kullanıcı ID'si gereklidir");
+      }
+
+      const response = await axios.delete(`/user/${userId}`, {
+        withCredentials: true,
+      });
+      return response.data;
+    } catch (error) {
+      const errMessage = error.message || "Kullanıcı silinemedi.";
+      const errCode = error.code || "UNKNOWN_ERROR";
+      return thunkAPI.rejectWithValue({ message: errMessage, code: errCode });
+    }
+  }
+);
+
+// Handle user deletion success
+const handleDeleteUserFulfilled = (state, action) => {
+  // If the admin deleted their own account or current logged in user
+  if (action.payload.data && action.payload.data.isCurrentUser) {
+    logInfo(
+      "✅ Silme",
+      "Admin kendi hesabını sildi veya giriş yapmış kullanıcı silindi - çıkış yapılıyor"
+    );
+    // Clear all user data
+    state.userInfo = null;
+    state.isLoggedIn = false;
+    state.isAdmin = false;
+    state.isAuthor = false;
+  } else {
+    logInfo(
+      "✅ Silme",
+      `${action.payload.data?.userName || "Kullanıcı"} silindi`
+    );
+  }
+  state.isLoading = false;
+  state.isSuccess = true;
+};
+
 /* =====================
    Thunk İşlemleri
 ===================== */
@@ -217,6 +262,27 @@ export const updateUserProfile = createAsyncThunk(
   }
 );
 
+// Kullanıcı rolü güncelleme thunk'ı
+export const updateUserRole = createAsyncThunk(
+  "user/updateUserRole",
+  async ({ userId, role }, thunkAPI) => {
+    try {
+      const response = await axios.patch(
+        `/user/${userId}/role`,
+        { role },
+        {
+          withCredentials: true,
+        }
+      );
+      return response.data;
+    } catch (error) {
+      const errMessage = error.message || "Kullanıcı rolü güncellenemedi.";
+      const errCode = error.code || "UNKNOWN_ERROR";
+      return thunkAPI.rejectWithValue({ message: errMessage, code: errCode });
+    }
+  }
+);
+
 // Yazarlar ve adminleri getirme thunk'ı
 export const fetchTeamMembers = createAsyncThunk(
   "user/fetchTeamMembers",
@@ -234,6 +300,42 @@ export const fetchTeamMembers = createAsyncThunk(
     }
   }
 );
+
+// Handle role update success
+const handleRoleUpdateFulfilled = (state, action) => {
+  if (action.payload.success && action.payload.data) {
+    const user = action.payload.data;
+    logInfo("✅ Rol Güncelleme", `${user.userName} rolü güncellendi`);
+  }
+  state.isLoading = false;
+  state.isSuccess = true;
+};
+
+// Tüm kullanıcıları getirme thunk'ı
+export const fetchUsers = createAsyncThunk(
+  "user/fetchUsers",
+  async (_, thunkAPI) => {
+    try {
+      const response = await axios.get("/user", { withCredentials: true });
+      if (!response.data.success) {
+        throw new Error("Kullanıcılar alınamadı.");
+      }
+      return response.data;
+    } catch (error) {
+      const errMessage = error.message || "Kullanıcılar alınamadı.";
+      const errCode = error.code || "UNKNOWN_ERROR";
+      return thunkAPI.rejectWithValue({ message: errMessage, code: errCode });
+    }
+  }
+);
+
+// Kullanıcı listesini getirme işlemi başarılı olduğunda
+const handleFetchUsersFulfilled = (state, action) => {
+  state.userList = action.payload.data;
+  state.isLoading = false;
+  state.isSuccess = true;
+  logInfo("✅ Kullanıcılar", `${action.payload.data.length} kullanıcı alındı`);
+};
 
 /* =====================
    Slice Tanımı
@@ -256,6 +358,7 @@ const userSlice = createSlice({
     isTeamSuccess: false,
     isTeamError: false,
     teamErrorMessage: "",
+    userList: [], // Tüm kullanıcılar listesi
   },
   reducers: {
     clearState: (state) => {
@@ -326,7 +429,25 @@ const userSlice = createSlice({
         state.isTeamError = true;
         state.teamErrorMessage =
           action.payload?.message || "Yazarlar ve adminler alınamadı.";
-      });
+      })
+      // updateUserRole
+      .addCase(updateUserRole.pending, handlePending)
+      .addCase(updateUserRole.fulfilled, handleRoleUpdateFulfilled)
+      .addCase(updateUserRole.rejected, (state, action) =>
+        handleRejected(state, action, "Kullanıcı rolü güncellenemedi.")
+      )
+      // deleteUser
+      .addCase(deleteUser.pending, handlePending)
+      .addCase(deleteUser.fulfilled, handleDeleteUserFulfilled)
+      .addCase(deleteUser.rejected, (state, action) =>
+        handleRejected(state, action, "Kullanıcı silinemedi.")
+      )
+      // fetchUsers
+      .addCase(fetchUsers.pending, handlePending)
+      .addCase(fetchUsers.fulfilled, handleFetchUsersFulfilled)
+      .addCase(fetchUsers.rejected, (state, action) =>
+        handleRejected(state, action, "Kullanıcılar getirilemedi.")
+      );
   },
 });
 

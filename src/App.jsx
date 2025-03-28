@@ -16,6 +16,7 @@ import HomePage from "./pages/HomePage";
 import PricePage from "./pages/other_pages/PricePage";
 import PageNotFound from "./pages/other_pages/PageNotFound";
 import ProfilePage from "./pages/other_pages/ProfilePage";
+import DeleteAccountPage from "./pages/other_pages/DeleteAccountPage";
 import TeamPage from "./pages/other_pages/TeamPage";
 import AboutUsPage from "./pages/other_pages/AboutUsPage";
 import DisclaimerPage from "./pages/other_pages/DisclaimerPage";
@@ -72,6 +73,14 @@ function AppContent() {
           <Route path="/login" element={<LoginPage />} />
           <Route path="/register" element={<RegisterPage />} />
           <Route path="/team" element={<TeamPage />} />
+          <Route
+            path="/delete-account"
+            element={
+              <ProtectedRoute allowedRoles={["user"]}>
+                <DeleteAccountPage />
+              </ProtectedRoute>
+            }
+          />
           <Route
             path="/profile"
             element={

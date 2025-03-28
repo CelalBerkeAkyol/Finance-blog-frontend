@@ -39,6 +39,7 @@ function ProtectedRoute({
     const hasRole = allowedRoles.some((role) => {
       if (role === "admin") return isAdmin;
       if (role === "author") return isAuthor;
+      if (role === "user") return userInfo?.role === "user";
       return false;
     });
 

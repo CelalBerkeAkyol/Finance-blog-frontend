@@ -90,6 +90,17 @@ const handleUpdateProfileFulfilled = (state, action) => {
   state.isSuccess = true;
 };
 
+// DeleteAccount fulfilled: Kullanıcı hesabı silindikten sonra state sıfırlanır.
+const handleDeleteAccountFulfilled = (state) => {
+  logInfo("✅ Hesap Silme", "Kullanıcı hesabı silindi");
+  state.isLoading = false;
+  state.isSuccess = true;
+  state.userInfo = null;
+  state.isLoggedIn = false;
+  state.isAdmin = false;
+  state.isAuthor = false;
+};
+
 /* =====================
    Thunk İşlemleri
 ===================== */
@@ -206,6 +217,23 @@ export const updateUserProfile = createAsyncThunk(
   }
 );
 
+// Kullanıcı hesabını silme thunk'ı
+export const deleteUserAccount = createAsyncThunk(
+  "user/deleteUserAccount",
+  async (userId, thunkAPI) => {
+    try {
+      const response = await axios.delete(`/user/${userId}`, {
+        withCredentials: true,
+      });
+      return response.data;
+    } catch (error) {
+      const errMessage = error.message || "Hesap silinemedi.";
+      const errCode = error.code || "UNKNOWN_ERROR";
+      return thunkAPI.rejectWithValue({ message: errMessage, code: errCode });
+    }
+  }
+);
+
 /* =====================
    Slice Tanımı
 ===================== */
@@ -279,6 +307,12 @@ const userSlice = createSlice({
       .addCase(updateUserProfile.fulfilled, handleUpdateProfileFulfilled)
       .addCase(updateUserProfile.rejected, (state, action) =>
         handleRejected(state, action, "Profil güncellenemedi.")
+      )
+      // deleteUserAccount
+      .addCase(deleteUserAccount.pending, handlePending)
+      .addCase(deleteUserAccount.fulfilled, handleDeleteAccountFulfilled)
+      .addCase(deleteUserAccount.rejected, (state, action) =>
+        handleRejected(state, action, "Hesap silinemedi.")
       );
   },
 });

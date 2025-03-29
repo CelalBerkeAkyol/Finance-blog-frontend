@@ -12,14 +12,12 @@ import {
   Input,
   Button,
   Spinner,
-  useDisclosure,
 } from "@nextui-org/react";
 import { Icon } from "@iconify/react";
 import { useDispatch, useSelector } from "react-redux";
 import {
   fetchUsers,
   updateUserRole,
-  deleteUser,
   hardDeleteUser,
   removeUser,
   updateUserInList,
@@ -31,8 +29,7 @@ import {
   selectIsUserListFetched,
   toggleUserActivation,
 } from "../../../../app/features/user/userListSlice";
-import { logoutUser } from "../../../../app/features/user/userSlice";
-import DeleteUserModal from "../../../modals/DeleteUserModal";
+
 import HardDeleteUserModal from "../../../modals/HardDeleteUserModal";
 import ChangeRoleModal from "../../../modals/ChangeRoleModal";
 import ToggleActivationModal from "../../../modals/ToggleActivationModal";
@@ -64,10 +61,6 @@ const UserListComponent = () => {
   const [selectedRole, setSelectedRole] = useState("");
 
   // Modal states with loading and error states
-  const { isOpen, onOpen, onClose } = useDisclosure(); // Delete modal
-  const [deleteLoading, setDeleteLoading] = useState(false);
-  const [deleteError, setDeleteError] = useState(null);
-
   const [hardDeleteModalOpen, setHardDeleteModalOpen] = useState(false);
   const [hardDeleteLoading, setHardDeleteLoading] = useState(false);
   const [hardDeleteError, setHardDeleteError] = useState(null);
@@ -107,11 +100,13 @@ const UserListComponent = () => {
       showError(errorMessage);
       errorsShown.current.errorMessage = true;
 
-      // Auth hatası kontrolü
+      // Auth hatası kontrolü - string yerine backend'den gelen error code'a göre
       if (
-        errorMessage.includes("token") ||
-        errorMessage.includes("izin") ||
-        errorMessage.includes("yetki")
+        errorMessage?.code === "AUTH_REQUIRED" ||
+        errorMessage?.code === "UNAUTHORIZED_ACCESS" ||
+        errorMessage?.code === "TOKEN_EXPIRED" ||
+        errorMessage?.code === "INVALID_TOKEN" ||
+        errorMessage?.code === "TOKEN_NOT_FOUND"
       ) {
         setAuthError(true);
         setTimeout(() => {
@@ -123,13 +118,6 @@ const UserListComponent = () => {
     }
 
     // Diğer hatalar için benzer kontroller
-    if (deleteError && !deleteLoading && !errorsShown.current.deleteError) {
-      showError(deleteError);
-      errorsShown.current.deleteError = true;
-    } else if (!deleteError) {
-      errorsShown.current.deleteError = false;
-    }
-
     if (
       roleUpdateError &&
       !roleUpdateLoading &&
@@ -165,8 +153,6 @@ const UserListComponent = () => {
   }, [
     errorMessage,
     isLoading,
-    deleteError,
-    deleteLoading,
     roleUpdateError,
     roleUpdateLoading,
     activationError,
@@ -206,15 +192,6 @@ const UserListComponent = () => {
     setPage(1);
   }, []);
 
-  const openDeleteModal = useCallback(
-    (user) => {
-      setSelectedUser(user);
-      setDeleteError(null);
-      onOpen();
-    },
-    [onOpen]
-  );
-
   const openHardDeleteModal = useCallback((user) => {
     setSelectedUser(user);
     setHardDeleteError(null);
@@ -233,63 +210,6 @@ const UserListComponent = () => {
     setActivationModalOpen(true);
     setActivationError(null);
   }, []);
-
-  // Action handlers - API işlemlerinde auth hatası kontrolü ekle
-  const handleDeleteUser = async () => {
-    if (!selectedUser) return;
-    setDeleteLoading(true);
-    setDeleteError(null);
-
-    try {
-      if (!isValidObjectId(selectedUser._id)) {
-        throw new Error("Geçersiz kullanıcı ID'si");
-      }
-
-      const result = await dispatch(
-        deleteUser({ userId: selectedUser._id })
-      ).unwrap();
-
-      const isCurrentUser = result.data && result.data.isCurrentUser === true;
-      onClose();
-
-      // Update UI
-      dispatch(
-        updateUserInList({
-          userId: selectedUser._id,
-          updates: { isActive: false, deletedAt: new Date() },
-        })
-      );
-
-      if (isCurrentUser) {
-        success("Hesabınız deaktif edildi, çıkış yapılıyor...");
-        setTimeout(() => {
-          dispatch(logoutUser());
-          window.location.href = "/login";
-        }, 2000);
-      } else {
-        success(
-          `${result.data?.userName || "Kullanıcı"} başarıyla deaktif edildi`
-        );
-      }
-    } catch (err) {
-      // Auth hatası kontrolü
-      if (err?.code === "AUTH_REQUIRED") {
-        setAuthError(true);
-        showError("Oturum sonlandı, lütfen tekrar giriş yapın");
-        setTimeout(() => {
-          window.location.href = "/login";
-        }, 1000);
-        return;
-      }
-
-      const errorMessage =
-        err.message || "Kullanıcı deaktif edilirken bir hata oluştu";
-      setDeleteError(errorMessage);
-      showError(errorMessage);
-    } finally {
-      setDeleteLoading(false);
-    }
-  };
 
   const handleHardDeleteUser = async () => {
     if (!selectedUser) return;
@@ -662,14 +582,6 @@ const UserListComponent = () => {
       </div>
 
       {/* Modals */}
-      <DeleteUserModal
-        isOpen={isOpen}
-        onClose={onClose}
-        selectedUser={selectedUser}
-        deleteError={deleteError}
-        handleDeleteUser={handleDeleteUser}
-        isLoading={deleteLoading}
-      />
       <HardDeleteUserModal
         isOpen={hardDeleteModalOpen}
         onClose={() => setHardDeleteModalOpen(false)}

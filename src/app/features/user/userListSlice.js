@@ -47,11 +47,46 @@ export const updateUserRole = createAsyncThunk(
   }
 );
 
+// Kullanıcı aktivasyon durumunu değiştirme thunk'ı
+export const toggleUserActivation = createAsyncThunk(
+  "userList/toggleUserActivation",
+  async ({ userId, isActive }, thunkAPI) => {
+    try {
+      const response = await axios.patch(
+        `/user/${userId}/toggle-activation`,
+        { isActive },
+        {
+          withCredentials: true,
+        }
+      );
+      return response.data;
+    } catch (error) {
+      const errMessage = error.message || "Kullanıcı durumu güncellenemedi.";
+      const errCode = error.code || "UNKNOWN_ERROR";
+      return thunkAPI.rejectWithValue({ message: errMessage, code: errCode });
+    }
+  }
+);
+
 // Handle role update success
 const handleRoleUpdateFulfilled = (state, action) => {
   if (action.payload.success && action.payload.data) {
     const user = action.payload.data;
     logInfo("✅ Rol Güncelleme", `${user.userName} rolü güncellendi`);
+  }
+  state.isLoading = false;
+  state.isSuccess = true;
+};
+
+// Handle activation toggle success
+const handleActivationToggleFulfilled = (state, action) => {
+  if (action.payload.success && action.payload.data) {
+    const user = action.payload.data;
+    const status = user.isActive ? "aktifleştirildi" : "deaktif edildi";
+    logInfo(
+      "✅ Aktivasyon Güncelleme",
+      `${user.userName} kullanıcısı ${status}`
+    );
   }
   state.isLoading = false;
   state.isSuccess = true;
@@ -218,6 +253,19 @@ const userListSlice = createSlice({
         state.isError = true;
         state.errorMessage =
           action.payload?.message || "Kullanıcı rolü güncellenemedi.";
+        state.errorCode = action.payload?.code || "UNKNOWN_ERROR";
+      })
+      // toggleUserActivation
+      .addCase(toggleUserActivation.pending, (state) => {
+        state.isLoading = true;
+        state.isError = false;
+      })
+      .addCase(toggleUserActivation.fulfilled, handleActivationToggleFulfilled)
+      .addCase(toggleUserActivation.rejected, (state, action) => {
+        state.isLoading = false;
+        state.isError = true;
+        state.errorMessage =
+          action.payload?.message || "Kullanıcı durumu güncellenemedi.";
         state.errorCode = action.payload?.code || "UNKNOWN_ERROR";
       })
       // deleteUser

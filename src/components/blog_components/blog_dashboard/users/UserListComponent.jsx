@@ -28,11 +28,13 @@ import {
   selectIsUserListError,
   selectUserListErrorMessage,
   selectIsUserListFetched,
+  toggleUserActivation,
 } from "../../../../app/features/user/userListSlice";
 import { fetchTeamMembers } from "../../../../app/features/user/teamSlice";
 import { logoutUser } from "../../../../app/features/user/userSlice";
 import DeleteUserModal from "../../../modals/DeleteUserModal";
 import ChangeRoleModal from "../../../modals/ChangeRoleModal";
+import ToggleActivationModal from "../../../modals/ToggleActivationModal";
 import { useFeedback } from "../../../../context/FeedbackContext";
 
 // MongoDB ObjectId validation helper function
@@ -41,8 +43,6 @@ const isValidObjectId = (id) => {
 };
 
 const UserListComponent = () => {
-  console.log("UserListComponent render edildi");
-
   const dispatch = useDispatch();
 
   // Redux state'lerini selektörlerle çek
@@ -70,6 +70,11 @@ const UserListComponent = () => {
   const [selectedRole, setSelectedRole] = useState("");
   const [roleUpdateLoading, setRoleUpdateLoading] = useState(false);
   const [roleUpdateError, setRoleUpdateError] = useState(null);
+
+  // Aktivasyon değiştirme modal
+  const [activationModalOpen, setActivationModalOpen] = useState(false);
+  const [activationLoading, setActivationLoading] = useState(false);
+  const [activationError, setActivationError] = useState(null);
 
   // Tek bir useEffect ile veri yükleme
   useEffect(() => {
@@ -100,6 +105,13 @@ const UserListComponent = () => {
       showError(roleUpdateError);
     }
   }, [roleUpdateError, showError]);
+
+  // activationError durumunda bildirim göster
+  useEffect(() => {
+    if (activationError) {
+      showError(activationError);
+    }
+  }, [activationError, showError]);
 
   // Tabloda görüntülenecek satır sayısı
   const rowsPerPage = 10;
@@ -283,6 +295,56 @@ const UserListComponent = () => {
     }
   };
 
+  // Aktivasyon değiştirme
+  const openActivationModal = (user) => {
+    setSelectedUser(user);
+    setActivationModalOpen(true);
+    setActivationError(null);
+  };
+
+  const handleToggleActivation = async () => {
+    if (!selectedUser) return;
+    setActivationLoading(true);
+
+    try {
+      // Redux action ile kullanıcı aktivasyon durumunu güncelle
+      const result = await dispatch(
+        toggleUserActivation({
+          userId: selectedUser._id,
+          isActive: !selectedUser.isActive,
+        })
+      ).unwrap();
+
+      // Modal'ı kapat
+      setActivationModalOpen(false);
+
+      const statusText = !selectedUser.isActive
+        ? "aktifleştirildi"
+        : "deaktif edildi";
+
+      success(`${selectedUser.userName} kullanıcısı başarıyla ${statusText}.`);
+
+      // UI'daki kullanıcı verisini güncelle (fetchUsers() çağırmak yerine)
+      if (userList) {
+        // Redux store'daki kullanıcının aktivasyon durumunu güncelle
+        dispatch(
+          updateUserInList({
+            userId: selectedUser._id,
+            updates: { isActive: !selectedUser.isActive },
+          })
+        );
+      }
+    } catch (err) {
+      const errorMessage =
+        err.message ||
+        "Kullanıcı aktivasyon durumu güncellenirken bir hata oluştu";
+      setActivationError(errorMessage);
+      showError(errorMessage);
+    } finally {
+      setActivationLoading(false);
+    }
+  };
+
   // Basit renk tanımı
   const renderRole = (role) => {
     let bgColorClass = "bg-primary-500";
@@ -352,6 +414,25 @@ const UserListComponent = () => {
           <Icon icon="mdi:account-convert" />
         </Button>
       </Tooltip>
+
+      <Tooltip content={user.isActive ? "Deaktif Et" : "Aktifleştir"}>
+        <Button
+          isIconOnly
+          size="sm"
+          variant="light"
+          className={
+            user.isActive
+              ? "text-orange-500 hover:bg-orange-100"
+              : "text-green-500 hover:bg-green-100"
+          }
+          onPress={() => openActivationModal(user)}
+        >
+          <Icon
+            icon={user.isActive ? "mdi:account-cancel" : "mdi:account-check"}
+          />
+        </Button>
+      </Tooltip>
+
       <Tooltip content="Delete User">
         <Button
           isIconOnly
@@ -500,6 +581,13 @@ const UserListComponent = () => {
         handleUpdateRole={handleUpdateRole}
         roleUpdateLoading={roleUpdateLoading}
         roleUpdateError={roleUpdateError}
+      />
+      <ToggleActivationModal
+        isOpen={activationModalOpen}
+        onClose={() => setActivationModalOpen(false)}
+        selectedUser={selectedUser}
+        handleToggleActivation={handleToggleActivation}
+        isLoading={activationLoading}
       />
     </div>
   );

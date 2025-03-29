@@ -88,7 +88,8 @@ export default function LoginComponent() {
           {isError &&
             (errorCode === "USER_NOT_FOUND" ||
               errorCode === "INVALID_PASSWORD" ||
-              errorCode === "SERVER_ERROR") && (
+              errorCode === "SERVER_ERROR" ||
+              errorCode === "ACCOUNT_DEACTIVATED") && (
               <p className="text-red-500 text-sm">{errorMessage}</p>
             )}
           <div className="flex items-center justify-between px-1 py-2">

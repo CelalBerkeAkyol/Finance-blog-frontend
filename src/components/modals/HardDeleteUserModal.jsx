@@ -8,11 +8,11 @@ import {
   Button,
 } from "@nextui-org/react";
 
-const DeleteUserModal = ({
+const HardDeleteUserModal = ({
   isOpen,
   onClose,
   selectedUser,
-  handleDeleteUser,
+  handleHardDeleteUser,
   isLoading,
 }) => {
   return (
@@ -20,20 +20,23 @@ const DeleteUserModal = ({
       <ModalContent>
         {(onCloseModal) => (
           <>
-            <ModalHeader className="flex flex-col gap-1">
-              Kullanıcı Deaktif Etme Onayı
+            <ModalHeader className="flex flex-col gap-1 text-red-600">
+              Kullanıcıyı Kalıcı Olarak Silme
             </ModalHeader>
             <ModalBody>
               {selectedUser && (
                 <div className="space-y-2">
+                  <p className="font-semibold text-danger">
+                    DİKKAT: Bu işlem geri alınamaz!
+                  </p>
                   <p>
                     <b>{selectedUser.userName}</b> ({selectedUser.email})
-                    kullanıcısını deaktif etmek istediğinize emin misiniz?
+                    kullanıcısını veritabanından kalıcı olarak silmek
+                    istediğinize emin misiniz?
                   </p>
-                  <p className="text-gray-600">
-                    Bu işlem sonucunda kullanıcı sisteme giriş yapamayacak,
-                    ancak hesap bilgileri veritabanında korunacaktır. Hesabı
-                    daha sonra tekrar aktifleştirebilirsiniz.
+                  <p className="text-red-500">
+                    Bu işlem sonucunda kullanıcının tüm verileri silinecek ve
+                    geri getirilemeyecektir.
                   </p>
                 </div>
               )}
@@ -43,11 +46,11 @@ const DeleteUserModal = ({
                 İptal
               </Button>
               <Button
-                className="bg-orange-500 text-white hover:bg-orange-600"
-                onPress={handleDeleteUser}
+                className="bg-red-600 text-white hover:bg-red-700"
+                onPress={handleHardDeleteUser}
                 isLoading={isLoading}
               >
-                Deaktif Et
+                Kalıcı Olarak Sil
               </Button>
             </ModalFooter>
           </>
@@ -57,4 +60,4 @@ const DeleteUserModal = ({
   );
 };
 
-export default DeleteUserModal;
+export default HardDeleteUserModal;

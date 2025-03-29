@@ -68,6 +68,50 @@ export const toggleUserActivation = createAsyncThunk(
   }
 );
 
+// Kullanıcı silme thunk'ı (soft delete - deaktif etme)
+export const deleteUser = createAsyncThunk(
+  "userList/deleteUser",
+  async ({ userId }, thunkAPI) => {
+    try {
+      // Kullanıcı ID'si sağlanmalı
+      if (!userId) {
+        throw new Error("Kullanıcı ID'si gereklidir");
+      }
+
+      const response = await axios.delete(`/user/${userId}`, {
+        withCredentials: true,
+      });
+      return response.data;
+    } catch (error) {
+      const errMessage = error.message || "Kullanıcı deaktif edilemedi.";
+      const errCode = error.code || "UNKNOWN_ERROR";
+      return thunkAPI.rejectWithValue({ message: errMessage, code: errCode });
+    }
+  }
+);
+
+// Kullanıcı kalıcı silme thunk'ı (hard delete - veritabanından silme)
+export const hardDeleteUser = createAsyncThunk(
+  "userList/hardDeleteUser",
+  async ({ userId }, thunkAPI) => {
+    try {
+      // Kullanıcı ID'si sağlanmalı
+      if (!userId) {
+        throw new Error("Kullanıcı ID'si gereklidir");
+      }
+
+      const response = await axios.delete(`/user/${userId}/hard`, {
+        withCredentials: true,
+      });
+      return response.data;
+    } catch (error) {
+      const errMessage = error.message || "Kullanıcı kalıcı olarak silinemedi.";
+      const errCode = error.code || "UNKNOWN_ERROR";
+      return thunkAPI.rejectWithValue({ message: errMessage, code: errCode });
+    }
+  }
+);
+
 // Handle role update success
 const handleRoleUpdateFulfilled = (state, action) => {
   if (action.payload.success && action.payload.data) {
@@ -92,41 +136,31 @@ const handleActivationToggleFulfilled = (state, action) => {
   state.isSuccess = true;
 };
 
-// Kullanıcı silme thunk'ı (admin için)
-export const deleteUser = createAsyncThunk(
-  "userList/deleteUser",
-  async ({ userId }, thunkAPI) => {
-    try {
-      // Kullanıcı ID'si sağlanmalı
-      if (!userId) {
-        throw new Error("Kullanıcı ID'si gereklidir");
-      }
-
-      const response = await axios.delete(`/user/${userId}`, {
-        withCredentials: true,
-      });
-      return response.data;
-    } catch (error) {
-      const errMessage = error.message || "Kullanıcı silinemedi.";
-      const errCode = error.code || "UNKNOWN_ERROR";
-      return thunkAPI.rejectWithValue({ message: errMessage, code: errCode });
-    }
-  }
-);
-
 // Handle user deletion success
 const handleDeleteUserFulfilled = (state, action) => {
   if (action.payload.data && action.payload.data.isCurrentUser) {
     logInfo(
-      "✅ Silme",
-      "Admin kendi hesabını sildi veya giriş yapmış kullanıcı silindi - çıkış yapılıyor"
+      "✅ Deaktif Etme",
+      "Admin kendi hesabını deaktif etti veya giriş yapmış kullanıcı deaktif edildi - çıkış yapılıyor"
     );
   } else {
     logInfo(
-      "✅ Silme",
-      `${action.payload.data?.userName || "Kullanıcı"} silindi`
+      "✅ Deaktif Etme",
+      `${action.payload.data?.userName || "Kullanıcı"} deaktif edildi`
     );
   }
+  state.isLoading = false;
+  state.isSuccess = true;
+};
+
+// Handle hard deletion success
+const handleHardDeleteUserFulfilled = (state, action) => {
+  logInfo(
+    "✅ Kalıcı Silme",
+    `${
+      action.payload.data?.userName || "Kullanıcı"
+    } veritabanından tamamen silindi`
+  );
   state.isLoading = false;
   state.isSuccess = true;
 };
@@ -277,7 +311,21 @@ const userListSlice = createSlice({
       .addCase(deleteUser.rejected, (state, action) => {
         state.isLoading = false;
         state.isError = true;
-        state.errorMessage = action.payload?.message || "Kullanıcı silinemedi.";
+        state.errorMessage =
+          action.payload?.message || "Kullanıcı deaktif edilemedi.";
+        state.errorCode = action.payload?.code || "UNKNOWN_ERROR";
+      })
+      // hardDeleteUser
+      .addCase(hardDeleteUser.pending, (state) => {
+        state.isLoading = true;
+        state.isError = false;
+      })
+      .addCase(hardDeleteUser.fulfilled, handleHardDeleteUserFulfilled)
+      .addCase(hardDeleteUser.rejected, (state, action) => {
+        state.isLoading = false;
+        state.isError = true;
+        state.errorMessage =
+          action.payload?.message || "Kullanıcı kalıcı olarak silinemedi.";
         state.errorCode = action.payload?.code || "UNKNOWN_ERROR";
       });
   },

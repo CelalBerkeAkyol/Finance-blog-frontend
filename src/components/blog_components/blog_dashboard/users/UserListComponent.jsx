@@ -20,6 +20,7 @@ import {
   fetchUsers,
   updateUserRole,
   deleteUser,
+  hardDeleteUser,
   removeUser,
   updateUserInList,
   startManualRefresh,
@@ -33,6 +34,7 @@ import {
 import { fetchTeamMembers } from "../../../../app/features/user/teamSlice";
 import { logoutUser } from "../../../../app/features/user/userSlice";
 import DeleteUserModal from "../../../modals/DeleteUserModal";
+import HardDeleteUserModal from "../../../modals/HardDeleteUserModal";
 import ChangeRoleModal from "../../../modals/ChangeRoleModal";
 import ToggleActivationModal from "../../../modals/ToggleActivationModal";
 import { useFeedback } from "../../../../context/FeedbackContext";
@@ -51,6 +53,8 @@ const UserListComponent = () => {
   const isError = useSelector(selectIsUserListError);
   const errorMessage = useSelector(selectUserListErrorMessage);
   const isFetched = useSelector(selectIsUserListFetched);
+  // Admin kontrolü için kullanıcı rolünü çek - render sırasında değişmemesi için component seviyesinde
+  const isAdmin = useSelector((state) => state.user.isAdmin);
 
   // Feedback context'i kullan
   const { success, error: showError } = useFeedback();
@@ -59,11 +63,16 @@ const UserListComponent = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [page, setPage] = useState(1);
 
-  // Modal yönetimi
+  // Soft delete modal yönetimi
   const { isOpen, onOpen, onClose } = useDisclosure();
   const [deleteError, setDeleteError] = useState(null);
   const [deleteLoading, setDeleteLoading] = useState(false);
   const [selectedUser, setSelectedUser] = useState(null);
+
+  // Hard delete modal yönetimi
+  const [hardDeleteModalOpen, setHardDeleteModalOpen] = useState(false);
+  const [hardDeleteLoading, setHardDeleteLoading] = useState(false);
+  const [hardDeleteError, setHardDeleteError] = useState(null);
 
   // Rol değiştirme modal
   const [roleModalOpen, setRoleModalOpen] = useState(false);
@@ -87,31 +96,38 @@ const UserListComponent = () => {
 
   // Hata durumunda bildirim göster
   useEffect(() => {
-    if (errorMessage) {
+    if (errorMessage && !isLoading) {
       showError(errorMessage);
     }
-  }, [errorMessage, showError]);
+  }, [errorMessage, isLoading, showError]);
 
   // deleteError durumunda bildirim göster
   useEffect(() => {
-    if (deleteError) {
+    if (deleteError && !deleteLoading) {
       showError(deleteError);
     }
-  }, [deleteError, showError]);
+  }, [deleteError, deleteLoading, showError]);
 
   // roleUpdateError durumunda bildirim göster
   useEffect(() => {
-    if (roleUpdateError) {
+    if (roleUpdateError && !roleUpdateLoading) {
       showError(roleUpdateError);
     }
-  }, [roleUpdateError, showError]);
+  }, [roleUpdateError, roleUpdateLoading, showError]);
 
   // activationError durumunda bildirim göster
   useEffect(() => {
-    if (activationError) {
+    if (activationError && !activationLoading) {
       showError(activationError);
     }
-  }, [activationError, showError]);
+  }, [activationError, activationLoading, showError]);
+
+  // hardDeleteError durumunda bildirim göster
+  useEffect(() => {
+    if (hardDeleteError && !hardDeleteLoading) {
+      showError(hardDeleteError);
+    }
+  }, [hardDeleteError, hardDeleteLoading, showError]);
 
   // Tabloda görüntülenecek satır sayısı
   const rowsPerPage = 10;
@@ -136,7 +152,7 @@ const UserListComponent = () => {
 
   // Sayfalanmış sonuçlar
   const pages = Math.ceil((filteredUsers?.length || 0) / rowsPerPage);
-  const items = useMemo(() => {
+  const paginatedItems = useMemo(() => {
     if (!filteredUsers) return [];
     const start = (page - 1) * rowsPerPage;
     return filteredUsers.slice(start, start + rowsPerPage);
@@ -155,6 +171,14 @@ const UserListComponent = () => {
     onOpen();
   };
 
+  // Kullanıcı kalıcı silme
+  const openHardDeleteModal = (user) => {
+    setSelectedUser(user);
+    setHardDeleteError(null);
+    setHardDeleteModalOpen(true);
+  };
+
+  // Soft delete (deaktif etme) işleyicisi
   const handleDeleteUser = async () => {
     if (!selectedUser) return;
     setDeleteLoading(true);
@@ -166,15 +190,38 @@ const UserListComponent = () => {
         throw new Error("Geçersiz kullanıcı ID'si");
       }
 
-      // Redux action ile kullanıcıyı sil
+      // Redux action ile kullanıcıyı deaktif et
       const result = await dispatch(
         deleteUser({ userId: selectedUser._id })
       ).unwrap();
 
-      // Silinen kullanıcı, oturum açmış kullanıcı mı kontrol et
-      if (result.data && result.data.isCurrentUser) {
-        onClose();
-        success("Hesabınız silindi, çıkış yapılıyor...");
+      // Deaktif edilen kullanıcı, oturum açmış kullanıcı mı kontrol et
+      const isCurrentUser = result.data && result.data.isCurrentUser === true;
+
+      console.log(
+        "Deaktif etme sonucu:",
+        result,
+        "İşlem yapan kullanıcı mı:",
+        isCurrentUser
+      );
+
+      // Modal'ı kapat
+      onClose();
+
+      // Kullanıcıyı UI'dan kaldır (fetchUsers() çağırmak yerine)
+      if (userList) {
+        // Deaktif edilen kullanıcının aktivasyon durumunu güncelle
+        dispatch(
+          updateUserInList({
+            userId: selectedUser._id,
+            updates: { isActive: false, deletedAt: new Date() },
+          })
+        );
+      }
+
+      // Eğer mevcut kullanıcı deaktif edildiyse
+      if (isCurrentUser) {
+        success("Hesabınız deaktif edildi, çıkış yapılıyor...");
 
         // Kullanıcıya bildirim göstermek için kısa bir bekleme süresi
         setTimeout(() => {
@@ -184,23 +231,53 @@ const UserListComponent = () => {
           window.location.href = "/login";
         }, 2000);
       } else {
-        success(`${result.data?.userName || "Kullanıcı"} başarıyla silindi`);
-        // Modal'ı kapat
-        onClose();
-
-        // Kullanıcıyı UI'dan kaldır (fetchUsers() çağırmak yerine)
-        if (userList) {
-          // Redux store'dan silinen kullanıcıyı kaldır
-          dispatch(removeUser(selectedUser._id));
-        }
+        success(
+          `${result.data?.userName || "Kullanıcı"} başarıyla deaktif edildi`
+        );
       }
     } catch (err) {
       const errorMessage =
-        err.message || "Kullanıcı silinirken bir hata oluştu";
+        err.message || "Kullanıcı deaktif edilirken bir hata oluştu";
       setDeleteError(errorMessage);
       showError(errorMessage);
     } finally {
       setDeleteLoading(false);
+    }
+  };
+
+  // Hard delete (kalıcı silme) işleyicisi
+  const handleHardDeleteUser = async () => {
+    if (!selectedUser) return;
+    setHardDeleteLoading(true);
+    setHardDeleteError(null);
+
+    try {
+      // Kullanıcı ID'sinin geçerliliğini kontrol et
+      if (!selectedUser._id || !isValidObjectId(selectedUser._id)) {
+        throw new Error("Geçersiz kullanıcı ID'si");
+      }
+
+      // Redux action ile kullanıcıyı kalıcı olarak sil
+      const result = await dispatch(
+        hardDeleteUser({ userId: selectedUser._id })
+      ).unwrap();
+
+      // Modal'ı kapat
+      setHardDeleteModalOpen(false);
+
+      // Kullanıcıyı UI'dan kaldır
+      dispatch(removeUser(selectedUser._id));
+
+      success(
+        `${result.data?.userName || "Kullanıcı"} veritabanından tamamen silindi`
+      );
+    } catch (err) {
+      const errorMessage =
+        err.message || "Kullanıcı kalıcı olarak silinirken bir hata oluştu";
+      setHardDeleteError(errorMessage);
+      showError(errorMessage);
+    } finally {
+      setHardDeleteLoading(false);
     }
   };
 
@@ -253,6 +330,11 @@ const UserListComponent = () => {
 
   // Kullanıcı listesini yenile - kullanıcı açıkça yenileme istediğinde
   const handleRefreshUsers = async () => {
+    // Zaten yükleme yapılıyorsa engelle
+    if (isLoading) {
+      return;
+    }
+
     try {
       console.log(
         "UserListComponent manuel kullanıcı listesi yenileme başlatıldı"
@@ -261,29 +343,51 @@ const UserListComponent = () => {
       // Önce userSlice'ın isLoading durumunu true'ya ayarla
       dispatch(startManualRefresh());
 
-      // İki action'ı da çağır ama sonuçlarını bekle
-      const results = await Promise.all([
+      // Önce API erişimini kontrol et
+      const results = await Promise.allSettled([
         dispatch(fetchUsers()).unwrap(),
         dispatch(fetchTeamMembers()).unwrap(),
       ]);
 
       // fetchUsers sonucu kontrolü
       const userResult = results[0];
-      if (userResult && userResult.success) {
+
+      if (
+        userResult.status === "fulfilled" &&
+        userResult.value &&
+        userResult.value.success
+      ) {
         console.log(
           `UserListComponent kullanıcı listesi yenilendi: ${
-            userResult.data?.length || 0
+            userResult.value.data?.length || 0
           } kullanıcı`
         );
         success("Kullanıcı listesi başarıyla yenilendi.");
-      } else {
-        showError("Kullanıcı listesi yenilenirken bir sorun oluştu.");
-        console.error(
-          "UserListComponent kullanıcı listesi yenileme yanıtı:",
-          userResult
-        );
+      } else if (userResult.status === "rejected") {
+        const err = userResult.reason;
+        if (err && err.code === "AUTH_REQUIRED") {
+          // Auth hatası - kullanıcı çıkış yapmış
+          console.warn(
+            "Kullanıcı oturumu sonlanmış, login sayfasına yönlendiriliyor"
+          );
+          // Doğrudan login sayfasına yönlendir
+          window.location.href = "/login";
+          return;
+        } else {
+          showError("Kullanıcı listesi yenilenirken bir sorun oluştu.");
+          console.error(
+            "UserListComponent kullanıcı listesi yenileme hatası:",
+            userResult.reason
+          );
+        }
       }
     } catch (err) {
+      // Auth hatası varsa login sayfasına yönlendir
+      if (err && err.code === "AUTH_REQUIRED") {
+        window.location.href = "/login";
+        return;
+      }
+
       console.error(
         "UserListComponent kullanıcı listesi yenileme hatası:",
         err
@@ -345,8 +449,8 @@ const UserListComponent = () => {
     }
   };
 
-  // Basit renk tanımı
-  const renderRole = (role) => {
+  // Helper fonksiyonları - render sırasında sabit kalacak şekilde yeniden tanımlanmayacak
+  const renderRole = React.useCallback((role) => {
     let bgColorClass = "bg-primary-500";
     let textColorClass = "text-white";
 
@@ -368,9 +472,9 @@ const UserListComponent = () => {
         {role || "User"}
       </Chip>
     );
-  };
+  }, []);
 
-  const renderStatus = (isVerified) => {
+  const renderStatus = React.useCallback((isVerified) => {
     const bgColorClass = isVerified ? "bg-green-500" : "bg-gray-300";
     const textColorClass = isVerified ? "text-white" : "text-gray-700";
 
@@ -383,9 +487,9 @@ const UserListComponent = () => {
         {isVerified ? "Verified" : "Not Verified"}
       </Chip>
     );
-  };
+  }, []);
 
-  const renderActiveStatus = (isActive) => {
+  const renderActiveStatus = React.useCallback((isActive) => {
     const bgColorClass = isActive ? "bg-green-500" : "bg-red-500";
     const textColorClass = "text-white";
 
@@ -398,53 +502,80 @@ const UserListComponent = () => {
         {isActive ? "Active" : "Passive"}
       </Chip>
     );
-  };
+  }, []);
 
-  // Aksiyon butonları
-  const renderActions = (user) => (
-    <div className="flex gap-2">
-      <Tooltip content="Change Role">
-        <Button
-          isIconOnly
-          size="sm"
-          variant="light"
-          className="text-yellow-500 hover:bg-yellow-100"
-          onPress={() => openRoleModal(user)}
-        >
-          <Icon icon="mdi:account-convert" />
-        </Button>
-      </Tooltip>
+  // Aksiyon butonları - useSelector kullanmıyoruz
+  const renderActions = React.useCallback(
+    (user) => {
+      return (
+        <div className="flex gap-2">
+          <Tooltip content="Change Role">
+            <Button
+              isIconOnly
+              size="sm"
+              variant="light"
+              className="text-yellow-500 hover:bg-yellow-100"
+              onPress={() => openRoleModal(user)}
+            >
+              <Icon icon="mdi:account-convert" />
+            </Button>
+          </Tooltip>
 
-      <Tooltip content={user.isActive ? "Deaktif Et" : "Aktifleştir"}>
-        <Button
-          isIconOnly
-          size="sm"
-          variant="light"
-          className={
-            user.isActive
-              ? "text-orange-500 hover:bg-orange-100"
-              : "text-green-500 hover:bg-green-100"
-          }
-          onPress={() => openActivationModal(user)}
-        >
-          <Icon
-            icon={user.isActive ? "mdi:account-cancel" : "mdi:account-check"}
-          />
-        </Button>
-      </Tooltip>
+          <Tooltip content={user.isActive ? "Deaktif Et" : "Aktifleştir"}>
+            <Button
+              isIconOnly
+              size="sm"
+              variant="light"
+              className={
+                user.isActive
+                  ? "text-orange-500 hover:bg-orange-100"
+                  : "text-green-500 hover:bg-green-100"
+              }
+              onPress={() => openActivationModal(user)}
+            >
+              <Icon
+                icon={
+                  user.isActive ? "mdi:account-cancel" : "mdi:account-check"
+                }
+              />
+            </Button>
+          </Tooltip>
 
-      <Tooltip content="Delete User">
-        <Button
-          isIconOnly
-          size="sm"
-          variant="light"
-          className="text-red-500 hover:bg-red-100"
-          onPress={() => openDeleteModal(user)}
-        >
-          <Icon icon="mdi:delete" />
-        </Button>
-      </Tooltip>
-    </div>
+          <Tooltip content="Deaktif Et">
+            <Button
+              isIconOnly
+              size="sm"
+              variant="light"
+              className="text-orange-500 hover:bg-orange-100"
+              onPress={() => openDeleteModal(user)}
+            >
+              <Icon icon="mdi:user-remove" />
+            </Button>
+          </Tooltip>
+
+          {isAdmin && (
+            <Tooltip content="Kalıcı Olarak Sil">
+              <Button
+                isIconOnly
+                size="sm"
+                variant="light"
+                className="text-red-600 hover:bg-red-100"
+                onPress={() => openHardDeleteModal(user)}
+              >
+                <Icon icon="mdi:delete-forever" />
+              </Button>
+            </Tooltip>
+          )}
+        </div>
+      );
+    },
+    [
+      isAdmin,
+      openRoleModal,
+      openActivationModal,
+      openDeleteModal,
+      openHardDeleteModal,
+    ]
   );
 
   // Yükleniyor
@@ -498,69 +629,74 @@ const UserListComponent = () => {
 
       {/* Tablo */}
       <div className="w-full overflow-x-auto">
-        <Table
-          aria-label="Kullanıcı listesi"
-          classNames={{
-            base: "max-w-full",
-            table: "min-w-full",
-          }}
-          bottomContent={
-            pages > 0 && (
-              <div className="flex w-full justify-center">
-                <Pagination
-                  isCompact
-                  showControls
-                  showShadow
-                  className="text-primary-500"
-                  page={page}
-                  total={pages}
-                  onChange={(p) => setPage(p)}
-                />
-              </div>
-            )
-          }
-        >
-          <TableHeader>
-            <TableColumn className="w-[130px]">KULLANICI ADI</TableColumn>
-            <TableColumn className="w-[180px]">E-POSTA</TableColumn>
-            <TableColumn className="w-[70px]">ROL</TableColumn>
-            <TableColumn className="w-[80px]">DURUM</TableColumn>
-            <TableColumn className="w-[80px]">AKTİF</TableColumn>
-            <TableColumn className="w-[100px]">SON GİRİŞ</TableColumn>
-            <TableColumn className="w-[100px]">KAYIT TARİHİ</TableColumn>
-            <TableColumn className="w-[100px]">SİLİNME TARİHİ</TableColumn>
-            <TableColumn className="w-[70px]">İŞLEMLER</TableColumn>
-          </TableHeader>
-          <TableBody items={items} emptyContent={"Kullanıcı bulunamadı."}>
-            {(item) => (
-              <TableRow key={item._id}>
-                <TableCell className="truncate max-w-[130px]">
-                  {item.userName}
-                </TableCell>
-                <TableCell className="truncate max-w-[180px]">
-                  {item.email}
-                </TableCell>
-                <TableCell>{renderRole(item.role)}</TableCell>
-                <TableCell>{renderStatus(item.isVerified)}</TableCell>
-                <TableCell>{renderActiveStatus(item.isActive)}</TableCell>
-                <TableCell className="truncate max-w-[100px]">
-                  {item.lastLogin
-                    ? new Date(item.lastLogin).toLocaleDateString("tr-TR")
-                    : "-"}
-                </TableCell>
-                <TableCell className="truncate max-w-[100px]">
-                  {new Date(item.createdAt).toLocaleDateString("tr-TR")}
-                </TableCell>
-                <TableCell className="truncate max-w-[100px]">
-                  {item.deletedAt
-                    ? new Date(item.deletedAt).toLocaleDateString("tr-TR")
-                    : "-"}
-                </TableCell>
-                <TableCell>{renderActions(item)}</TableCell>
-              </TableRow>
-            )}
-          </TableBody>
-        </Table>
+        {paginatedItems.length > 0 ? (
+          <>
+            <Table
+              aria-label="Kullanıcı listesi"
+              className="w-full"
+              bottomContent={
+                pages > 0 && (
+                  <div className="flex w-full justify-center">
+                    <Pagination
+                      isCompact
+                      showControls
+                      showShadow
+                      className="text-primary-500"
+                      page={page}
+                      total={pages}
+                      onChange={(p) => setPage(p)}
+                    />
+                  </div>
+                )
+              }
+            >
+              <TableHeader>
+                <TableColumn>KULLANICI ADI</TableColumn>
+                <TableColumn>E-POSTA</TableColumn>
+                <TableColumn>ROL</TableColumn>
+                <TableColumn>DURUM</TableColumn>
+                <TableColumn>AKTİF</TableColumn>
+                <TableColumn>SON GİRİŞ</TableColumn>
+                <TableColumn>KAYIT TARİHİ</TableColumn>
+                <TableColumn>SİLİNME TARİHİ</TableColumn>
+                <TableColumn>İŞLEMLER</TableColumn>
+              </TableHeader>
+              <TableBody>
+                {paginatedItems.map((item) => (
+                  <TableRow key={item._id}>
+                    <TableCell className="truncate max-w-[130px]">
+                      {item.userName}
+                    </TableCell>
+                    <TableCell className="truncate max-w-[180px]">
+                      {item.email}
+                    </TableCell>
+                    <TableCell>{renderRole(item.role)}</TableCell>
+                    <TableCell>{renderStatus(item.isVerified)}</TableCell>
+                    <TableCell>{renderActiveStatus(item.isActive)}</TableCell>
+                    <TableCell className="truncate max-w-[100px]">
+                      {item.lastLogin
+                        ? new Date(item.lastLogin).toLocaleDateString("tr-TR")
+                        : "-"}
+                    </TableCell>
+                    <TableCell className="truncate max-w-[100px]">
+                      {new Date(item.createdAt).toLocaleDateString("tr-TR")}
+                    </TableCell>
+                    <TableCell className="truncate max-w-[100px]">
+                      {item.deletedAt
+                        ? new Date(item.deletedAt).toLocaleDateString("tr-TR")
+                        : "-"}
+                    </TableCell>
+                    <TableCell>{renderActions(item)}</TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </>
+        ) : (
+          <div className="flex justify-center items-center p-8 text-gray-500">
+            Kullanıcı bulunamadı.
+          </div>
+        )}
       </div>
 
       {/* Modallar */}
@@ -571,6 +707,13 @@ const UserListComponent = () => {
         deleteError={deleteError}
         handleDeleteUser={handleDeleteUser}
         isLoading={deleteLoading}
+      />
+      <HardDeleteUserModal
+        isOpen={hardDeleteModalOpen}
+        onClose={() => setHardDeleteModalOpen(false)}
+        selectedUser={selectedUser}
+        handleHardDeleteUser={handleHardDeleteUser}
+        isLoading={hardDeleteLoading}
       />
       <ChangeRoleModal
         roleModalOpen={roleModalOpen}
@@ -593,4 +736,5 @@ const UserListComponent = () => {
   );
 };
 
-export default React.memo(UserListComponent);
+// React.memo yerine normal export kullanarak sorunları önle
+export default UserListComponent;

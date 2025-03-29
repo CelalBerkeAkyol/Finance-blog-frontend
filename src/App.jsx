@@ -36,7 +36,7 @@ import UsersPage from "./pages/dashboard_pages/UsersPage";
 import LoginPage from "./pages/auth/LoginPage";
 import RegisterPage from "./pages/auth/RegisterPage";
 
-import ProtectedRoute from "./components/ProtectedRoute";
+import ProtectedRoute from "./components/auth/ProtectedRoute";
 import BlogPostPage from "./pages/blog_pages/BlogPostPage";
 import BlogsPage from "./pages/blog_pages/BlogsPage";
 import Footer from "./components/footer/Footer";

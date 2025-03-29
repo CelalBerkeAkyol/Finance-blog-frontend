@@ -1,20 +1,16 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import axios from "../../../api";
-import { logInfo } from "../../../utils/logger";
+import { logInfo, logError, logWarning } from "../../../utils/logger";
 
 // Tüm kullanıcıları getirme thunk'ı
 export const fetchUsers = createAsyncThunk(
   "userList/fetchUsers",
   async (_, thunkAPI) => {
     try {
-      console.log("🔄 fetchUsers thunk çalıştırılıyor...");
-
       const response = await axios.get("/user", {
         withCredentials: true,
         signal: thunkAPI.signal,
       });
-
-      console.log("✅ fetchUsers yanıtı:", response.data);
 
       if (!response.data.success) {
         throw new Error("Kullanıcılar alınamadı. API false dönüyor.");
@@ -22,7 +18,7 @@ export const fetchUsers = createAsyncThunk(
 
       return response.data;
     } catch (error) {
-      console.error("❌ fetchUsers hatası:", error);
+      logError("userListSlice", "fetchUsers hatası", error);
       const errMessage = error.message || "Kullanıcılar alınamadı.";
       const errCode = error.code || "UNKNOWN_ERROR";
       return thunkAPI.rejectWithValue({ message: errMessage, code: errCode });
@@ -165,16 +161,16 @@ const userListSlice = createSlice({
         state.errorMessage = "";
       })
       .addCase(fetchUsers.fulfilled, (state, action) => {
-        console.log(
-          "Kullanıcı listesi başarıyla alındı, state güncelleniyor:",
+        logInfo(
+          "userListSlice",
+          "Kullanıcı listesi başarıyla alındı, state güncelleniyor",
           action.payload
         );
 
         if (!action.payload || !action.payload.data) {
-          console.warn("⚠️ API'den kullanıcı verisi gelmedi veya boş");
-          logInfo(
-            "⚠️ Kullanıcılar",
-            "API'den kullanıcı verileri gelmedi veya boş"
+          logWarning(
+            "userListSlice",
+            "API'den kullanıcı verisi gelmedi veya boş"
           );
           state.userList = [];
         } else {
@@ -184,8 +180,9 @@ const userListSlice = createSlice({
             : [];
 
           if (!Array.isArray(action.payload.data)) {
-            console.warn(
-              "⚠️ API'den gelen kullanıcı verisi dizi değil:",
+            logWarning(
+              "userListSlice",
+              "API'den gelen kullanıcı verisi dizi değil",
               action.payload.data
             );
           }

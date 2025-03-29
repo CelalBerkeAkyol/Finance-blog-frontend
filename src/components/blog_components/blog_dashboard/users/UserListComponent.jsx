@@ -323,6 +323,21 @@ const UserListComponent = () => {
     );
   };
 
+  const renderActiveStatus = (isActive) => {
+    const bgColorClass = isActive ? "bg-green-500" : "bg-red-500";
+    const textColorClass = "text-white";
+
+    return (
+      <Chip
+        size="sm"
+        variant="flat"
+        className={`${bgColorClass} ${textColorClass}`}
+      >
+        {isActive ? "Active" : "Passive"}
+      </Chip>
+    );
+  };
+
   // Aksiyon butonları
   const renderActions = (user) => (
     <div className="flex gap-2">
@@ -429,7 +444,10 @@ const UserListComponent = () => {
             <TableColumn className="w-[180px]">E-POSTA</TableColumn>
             <TableColumn className="w-[70px]">ROL</TableColumn>
             <TableColumn className="w-[80px]">DURUM</TableColumn>
+            <TableColumn className="w-[80px]">AKTİF</TableColumn>
+            <TableColumn className="w-[100px]">SON GİRİŞ</TableColumn>
             <TableColumn className="w-[100px]">KAYIT TARİHİ</TableColumn>
+            <TableColumn className="w-[100px]">SİLİNME TARİHİ</TableColumn>
             <TableColumn className="w-[70px]">İŞLEMLER</TableColumn>
           </TableHeader>
           <TableBody items={items} emptyContent={"Kullanıcı bulunamadı."}>
@@ -443,8 +461,19 @@ const UserListComponent = () => {
                 </TableCell>
                 <TableCell>{renderRole(item.role)}</TableCell>
                 <TableCell>{renderStatus(item.isVerified)}</TableCell>
+                <TableCell>{renderActiveStatus(item.isActive)}</TableCell>
+                <TableCell className="truncate max-w-[100px]">
+                  {item.lastLogin
+                    ? new Date(item.lastLogin).toLocaleDateString("tr-TR")
+                    : "-"}
+                </TableCell>
                 <TableCell className="truncate max-w-[100px]">
                   {new Date(item.createdAt).toLocaleDateString("tr-TR")}
+                </TableCell>
+                <TableCell className="truncate max-w-[100px]">
+                  {item.deletedAt
+                    ? new Date(item.deletedAt).toLocaleDateString("tr-TR")
+                    : "-"}
                 </TableCell>
                 <TableCell>{renderActions(item)}</TableCell>
               </TableRow>

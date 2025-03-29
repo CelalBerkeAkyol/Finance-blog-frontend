@@ -52,10 +52,30 @@ const DeleteAccountPage = () => {
       return;
     }
 
+    // userInfo'yu konsolda göster
+    console.log("DeleteAccountPage - userInfo:", userInfo);
+
+    // ID'yi doğru şekilde al
+    const userId = userInfo.id || userInfo._id;
+
+    if (!userId) {
+      showError(
+        "Kullanıcı ID'si bulunamadı. Lütfen sayfayı yenileyip tekrar deneyin."
+      );
+      return;
+    }
+
     setIsDeleting(true);
 
     try {
-      const result = await dispatch(deleteUserAccount(userInfo._id)).unwrap();
+      console.log("Hesap silme isteği gönderiliyor, ID:", userId);
+
+      // ID'nin undefined, null veya boş string olup olmadığını son bir kez kontrol et
+      if (!userId || userId === "" || userId === "undefined") {
+        throw new Error("Geçersiz kullanıcı ID: " + userId);
+      }
+
+      const result = await dispatch(deleteUserAccount(userId)).unwrap();
 
       if (result.success) {
         success("Hesabınız başarıyla silindi.");

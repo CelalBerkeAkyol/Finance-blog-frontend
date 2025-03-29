@@ -222,6 +222,21 @@ export const deleteUserAccount = createAsyncThunk(
   "user/deleteUserAccount",
   async (userId, thunkAPI) => {
     try {
+      // userId parametresi ve kullanıcı state'i için güvenlik kontrolleri
+      if (!userId) {
+        console.error(
+          "deleteUserAccount: Silme işlemi için kullanıcı ID'si belirtilmedi"
+        );
+        throw new Error(
+          "Kullanıcı silme işlemi için geçerli bir ID belirtilmelidir"
+        );
+      }
+
+      console.log(
+        "deleteUserAccount: Kullanıcı silme işlemi başlatıldı, ID =",
+        userId
+      );
+
       const response = await axios.delete(`/user/${userId}`, {
         withCredentials: true,
       });

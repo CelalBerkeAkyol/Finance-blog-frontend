@@ -12,34 +12,20 @@ import {
   Spinner,
 } from "@nextui-org/react";
 import { Icon } from "@iconify/react";
-import { deleteUserAccount } from "../../app/features/user/userSlice";
+import {
+  deleteUserAccount,
+  clearUserState,
+} from "../../app/features/user/userSlice";
 import { useFeedback } from "../../context/FeedbackContext";
+import { logInfo } from "../../utils/logger";
 
 const DeleteAccountPage = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
-  const { success, error: showError } = useFeedback();
-  const { userInfo, isLoading, isLoggedIn } = useSelector(
-    (state) => state.user
-  );
+  const { success, error: showError, warning } = useFeedback();
+  const { userInfo, isLoading } = useSelector((state) => state.user);
   const [confirmText, setConfirmText] = useState("");
   const [isDeleting, setIsDeleting] = useState(false);
-
-  // Kullanıcıyı kontrol et
-  useEffect(() => {
-    // Kullanıcı giriş yapmamışsa, login sayfasına yönlendir
-    if (!isLoggedIn) {
-      navigate("/login?redirect=delete-account");
-      return;
-    }
-
-    // Admin veya author ise, anasayfaya yönlendir
-    if (userInfo?.role === "admin" || userInfo?.role === "author") {
-      showError("Bu sayfaya erişim yetkiniz bulunmamaktadır.");
-      navigate("/");
-      return;
-    }
-  }, [isLoggedIn, userInfo, navigate, showError]);
 
   const handleDeleteConfirm = async () => {
     if (!userInfo) {
@@ -51,9 +37,6 @@ const DeleteAccountPage = () => {
       showError("Kullanıcı adınızı doğru girmelisiniz.");
       return;
     }
-
-    // userInfo'yu konsolda göster
-    console.log("DeleteAccountPage - userInfo:", userInfo);
 
     // ID'yi doğru şekilde al
     const userId = userInfo.id || userInfo._id;
@@ -68,18 +51,23 @@ const DeleteAccountPage = () => {
     setIsDeleting(true);
 
     try {
-      console.log("Hesap silme isteği gönderiliyor, ID:", userId);
+      logInfo("Hesap silme isteği gönderiliyor, ID: " + userId);
 
       // ID'nin undefined, null veya boş string olup olmadığını son bir kez kontrol et
-      if (!userId || userId === "" || userId === "undefined") {
-        throw new Error("Geçersiz kullanıcı ID: " + userId);
-      }
 
       const result = await dispatch(deleteUserAccount(userId)).unwrap();
 
       if (result.success) {
+        // Kullanıcı oturumunu tamamen temizle
+        dispatch(clearUserState());
+
+        // Başarılı mesajı göster ve anasayfaya yönlendir
         success("Hesabınız başarıyla silindi.");
-        navigate("/");
+
+        // Sayfa yönlendirmesinden önce küçük bir gecikme ekle
+        setTimeout(() => {
+          navigate("/");
+        }, 2000);
       } else {
         showError(
           "Hesap silme işlemi sırasında bir hata oluştu. Lütfen tekrar deneyin."
@@ -100,11 +88,6 @@ const DeleteAccountPage = () => {
         <Spinner size="lg" label="Yükleniyor..." />
       </div>
     );
-  }
-
-  // Kullanıcı admin veya author ise bir şey gösterme
-  if (userInfo.role === "admin" || userInfo.role === "author") {
-    return null;
   }
 
   return (
@@ -128,19 +111,21 @@ const DeleteAccountPage = () => {
                   Uyarı!
                 </h2>
                 <p className="text-sm">
-                  Hesabınızı silmek üzeresiniz. Bu işlem geri alınamaz ve tüm
-                  verileriniz kalıcı olarak silinecektir:
+                  Hesabınızı kalıcı olarak silmek üzeresiniz. Bu işlem geri
+                  alınamaz ve tüm verileriniz kalıcı olarak silinecektir:
                 </p>
                 <ul className="list-disc ml-5 mt-2 text-sm">
                   <li>Kişisel bilgileriniz</li>
                   <li>Profiliniz</li>
                   <li>Hesap ayarlarınız</li>
+                  <li>Tüm kayıtlı verileriniz</li>
                 </ul>
               </div>
 
               <p className="text-sm">
-                Hesabınızı silmek istediğinizden emin misiniz? Eğer eminseniz,
-                onay için kullanıcı adınızı aşağıya yazın:
+                Hesabınızı kalıcı olarak silmek istediğinizden emin misiniz?
+                Silinen hesap geri getirilemez. Eğer eminseniz, onay için
+                kullanıcı adınızı aşağıya yazın:
               </p>
 
               <div className="mt-4">
@@ -175,7 +160,7 @@ const DeleteAccountPage = () => {
               isDisabled={confirmText !== userInfo.userName}
               startContent={<Icon icon="mdi:delete" />}
             >
-              Hesabımı Sil
+              Hesabımı Kalıcı Olarak Sil
             </Button>
           </CardFooter>
         </Card>

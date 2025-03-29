@@ -91,8 +91,14 @@ const handleUpdateProfileFulfilled = (state, action) => {
 };
 
 // DeleteAccount fulfilled: Kullanıcı hesabı silindikten sonra state sıfırlanır.
-const handleDeleteAccountFulfilled = (state) => {
+const handleDeleteAccountFulfilled = (state, action) => {
   logInfo("✅ Hesap Silme", "Kullanıcı hesabı silindi");
+
+  // LocalStorage ve sessionStorage temizle (çift kontrol)
+  localStorage.removeItem("userInfo");
+  sessionStorage.removeItem("userInfo");
+
+  // State'i tamamen sıfırla
   state.isLoading = false;
   state.isSuccess = true;
   state.userInfo = null;
@@ -232,14 +238,15 @@ export const deleteUserAccount = createAsyncThunk(
         );
       }
 
-      console.log(
+      logInfo(
         "deleteUserAccount: Kullanıcı silme işlemi başlatıldı, ID =",
         userId
       );
 
-      const response = await axios.delete(`/user/${userId}`, {
+      const response = await axios.delete(`/user/${userId}/hard`, {
         withCredentials: true,
       });
+
       return response.data;
     } catch (error) {
       const errMessage = error.message || "Hesap silinemedi.";

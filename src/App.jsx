@@ -21,6 +21,7 @@ import TeamPage from "./pages/other_pages/TeamPage";
 import AboutUsPage from "./pages/other_pages/AboutUsPage";
 import DisclaimerPage from "./pages/other_pages/DisclaimerPage";
 import PrivacyPolicyPage from "./pages/other_pages/PrivacyPolicyPage";
+import AdminLogsPage from "./pages/AdminLogsPage";
 
 {
   /* dashboard pages */
@@ -142,6 +143,14 @@ function AppContent() {
             element={
               <ProtectedRoute allowedRoles={["admin", "author"]}>
                 <GalleryPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/dashboard/logs"
+            element={
+              <ProtectedRoute allowedRoles={["admin"]}>
+                <AdminLogsPage />
               </ProtectedRoute>
             }
           />

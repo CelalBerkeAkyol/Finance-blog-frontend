@@ -100,18 +100,32 @@ const BlogSidebarComponent = () => {
             </Link>
           </li>
           {isAdmin && (
-            <li>
-              <Link
-                to="/dashboard/users"
-                className="flex items-center p-2 rounded-lg hover:bg-content3"
-              >
-                <Icon
-                  icon="mdi:account-group-outline"
-                  className="h-5 w-5 min-w-5"
-                />
-                {isOpen && <span className="ml-2">Users</span>}
-              </Link>
-            </li>
+            <>
+              <li>
+                <Link
+                  to="/dashboard/users"
+                  className="flex items-center p-2 rounded-lg hover:bg-content3"
+                >
+                  <Icon
+                    icon="mdi:account-group-outline"
+                    className="h-5 w-5 min-w-5"
+                  />
+                  {isOpen && <span className="ml-2">Users</span>}
+                </Link>
+              </li>
+              <li>
+                <Link
+                  to="/dashboard/logs"
+                  className="flex items-center p-2 rounded-lg hover:bg-content3"
+                >
+                  <Icon
+                    icon="mdi:file-document-alert-outline"
+                    className="h-5 w-5 min-w-5"
+                  />
+                  {isOpen && <span className="ml-2">Loglar</span>}
+                </Link>
+              </li>
+            </>
           )}
         </ul>
       </nav>

@@ -7,6 +7,8 @@
 const isProduction = import.meta.env.PROD;
 const enableLoggingEnv = import.meta.env.VITE_ENABLE_LOGGING === "true";
 const logLevel = import.meta.env.VITE_LOG_LEVEL || "debug";
+const appName = import.meta.env.VITE_APP_NAME || "Fin AI Blog";
+const appVersion = import.meta.env.VITE_APP_VERSION || "1.0.0";
 
 // Log seviyeleri
 const LOG_LEVELS = {
@@ -66,57 +68,47 @@ const SENSITIVE_DATA_PATTERNS = [
 ];
 
 /**
- * Hassas verileri temizleyen fonksiyon
- * @param {any} data - Temizlenecek veri
- * @returns {any} - Hassas verilerden arındırılmış veri
+ * Hassas verileri tespit edip maskeler
+ * @param {Object} obj - İncelenecek obje
+ * @returns {Object} - Hassas verileri maskelenmiş obje
  */
-function sanitizeData(data) {
-  // Data null veya undefined ise doğrudan döndür
-  if (data == null) return data;
-
-  // String ise ve token içeriyorsa maskele
-  if (typeof data === "string") {
-    // Token içeren string'leri maskele
-    if (/bearer\s+/i.test(data) || /jwt/i.test(data) || data.length > 30) {
-      return "[MASKED_SENSITIVE_DATA]";
-    }
-    return data;
+function sanitizeData(obj) {
+  // Obje değilse veya null ise direkt olarak döndür
+  if (obj === null || typeof obj !== "object") {
+    return obj;
   }
 
-  // Hata nesnesi ise
-  if (data instanceof Error) {
-    // Hata mesajı ve stack trace'i kopyala, hassas veri filtreleme yap
-    const sanitizedError = new Error(data.message);
-    sanitizedError.stack = data.stack;
-    sanitizedError.name = data.name;
-    return sanitizedError;
+  // Tarih objesi ise string'e çevir
+  if (obj instanceof Date) {
+    return obj.toISOString();
   }
 
-  // Obje veya dizi ise, deep copy yaparak temizle
-  if (typeof data === "object") {
-    if (Array.isArray(data)) {
-      return data.map((item) => sanitizeData(item));
-    }
-
-    // Obje ise
-    const sanitized = {};
-    for (const [key, value] of Object.entries(data)) {
-      // Hassas veri içeren field'ları kontrol et
-      const isSensitive = SENSITIVE_DATA_PATTERNS.some((pattern) =>
-        pattern.test(key)
-      );
-
-      if (isSensitive) {
-        sanitized[key] = "[MASKED_SENSITIVE_DATA]";
-      } else {
-        sanitized[key] = sanitizeData(value);
-      }
-    }
-    return sanitized;
+  // Dizi ise elemanlarını kontrol et
+  if (Array.isArray(obj)) {
+    return obj.map((item) => sanitizeData(item));
   }
 
-  // Diğer primitif tipler (number, boolean, vs) için direkt döndür
-  return data;
+  // Objenin kopyasını oluştur
+  const sanitized = { ...obj };
+
+  // Objenin her alanını kontrol et
+  Object.keys(sanitized).forEach((key) => {
+    // Hassas veri kontrolü
+    const isSensitive = SENSITIVE_DATA_PATTERNS.some((pattern) =>
+      pattern.test(key)
+    );
+
+    if (isSensitive) {
+      // Hassas veri alanlarını maskele
+      sanitized[key] =
+        typeof sanitized[key] === "string" ? "***MASKED***" : null;
+    } else if (typeof sanitized[key] === "object" && sanitized[key] !== null) {
+      // Alt objeleri de kontrol et
+      sanitized[key] = sanitizeData(sanitized[key]);
+    }
+  });
+
+  return sanitized;
 }
 
 /**
@@ -126,8 +118,127 @@ function sanitizeData(data) {
  */
 function shouldLog(level) {
   return (
-    !isProduction && enableLoggingEnv && LOG_LEVELS[level] >= currentLogLevel
+    (!isProduction || (isProduction && level === "error")) &&
+    enableLoggingEnv &&
+    LOG_LEVELS[level] >= currentLogLevel
   );
+}
+
+/**
+ * Korelasyon ID'si oluşturur
+ * @returns {string} - UUID formatında korelasyon ID'si
+ */
+function generateCorrelationId() {
+  return "xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx".replace(/[xy]/g, function (c) {
+    const r = (Math.random() * 16) | 0;
+    const v = c === "x" ? r : (r & 0x3) | 0x8;
+    return v.toString(16);
+  });
+}
+
+// Genel korelasyon ID'si - sayfa yüklendiğinde bir kez oluşturulur
+const generalCorrelationId = generateCorrelationId();
+
+/**
+ * Tarayıcı ve kullanıcı bilgilerini alır
+ * @returns {Object} - Kullanıcı ajanı ve diğer bilgiler
+ */
+function getBrowserInfo() {
+  return {
+    userAgent: navigator.userAgent,
+    language: navigator.language,
+    platform: navigator.platform,
+    screenWidth: window.screen.width,
+    screenHeight: window.screen.height,
+  };
+}
+
+/**
+ * Standart log objesi oluşturur
+ * @param {string} level - Log seviyesi
+ * @param {string} module - Modül adı
+ * @param {string} message - Log mesajı
+ * @param {Object} additionalData - Ek veri
+ * @returns {Object} - Standart log objesi
+ */
+function createLogObject(level, module, message, additionalData = null) {
+  const timestamp = new Date().toISOString();
+  const environment = isProduction ? "production" : "development";
+  const userInfo = getBrowserInfo();
+
+  // Temel log yapısı
+  const logObject = {
+    timestamp,
+    level,
+    service: appName,
+    module,
+    message,
+    environment,
+    request: {
+      url: window.location.href,
+      userAgent: userInfo.userAgent,
+    },
+    correlationId: generalCorrelationId,
+    appVersion,
+  };
+
+  // Ek veriyi ekle
+  if (additionalData) {
+    if (additionalData instanceof Error) {
+      logObject.error = {
+        name: additionalData.name,
+        message: additionalData.message,
+        // Stack trace'i sadece development ortamında ekle
+        stack: !isProduction ? additionalData.stack : undefined,
+      };
+    } else {
+      logObject.data = sanitizeData(additionalData);
+    }
+  }
+
+  return logObject;
+}
+
+/**
+ * Log objesini konsola ve dosyaya yazar
+ * @param {Object} logObject - Log objesi
+ * @param {string} consoleStyle - Konsol stil bilgisi
+ */
+function writeLog(logObject, consoleStyle) {
+  // Konsolda gösterme
+  console.log(
+    `%c[${logObject.level.toUpperCase()}] ${logObject.module}: ${
+      logObject.message
+    }`,
+    consoleStyle,
+    logObject
+  );
+
+  // Log objesini JSON formatına çevir
+  const logJson = JSON.stringify(logObject);
+
+  // Log dosyasına yazmak için localStorage kullan
+  // Not: Bu bir workaround, gerçek uygulamada sunucu taraflı loglama kullanılmalı
+  try {
+    const storedLogs = localStorage.getItem("application_logs") || "[]";
+    const logs = JSON.parse(storedLogs);
+    logs.push(logObject);
+
+    // Son 1000 logu tut (maksimum localStorage büyüklüğünü aşmamak için)
+    if (logs.length > 1000) {
+      logs.shift(); // En eski logu çıkar
+    }
+
+    localStorage.setItem("application_logs", JSON.stringify(logs));
+  } catch (e) {
+    console.error("Log dosyasına yazma hatası:", e);
+  }
+
+  // Production ortamında gerçek bir API'ye gönderebiliriz
+  if (isProduction && logObject.level === "error") {
+    // TODO: Log sunucusuna gönderme işlemi
+    // sendLogToServer(logJson);
+  }
 }
 
 /**
@@ -144,10 +255,14 @@ export function logRender(componentName, forceLogging = false) {
   renderCounts.set(componentName, newCount);
 
   if (shouldLog("debug") || forceLogging) {
-    console.log(
-      `%c${componentName} render edildi. Toplam render sayısı: ${newCount}`,
-      "color: #6b7280; font-style: italic;"
+    const logObject = createLogObject(
+      "debug",
+      "Component",
+      `${componentName} render edildi. Toplam render sayısı: ${newCount}`,
+      { component: componentName, renderCount: newCount }
     );
+
+    writeLog(logObject, "color: #6b7280; font-style: italic;");
   }
 }
 
@@ -156,11 +271,8 @@ export function logRender(componentName, forceLogging = false) {
  */
 export function logInfo(module, message, data = null) {
   if (shouldLog("info")) {
-    console.info(
-      `%c[INFO] ${module}: ${message}`,
-      "color: #3b82f6; font-weight: bold;",
-      data ? sanitizeData(data) : ""
-    );
+    const logObject = createLogObject("info", module, message, data);
+    writeLog(logObject, "color: #3b82f6; font-weight: bold;");
   }
 }
 
@@ -185,11 +297,8 @@ export function logError(module, message, error = null) {
   }
 
   if (shouldLog("error")) {
-    console.error(
-      `%c[ERROR] ${module}: ${message}`,
-      "color: #ef4444; font-weight: bold;",
-      error ? sanitizeData(error) : ""
-    );
+    const logObject = createLogObject("error", module, message, error);
+    writeLog(logObject, "color: #ef4444; font-weight: bold;");
   }
 }
 
@@ -198,11 +307,8 @@ export function logError(module, message, error = null) {
  */
 export function logWarning(module, message, data = null) {
   if (shouldLog("warning")) {
-    console.warn(
-      `%c[WARNING] ${module}: ${message}`,
-      "color: #f59e0b; font-weight: bold;",
-      data ? sanitizeData(data) : ""
-    );
+    const logObject = createLogObject("warning", module, message, data);
+    writeLog(logObject, "color: #f59e0b; font-weight: bold;");
   }
 }
 
@@ -211,11 +317,8 @@ export function logWarning(module, message, data = null) {
  */
 export function logDebug(module, message, data = null) {
   if (shouldLog("debug")) {
-    console.debug(
-      `%c[DEBUG] ${module}: ${message}`,
-      "color: #8b5cf6; font-weight: bold;",
-      data ? sanitizeData(data) : ""
-    );
+    const logObject = createLogObject("debug", module, message, data);
+    writeLog(logObject, "color: #8b5cf6; font-weight: bold;");
   }
 }
 
@@ -227,11 +330,49 @@ export function logDebug(module, message, data = null) {
  */
 export function logSuccess(module, message, data = null) {
   if (shouldLog("success")) {
-    console.log(
-      `%c[SUCCESS] ${module}: ${message}`,
-      "color: #10B981; font-weight: bold;",
-      data ? sanitizeData(data) : ""
-    );
+    const logObject = createLogObject("success", module, message, data);
+    writeLog(logObject, "color: #10B981; font-weight: bold;");
+  }
+}
+
+/**
+ * Kaydedilen logları dışa aktarır (indirilebilir dosya olarak)
+ * @returns {boolean} - İşlem başarılı mı?
+ */
+export function exportLogs() {
+  try {
+    const logs = localStorage.getItem("application_logs") || "[]";
+    const blob = new Blob([logs], { type: "application/json" });
+    const url = URL.createObjectURL(blob);
+
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `logs_${appName.replace(/\s+/g, "_")}_${
+      new Date().toISOString().split("T")[0]
+    }.json`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+
+    return true;
+  } catch (e) {
+    console.error("Log dışa aktarma hatası:", e);
+    return false;
+  }
+}
+
+/**
+ * Kaydedilen logları temizler
+ * @returns {boolean} - İşlem başarılı mı?
+ */
+export function clearLogs() {
+  try {
+    localStorage.removeItem("application_logs");
+    return true;
+  } catch (e) {
+    console.error("Log temizleme hatası:", e);
+    return false;
   }
 }
 
@@ -242,5 +383,7 @@ export default {
   logError,
   logWarning,
   logDebug,
-  logSuccess, // Yeni başarı log fonksiyonunu ekledik
+  logSuccess,
+  exportLogs,
+  clearLogs,
 };

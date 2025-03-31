@@ -57,13 +57,10 @@ const ProfileComponent = () => {
 
   // Kullanıcı verilerini kontrol et
   useEffect(() => {
-    if (userInfo && userInfo._id) {
-      setIsUserDataReady(true);
-    } else {
-      setIsUserDataReady(false);
+    if (!isLoading && !userInfo) {
       dispatch(fetchUser());
     }
-  }, [userInfo, dispatch]);
+  }, [isLoading, userInfo, dispatch]);
 
   // Form verilerini başlat
   useEffect(() => {

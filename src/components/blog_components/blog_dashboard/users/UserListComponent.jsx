@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from "react";
+import React, { useState, useEffect, useMemo, useCallback } from "react";
 import {
   Table,
   TableHeader,
@@ -12,142 +12,260 @@ import {
   Input,
   Button,
   Spinner,
-  useDisclosure,
 } from "@nextui-org/react";
 import { Icon } from "@iconify/react";
-import useUsers from "../../../../hooks/useUsers";
-import DeleteUserModal from "../../../modals/DeleteUserModal";
+import { useDispatch, useSelector } from "react-redux";
+import {
+  fetchUsers,
+  updateUserRole,
+  hardDeleteUser,
+  removeUser,
+  updateUserInList,
+  startManualRefresh,
+  selectUserList,
+  selectIsUserListLoading,
+  selectIsUserListError,
+  selectUserListErrorMessage,
+  selectIsUserListFetched,
+  toggleUserActivation,
+} from "../../../../app/features/user/userListSlice";
+
+import HardDeleteUserModal from "../../../modals/HardDeleteUserModal";
 import ChangeRoleModal from "../../../modals/ChangeRoleModal";
-import axios from "../../../../api";
+import ToggleActivationModal from "../../../modals/ToggleActivationModal";
 import { useFeedback } from "../../../../context/FeedbackContext";
 
+// MongoDB ObjectId validation helper function
+const isValidObjectId = (id) => /^[0-9a-fA-F]{24}$/.test(id);
+
 const UserListComponent = () => {
-  const {
-    users,
-    setUsers,
-    filteredUsers,
-    loading,
-    error,
-    searchTerm,
-    setSearchTerm,
-    rowsPerPage,
-    fetchUsers,
-  } = useUsers();
+  const dispatch = useDispatch();
+  const { success, error: showError } = useFeedback();
 
-  // Feedback context'i kullan
-  const { success, error: showError, warning } = useFeedback();
+  // Redux state selectors
+  const userList = useSelector(selectUserList);
+  const isLoading = useSelector(selectIsUserListLoading);
+  const isError = useSelector(selectIsUserListError);
+  const errorMessage = useSelector(selectUserListErrorMessage);
+  const isFetched = useSelector(selectIsUserListFetched);
+  const isAdmin = useSelector((state) => state.user.isAdmin);
+  const isLoggedIn = useSelector((state) => state.user.isLoggedIn);
 
+  // Erro state tracking
+  const [authError, setAuthError] = useState(false);
+
+  // UI states
+  const [searchTerm, setSearchTerm] = useState("");
   const [page, setPage] = useState(1);
-
-  // Modal yönetimi
-  const { isOpen, onOpen, onClose } = useDisclosure();
-  const [deleteError, setDeleteError] = useState(null);
-  const [deleteLoading, setDeleteLoading] = useState(false);
   const [selectedUser, setSelectedUser] = useState(null);
-
-  // Rol değiştirme modal
-  const [roleModalOpen, setRoleModalOpen] = useState(false);
   const [selectedRole, setSelectedRole] = useState("");
+
+  // Modal states with loading and error states
+  const [hardDeleteModalOpen, setHardDeleteModalOpen] = useState(false);
+  const [hardDeleteLoading, setHardDeleteLoading] = useState(false);
+  const [hardDeleteError, setHardDeleteError] = useState(null);
+
+  const [roleModalOpen, setRoleModalOpen] = useState(false);
   const [roleUpdateLoading, setRoleUpdateLoading] = useState(false);
   const [roleUpdateError, setRoleUpdateError] = useState(null);
 
-  // Hata durumunda bildirim göster
-  useEffect(() => {
-    if (error) {
-      showError(error);
-    }
-  }, [error, showError]);
+  const [activationModalOpen, setActivationModalOpen] = useState(false);
+  const [activationLoading, setActivationLoading] = useState(false);
+  const [activationError, setActivationError] = useState(null);
 
-  // deleteError durumunda bildirim göster
+  // Prevent fetch if we've already had an auth error
   useEffect(() => {
-    if (deleteError) {
-      showError(deleteError);
+    // Eğer kullanıcı giriş yapmamışsa veya önceden auth hatası olduysa, fetch yapmayı dene
+    if (!isFetched && !isLoading && isLoggedIn && !authError) {
+      dispatch(fetchUsers())
+        .unwrap()
+        .catch((err) => {
+          if (err.code === "AUTH_REQUIRED") {
+            setAuthError(true);
+            // Token hatası varsa login sayfasına yönlendir
+            setTimeout(() => {
+              window.location.href = "/login";
+            }, 1000);
+          }
+        });
     }
-  }, [deleteError, showError]);
+  }, [dispatch, isFetched, isLoading, isLoggedIn, authError]);
 
-  // roleUpdateError durumunda bildirim göster
+  // Hata bildirimleri için referans kullan - sonsuz döngü sorununu önlemek için
+  const errorsShown = React.useRef({});
+
+  // Handle error notifications - use a ref to prevent infinite loops
   useEffect(() => {
-    if (roleUpdateError) {
+    if (errorMessage && !isLoading && !errorsShown.current.errorMessage) {
+      showError(errorMessage);
+      errorsShown.current.errorMessage = true;
+
+      // Auth hatası kontrolü - string yerine backend'den gelen error code'a göre
+      if (
+        errorMessage?.code === "AUTH_REQUIRED" ||
+        errorMessage?.code === "UNAUTHORIZED_ACCESS" ||
+        errorMessage?.code === "TOKEN_EXPIRED" ||
+        errorMessage?.code === "INVALID_TOKEN" ||
+        errorMessage?.code === "TOKEN_NOT_FOUND"
+      ) {
+        setAuthError(true);
+        setTimeout(() => {
+          window.location.href = "/login";
+        }, 1000);
+      }
+    } else if (!errorMessage) {
+      errorsShown.current.errorMessage = false;
+    }
+
+    // Diğer hatalar için benzer kontroller
+    if (
+      roleUpdateError &&
+      !roleUpdateLoading &&
+      !errorsShown.current.roleUpdateError
+    ) {
       showError(roleUpdateError);
+      errorsShown.current.roleUpdateError = true;
+    } else if (!roleUpdateError) {
+      errorsShown.current.roleUpdateError = false;
     }
-  }, [roleUpdateError, showError]);
 
-  // Kullanıcıları ilk yükleme
-  useEffect(() => {
-    fetchUsers();
-  }, []);
+    if (
+      activationError &&
+      !activationLoading &&
+      !errorsShown.current.activationError
+    ) {
+      showError(activationError);
+      errorsShown.current.activationError = true;
+    } else if (!activationError) {
+      errorsShown.current.activationError = false;
+    }
 
-  // Arama
-  const handleSearch = (e) => {
-    setSearchTerm(e.target.value);
-    setPage(1);
-  };
+    if (
+      hardDeleteError &&
+      !hardDeleteLoading &&
+      !errorsShown.current.hardDeleteError
+    ) {
+      showError(hardDeleteError);
+      errorsShown.current.hardDeleteError = true;
+    } else if (!hardDeleteError) {
+      errorsShown.current.hardDeleteError = false;
+    }
+  }, [
+    errorMessage,
+    isLoading,
+    roleUpdateError,
+    roleUpdateLoading,
+    activationError,
+    activationLoading,
+    hardDeleteError,
+    hardDeleteLoading,
+    showError,
+  ]);
 
-  // Sayfalanmış sonuçlar
-  const pages = Math.ceil(filteredUsers.length / rowsPerPage);
-  const items = useMemo(() => {
+  // Table configuration
+  const rowsPerPage = 10;
+
+  // Filter users based on search term
+  const filteredUsers = useMemo(() => {
+    if (!userList) return [];
+    if (!searchTerm.trim()) return userList;
+
+    return userList.filter(
+      (user) =>
+        user.userName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        user.email?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        user.role?.toLowerCase().includes(searchTerm.toLowerCase())
+    );
+  }, [userList, searchTerm]);
+
+  // Paginate results
+  const pages = Math.ceil((filteredUsers?.length || 0) / rowsPerPage);
+  const paginatedItems = useMemo(() => {
+    if (!filteredUsers.length) return [];
     const start = (page - 1) * rowsPerPage;
     return filteredUsers.slice(start, start + rowsPerPage);
   }, [page, filteredUsers, rowsPerPage]);
 
-  // Kullanıcı silme
-  const openDeleteModal = (user) => {
+  // Event handlers
+  const handleSearch = useCallback((e) => {
+    setSearchTerm(e.target.value);
+    setPage(1);
+  }, []);
+
+  const openHardDeleteModal = useCallback((user) => {
     setSelectedUser(user);
-    setDeleteError(null);
-    onOpen();
-  };
-  const handleDeleteUser = async () => {
-    if (!selectedUser) return;
-    setDeleteLoading(true);
-    setDeleteError(null);
+    setHardDeleteError(null);
+    setHardDeleteModalOpen(true);
+  }, []);
 
-    try {
-      await axios.delete(`/user/${selectedUser._id}`, {
-        withCredentials: true,
-      });
-      setUsers(users.filter((u) => u._id !== selectedUser._id));
-      onClose();
-      success(`${selectedUser.userName} kullanıcısı başarıyla silindi.`);
-    } catch (err) {
-      const errorMessage =
-        err.response?.data?.message || "Kullanıcı silinirken bir hata oluştu";
-      setDeleteError(errorMessage);
-      showError(errorMessage);
-    } finally {
-      setDeleteLoading(false);
-    }
-  };
-
-  // Rol değiştirme
-  const openRoleModal = (user) => {
+  const openRoleModal = useCallback((user) => {
     setSelectedUser(user);
     setSelectedRole(user.role || "user");
     setRoleModalOpen(true);
     setRoleUpdateError(null);
+  }, []);
+
+  const openActivationModal = useCallback((user) => {
+    setSelectedUser(user);
+    setActivationModalOpen(true);
+    setActivationError(null);
+  }, []);
+
+  const handleHardDeleteUser = async () => {
+    if (!selectedUser) return;
+    setHardDeleteLoading(true);
+    setHardDeleteError(null);
+
+    try {
+      if (!isValidObjectId(selectedUser._id)) {
+        throw new Error("Geçersiz kullanıcı ID'si");
+      }
+
+      const result = await dispatch(
+        hardDeleteUser({ userId: selectedUser._id })
+      ).unwrap();
+
+      setHardDeleteModalOpen(false);
+      dispatch(removeUser(selectedUser._id));
+      success(
+        `${result.data?.userName || "Kullanıcı"} veritabanından tamamen silindi`
+      );
+    } catch (err) {
+      const errorMessage =
+        err.message || "Kullanıcı kalıcı olarak silinirken bir hata oluştu";
+      setHardDeleteError(errorMessage);
+      showError(errorMessage);
+    } finally {
+      setHardDeleteLoading(false);
+    }
   };
+
   const handleUpdateRole = async () => {
     if (!selectedUser || !selectedRole) return;
     setRoleUpdateLoading(true);
 
     try {
-      await axios.patch(
-        `/user/${selectedUser._id}/role`,
-        { role: selectedRole },
-        { withCredentials: true }
-      );
-      setUsers(
-        users.map((u) =>
-          u._id === selectedUser._id ? { ...u, role: selectedRole } : u
-        )
-      );
+      await dispatch(
+        updateUserRole({
+          userId: selectedUser._id,
+          role: selectedRole,
+        })
+      ).unwrap();
+
       setRoleModalOpen(false);
       success(
         `${selectedUser.userName} kullanıcısının rolü "${selectedRole}" olarak güncellendi.`
       );
+
+      dispatch(
+        updateUserInList({
+          userId: selectedUser._id,
+          updates: { role: selectedRole },
+        })
+      );
     } catch (err) {
       const errorMessage =
-        err.response?.data?.message ||
-        "Kullanıcı rolü güncellenirken bir hata oluştu";
+        err.message || "Kullanıcı rolü güncellenirken bir hata oluştu";
       setRoleUpdateError(errorMessage);
       showError(errorMessage);
     } finally {
@@ -155,26 +273,93 @@ const UserListComponent = () => {
     }
   };
 
-  // Refresh users
-  const handleRefreshUsers = async () => {
+  const handleToggleActivation = async () => {
+    if (!selectedUser) return;
+    setActivationLoading(true);
+
     try {
-      await fetchUsers();
-      success("Kullanıcı listesi başarıyla yenilendi.");
+      const result = await dispatch(
+        toggleUserActivation({
+          userId: selectedUser._id,
+          isActive: !selectedUser.isActive,
+        })
+      ).unwrap();
+
+      setActivationModalOpen(false);
+
+      const statusText = !selectedUser.isActive
+        ? "aktifleştirildi"
+        : "deaktif edildi";
+      success(`${selectedUser.userName} kullanıcısı başarıyla ${statusText}.`);
+
+      dispatch(
+        updateUserInList({
+          userId: selectedUser._id,
+          updates: {
+            isActive: !selectedUser.isActive,
+            deletedAt: !selectedUser.isActive ? null : new Date(),
+          },
+        })
+      );
+
+      setTimeout(() => {
+        dispatch(fetchUsers());
+      }, 500);
     } catch (err) {
-      showError("Kullanıcı listesi yenilenirken bir hata oluştu.");
+      if (err?.code === "AUTH_REQUIRED") {
+        setAuthError(true);
+        showError("Oturum sonlandı, lütfen tekrar giriş yapın");
+        setTimeout(() => {
+          window.location.href = "/login";
+        }, 1000);
+        return;
+      }
+
+      const errorMessage =
+        err.message ||
+        "Kullanıcı aktivasyon durumu güncellenirken bir hata oluştu";
+      setActivationError(errorMessage);
+      showError(errorMessage);
+    } finally {
+      setActivationLoading(false);
     }
   };
 
-  // Basit renk tanımı
-  const renderRole = (role) => {
+  const handleRefreshUsers = async () => {
+    if (isLoading || authError) return;
+
+    try {
+      dispatch(startManualRefresh());
+      const result = await dispatch(fetchUsers()).unwrap();
+
+      if (result?.success) {
+        success("Kullanıcı listesi başarıyla yenilendi.");
+      }
+    } catch (err) {
+      if (err?.code === "AUTH_REQUIRED") {
+        setAuthError(true);
+        showError("Oturum sonlandı, lütfen tekrar giriş yapın");
+        setTimeout(() => {
+          window.location.href = "/login";
+        }, 1000);
+        return;
+      }
+
+      showError(
+        "Kullanıcı listesi yenilenirken bir hata oluştu: " +
+          (err.message || "Bilinmeyen hata")
+      );
+    }
+  };
+
+  // UI Rendering helpers
+  const renderRole = useCallback((role) => {
     let bgColorClass = "bg-primary-500";
     let textColorClass = "text-white";
 
     if (role?.toLowerCase() === "admin") {
       bgColorClass = "bg-red-500";
-      textColorClass = "text-white";
-    }
-    if (role?.toLowerCase() === "author") {
+    } else if (role?.toLowerCase() === "author") {
       bgColorClass = "bg-yellow-500";
       textColorClass = "text-black";
     }
@@ -188,53 +373,89 @@ const UserListComponent = () => {
         {role || "User"}
       </Chip>
     );
-  };
+  }, []);
 
-  const renderStatus = (isVerified) => {
-    const bgColorClass = isVerified ? "bg-green-500" : "bg-gray-300";
-    const textColorClass = isVerified ? "text-white" : "text-gray-700";
-
-    return (
+  const renderStatus = useCallback(
+    (isVerified) => (
       <Chip
         size="sm"
         variant="flat"
-        className={`${bgColorClass} ${textColorClass}`}
+        className={`${
+          isVerified ? "bg-green-500 text-white" : "bg-gray-300 text-gray-700"
+        }`}
       >
         {isVerified ? "Verified" : "Not Verified"}
       </Chip>
-    );
-  };
-
-  // Aksiyon butonları
-  const renderActions = (user) => (
-    <div className="flex gap-2">
-      <Tooltip content="Change Role">
-        <Button
-          isIconOnly
-          size="sm"
-          variant="light"
-          className="text-yellow-500 hover:bg-yellow-100"
-          onPress={() => openRoleModal(user)}
-        >
-          <Icon icon="mdi:account-convert" />
-        </Button>
-      </Tooltip>
-      <Tooltip content="Delete User">
-        <Button
-          isIconOnly
-          size="sm"
-          variant="light"
-          className="text-red-500 hover:bg-red-100"
-          onPress={() => openDeleteModal(user)}
-        >
-          <Icon icon="mdi:delete" />
-        </Button>
-      </Tooltip>
-    </div>
+    ),
+    []
   );
 
-  // Yükleniyor
-  if (loading) {
+  const renderActiveStatus = useCallback(
+    (isActive) => (
+      <Chip
+        size="sm"
+        variant="flat"
+        className={`${isActive ? "bg-green-500" : "bg-red-500"} text-white`}
+      >
+        {isActive ? "Active" : "Passive"}
+      </Chip>
+    ),
+    []
+  );
+
+  const renderActions = useCallback(
+    (user) => (
+      <div className="flex gap-2">
+        <Tooltip content="Change Role">
+          <Button
+            isIconOnly
+            size="sm"
+            variant="light"
+            className="text-yellow-500 hover:bg-yellow-100"
+            onPress={() => openRoleModal(user)}
+          >
+            <Icon icon="mdi:account-convert" />
+          </Button>
+        </Tooltip>
+
+        <Tooltip content={user.isActive ? "Deaktif Et" : "Aktifleştir"}>
+          <Button
+            isIconOnly
+            size="sm"
+            variant="light"
+            className={
+              user.isActive
+                ? "text-orange-500 hover:bg-orange-100"
+                : "text-green-500 hover:bg-green-100"
+            }
+            onPress={() => openActivationModal(user)}
+          >
+            <Icon
+              icon={user.isActive ? "mdi:user-remove" : "mdi:account-check"}
+            />
+          </Button>
+        </Tooltip>
+
+        {isAdmin && (
+          <Tooltip content="Kalıcı Olarak Sil">
+            <Button
+              isIconOnly
+              size="sm"
+              variant="light"
+              className="text-red-600 hover:bg-red-100"
+              onPress={() => openHardDeleteModal(user)}
+            >
+              <Icon icon="mdi:delete-forever" />
+            </Button>
+          </Tooltip>
+        )}
+      </div>
+    ),
+    [isAdmin, openRoleModal, openActivationModal, openHardDeleteModal]
+  );
+
+  // Loading state
+  if (isLoading) {
     return (
       <div className="flex justify-center items-center h-64">
         <Spinner size="lg" label="Kullanıcılar yükleniyor..." />
@@ -242,20 +463,28 @@ const UserListComponent = () => {
     );
   }
 
-  // Hata
-  if (error) {
+  // Auth error state
+  if (authError) {
     return (
       <div className="flex justify-center items-center h-64 text-red-500">
-        <p>Hata: {error}</p>
+        <p>Oturum sonlandı, yönlendiriliyorsunuz...</p>
       </div>
     );
   }
 
-  // Asıl render
+  // Error state
+  if (isError) {
+    return (
+      <div className="flex justify-center items-center h-64 text-red-500">
+        <p>Hata: {errorMessage}</p>
+      </div>
+    );
+  }
+
   return (
     <div className="w-full flex flex-col gap-4 overflow-hidden">
-      {/* Üst kısım */}
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 sm:gap-2 w-full overflow-hidden">
+      {/* Header */}
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 sm:gap-2 w-full">
         <h1 className="text-2xl font-bold whitespace-nowrap">
           Kullanıcı Listesi
         </h1>
@@ -282,67 +511,83 @@ const UserListComponent = () => {
         </div>
       </div>
 
-      {/* Tablo */}
+      {/* Table */}
       <div className="w-full overflow-x-auto">
-        <Table
-          aria-label="Kullanıcı listesi"
-          classNames={{
-            base: "max-w-full",
-            table: "min-w-full",
-          }}
-          bottomContent={
-            pages > 0 && (
-              <div className="flex w-full justify-center">
-                <Pagination
-                  isCompact
-                  showControls
-                  showShadow
-                  className="text-primary-500"
-                  page={page}
-                  total={pages}
-                  onChange={(p) => setPage(p)}
-                />
-              </div>
-            )
-          }
-        >
-          <TableHeader>
-            <TableColumn className="w-[130px]">KULLANICI ADI</TableColumn>
-            <TableColumn className="w-[180px]">E-POSTA</TableColumn>
-            <TableColumn className="w-[70px]">ROL</TableColumn>
-            <TableColumn className="w-[80px]">DURUM</TableColumn>
-            <TableColumn className="w-[100px]">KAYIT TARİHİ</TableColumn>
-            <TableColumn className="w-[70px]">İŞLEMLER</TableColumn>
-          </TableHeader>
-          <TableBody items={items} emptyContent={"Kullanıcı bulunamadı."}>
-            {(item) => (
-              <TableRow key={item._id}>
-                <TableCell className="truncate max-w-[130px]">
-                  {item.userName}
-                </TableCell>
-                <TableCell className="truncate max-w-[180px]">
-                  {item.email}
-                </TableCell>
-                <TableCell>{renderRole(item.role)}</TableCell>
-                <TableCell>{renderStatus(item.isVerified)}</TableCell>
-                <TableCell className="truncate max-w-[100px]">
-                  {new Date(item.createdAt).toLocaleDateString("tr-TR")}
-                </TableCell>
-                <TableCell>{renderActions(item)}</TableCell>
-              </TableRow>
-            )}
-          </TableBody>
-        </Table>
+        {paginatedItems.length > 0 ? (
+          <Table
+            aria-label="Kullanıcı listesi"
+            className="w-full"
+            bottomContent={
+              pages > 0 && (
+                <div className="flex w-full justify-center">
+                  <Pagination
+                    isCompact
+                    showControls
+                    showShadow
+                    className="text-primary-500"
+                    page={page}
+                    total={pages}
+                    onChange={setPage}
+                  />
+                </div>
+              )
+            }
+          >
+            <TableHeader>
+              <TableColumn>KULLANICI ADI</TableColumn>
+              <TableColumn>E-POSTA</TableColumn>
+              <TableColumn>ROL</TableColumn>
+              <TableColumn>DURUM</TableColumn>
+              <TableColumn>AKTİF</TableColumn>
+              <TableColumn>SON GİRİŞ</TableColumn>
+              <TableColumn>KAYIT TARİHİ</TableColumn>
+              <TableColumn>SİLİNME TARİHİ</TableColumn>
+              <TableColumn>İŞLEMLER</TableColumn>
+            </TableHeader>
+            <TableBody>
+              {paginatedItems.map((item) => (
+                <TableRow key={item._id}>
+                  <TableCell className="truncate max-w-[130px]">
+                    {item.userName}
+                  </TableCell>
+                  <TableCell className="truncate max-w-[180px]">
+                    {item.email}
+                  </TableCell>
+                  <TableCell>{renderRole(item.role)}</TableCell>
+                  <TableCell>{renderStatus(item.isVerified)}</TableCell>
+                  <TableCell>{renderActiveStatus(item.isActive)}</TableCell>
+                  <TableCell className="truncate max-w-[100px]">
+                    {item.lastLogin
+                      ? new Date(item.lastLogin).toLocaleDateString("tr-TR")
+                      : "-"}
+                  </TableCell>
+                  <TableCell className="truncate max-w-[100px]">
+                    {new Date(item.createdAt).toLocaleDateString("tr-TR")}
+                  </TableCell>
+                  <TableCell className="truncate max-w-[100px]">
+                    {item.deletedAt
+                      ? new Date(item.deletedAt).toLocaleDateString("tr-TR")
+                      : "-"}
+                  </TableCell>
+                  <TableCell>{renderActions(item)}</TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        ) : (
+          <div className="flex justify-center items-center p-8 text-gray-500">
+            Kullanıcı bulunamadı.
+          </div>
+        )}
       </div>
 
-      {/* Modallar */}
-      <DeleteUserModal
-        isOpen={isOpen}
-        onClose={onClose}
+      {/* Modals */}
+      <HardDeleteUserModal
+        isOpen={hardDeleteModalOpen}
+        onClose={() => setHardDeleteModalOpen(false)}
         selectedUser={selectedUser}
-        deleteError={deleteError}
-        handleDeleteUser={handleDeleteUser}
-        isLoading={deleteLoading}
+        handleHardDeleteUser={handleHardDeleteUser}
+        isLoading={hardDeleteLoading}
       />
       <ChangeRoleModal
         roleModalOpen={roleModalOpen}
@@ -353,6 +598,13 @@ const UserListComponent = () => {
         handleUpdateRole={handleUpdateRole}
         roleUpdateLoading={roleUpdateLoading}
         roleUpdateError={roleUpdateError}
+      />
+      <ToggleActivationModal
+        isOpen={activationModalOpen}
+        onClose={() => setActivationModalOpen(false)}
+        selectedUser={selectedUser}
+        handleToggleActivation={handleToggleActivation}
+        isLoading={activationLoading}
       />
     </div>
   );

@@ -1,4 +1,12 @@
+import { useSelector } from "react-redux";
+import { Link } from "react-router-dom";
+
 export default function Footer() {
+  const { isLoggedIn, userInfo } = useSelector((state) => state.user);
+
+  // Sadece normal kullanıcılar (user rolü) için hesap silme linkini göster
+  const showDeleteAccountLink = isLoggedIn && userInfo?.role === "user";
+
   return (
     <footer className="bg-neutral-900 text-gray-300 mt-auto">
       <div className="container mx-auto grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 px-4 sm:px-6 pt-8">
@@ -9,29 +17,26 @@ export default function Footer() {
           </h3>
           <ul className="space-y-2">
             <li>
-              <a
-                href="http://localhost:5173/blog/category/makro-ekonomi"
+              <Link
+                to="/blog/category/makro-ekonomi"
                 className="hover:underline"
               >
                 Makro Ekonomi
-              </a>
+              </Link>
             </li>
             <li>
-              <a
-                href="http://localhost:5173/blog/category/mikro-ekonomi"
+              <Link
+                to="/blog/category/mikro-ekonomi"
                 className="hover:underline"
               >
                 Mikro Ekonomi
-              </a>
+              </Link>
             </li>
 
             <li>
-              <a
-                href="http://localhost:5173/blog/category/araştırma"
-                className="hover:underline"
-              >
+              <Link to="/blog/category/araştırma" className="hover:underline">
                 Araştırma
-              </a>
+              </Link>
             </li>
           </ul>
         </div>
@@ -41,29 +46,30 @@ export default function Footer() {
           <h3 className="text-white font-semibold text-lg mb-4">Company</h3>
           <ul className="space-y-2">
             <li>
-              <a
-                href="http://localhost:5173/about-us"
-                className="hover:underline"
-              >
+              <Link to="/about-us" className="hover:underline">
                 About us
-              </a>
+              </Link>
             </li>
             <li>
-              <a
-                href="http://localhost:5173/privacy-policy"
-                className="hover:underline"
-              >
+              <Link to="/privacy-policy" className="hover:underline">
                 Privacy Policy
-              </a>
+              </Link>
             </li>
             <li>
-              <a
-                href="http://localhost:5173/disclaimer"
-                className="hover:underline"
-              >
+              <Link to="/disclaimer" className="hover:underline">
                 Terms of Service
-              </a>
+              </Link>
             </li>
+            {showDeleteAccountLink && (
+              <li>
+                <Link
+                  to="/delete-account"
+                  className="hover:underline text-danger-400"
+                >
+                  Hesabımı Sil
+                </Link>
+              </li>
+            )}
           </ul>
         </div>
 

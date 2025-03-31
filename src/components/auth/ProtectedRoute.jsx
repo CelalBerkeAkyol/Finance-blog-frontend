@@ -1,9 +1,9 @@
 import React, { useEffect, useState } from "react";
 import { Navigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
-import { fetchUser } from "../app/features/user/userSlice";
-import { logDebug, logError } from "../utils/logger";
-import ErrorComponent from "./error/ErrorComponent";
+import { fetchUser } from "../../app/features/user/userSlice";
+import { logDebug, logError } from "../../utils/logger";
+import ErrorComponent from "../error/ErrorComponent";
 
 /**
  * Korumalı route bileşeni
@@ -39,6 +39,7 @@ function ProtectedRoute({
     const hasRole = allowedRoles.some((role) => {
       if (role === "admin") return isAdmin;
       if (role === "author") return isAuthor;
+      if (role === "user") return userInfo?.role === "user";
       return false;
     });
 

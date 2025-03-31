@@ -150,11 +150,36 @@ export const fetchUser = createAsyncThunk(
   "user/fetchUser",
   async (_, thunkAPI) => {
     try {
-      const tokenResponse = await axios.post(
-        "/auth/verify-token",
-        {},
-        { withCredentials: true }
-      );
+      // Önce token doğrulama deneyin
+      let tokenResponse;
+      try {
+        tokenResponse = await axios.post(
+          "/auth/verify-token",
+          {},
+          { withCredentials: true }
+        );
+      } catch (tokenError) {
+        // Token doğrulama başarısız olursa, refresh token ile yenilemeyi deneyin
+        console.log("Token doğrulama başarısız, refresh token deneniyor...");
+        const refreshResponse = await axios.post(
+          "/auth/refresh-token",
+          {},
+          { withCredentials: true }
+        );
+
+        if (!refreshResponse.data.success) {
+          throw new Error(
+            "Refresh token geçersiz, yeniden giriş yapmalısınız."
+          );
+        }
+
+        // Refresh başarılı olduysa verify-token'ı tekrar deneyin
+        tokenResponse = await axios.post(
+          "/auth/verify-token",
+          {},
+          { withCredentials: true }
+        );
+      }
 
       if (!tokenResponse.data.success) {
         throw new Error("Token geçersiz.");
@@ -176,10 +201,14 @@ export const fetchUser = createAsyncThunk(
           }
         } catch (userError) {
           // Hata durumunda token'dan gelen bilgileri kullanmaya devam edelim
+          console.log(
+            "Kullanıcı detayları alınamadı, token bilgileri kullanılıyor."
+          );
         }
       }
       return { valid: true, user: userData.user };
     } catch (error) {
+      console.error("Kullanıcı bilgileri alınamadı:", error);
       const errMessage = error.message || "Kullanıcı bilgileri alınamadı.";
       const errCode = error.code || "UNKNOWN_ERROR";
       return thunkAPI.rejectWithValue({ message: errMessage, code: errCode });

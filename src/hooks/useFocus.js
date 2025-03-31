@@ -1,4 +1,5 @@
 import { useRef, useCallback, useEffect } from "react";
+import { logError } from "../utils/logger";
 
 /**
  * Input alanına otomatik ve sürekli fokus sağlayan hook
@@ -21,7 +22,7 @@ function useFocus() {
         try {
           inputRef.current.focus();
         } catch (e) {
-          console.error("Focus error:", e);
+          logError("useFocus", "Focus error:", e);
         }
       }, 10);
     }

@@ -17,7 +17,7 @@ import {
   clearUserState,
 } from "../../app/features/user/userSlice";
 import { useFeedback } from "../../context/FeedbackContext";
-import { logInfo } from "../../utils/logger";
+import { logInfo, logError } from "../../utils/logger";
 
 const DeleteAccountPage = () => {
   const dispatch = useDispatch();
@@ -51,7 +51,10 @@ const DeleteAccountPage = () => {
     setIsDeleting(true);
 
     try {
-      logInfo("Hesap silme isteği gönderiliyor, ID: " + userId);
+      logInfo(
+        "DeleteAccountPage",
+        "Hesap silme isteği gönderiliyor, ID: " + userId
+      );
 
       // ID'nin undefined, null veya boş string olup olmadığını son bir kez kontrol et
 
@@ -74,7 +77,7 @@ const DeleteAccountPage = () => {
         );
       }
     } catch (err) {
-      console.error("Hesap silme hatası:", err);
+      logError("DeleteAccountPage", "Hesap silme hatası:", err);
       showError(err.message || "Hesap silme işlemi sırasında bir hata oluştu.");
     } finally {
       setIsDeleting(false);

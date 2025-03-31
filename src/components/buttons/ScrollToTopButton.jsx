@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useCallback } from "react";
 import { Icon } from "@iconify/react";
+import { logError } from "../../utils/logger";
 
 const ScrollToTopButton = () => {
   const [showScrollButton, setShowScrollButton] = useState(false);
@@ -14,7 +15,7 @@ const ScrollToTopButton = () => {
     } catch (error) {
       // Smooth scroll desteklenmeyen tarayıcılar için fallback
       window.scrollTo(0, 0);
-      console.error("Smooth scroll error:", error);
+      logError("ScrollToTopButton", "Smooth scroll error:", error);
     }
   }, []);
 

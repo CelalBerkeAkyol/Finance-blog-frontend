@@ -15,6 +15,7 @@ import TableSkeleton from "../../components/blog_components/blog/TableSkeleton";
 import RightSideBar from "../../components/blog_components/blog/RightSideBar";
 import RightSideBarSkeleton from "../../components/blog_components/blog/RightSideBarSkeleton";
 import FloatingActionButtons from "../../components/buttons/FloatingActionButtons";
+import { logInfo, logError } from "../../utils/logger";
 
 function BlogPostPage() {
   const { id } = useParams();
@@ -37,15 +38,15 @@ function BlogPostPage() {
 
   // Load all posts only once when component mounts
   useEffect(() => {
-    console.log("Fetching all posts for related posts sidebar");
+    logInfo("BlogPostPage", "Fetching all posts for related posts sidebar");
     // The fetchPosts action expects an object with page and limit properties
     dispatch(fetchPosts({ page: 1, limit: 100 }))
       .then((response) => {
-        console.log("Fetched posts response:", response);
+        logInfo("BlogPostPage", "Fetched posts response:", response);
         setLoadedPosts(true);
       })
       .catch((error) => {
-        console.error("Error fetching posts:", error);
+        logError("BlogPostPage", "Error fetching posts:", error);
       });
   }, [dispatch]);
 

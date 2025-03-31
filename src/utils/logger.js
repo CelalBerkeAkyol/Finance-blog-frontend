@@ -23,6 +23,102 @@ const currentLogLevel = LOG_LEVELS[logLevel] || 0;
 // Render sayılarını takip etmek için kullanılan Map
 const renderCounts = new Map();
 
+// Hassas veri anahtarları - loglanmaması gereken bilgileri tanımlayan regex desenler
+const SENSITIVE_DATA_PATTERNS = [
+  // Şifre ile ilgili alanlar
+  /password/i,
+  /şifre/i,
+  /sifre/i,
+  /parola/i,
+
+  // Token ile ilgili alanlar
+  /token/i,
+  /jwt/i,
+  /auth/i,
+  /api[-_]?key/i,
+
+  // Kredi kartı bilgileri
+  /kart/i,
+  /card/i,
+  /cvv/i,
+  /cvc/i,
+  /expiry/i,
+  /son[-_]?kullanma/i,
+
+  // TC Kimlik ve kişisel bilgiler
+  /tc[-_]?kimlik/i,
+  /kimlik[-_]?no/i,
+  /tc[-_]?no/i,
+  /identity/i,
+  /telefon/i,
+  /phone/i,
+  /e[-_]?mail/i,
+  /email/i,
+  /eposta/i,
+  /e[-_]?posta/i,
+
+  // Ödeme bilgileri
+  /payment/i,
+  /ödeme/i,
+  /fatura/i,
+  /invoice/i,
+  /billing/i,
+];
+
+/**
+ * Hassas verileri temizleyen fonksiyon
+ * @param {any} data - Temizlenecek veri
+ * @returns {any} - Hassas verilerden arındırılmış veri
+ */
+function sanitizeData(data) {
+  // Data null veya undefined ise doğrudan döndür
+  if (data == null) return data;
+
+  // String ise ve token içeriyorsa maskele
+  if (typeof data === "string") {
+    // Token içeren string'leri maskele
+    if (/bearer\s+/i.test(data) || /jwt/i.test(data) || data.length > 30) {
+      return "[MASKED_SENSITIVE_DATA]";
+    }
+    return data;
+  }
+
+  // Hata nesnesi ise
+  if (data instanceof Error) {
+    // Hata mesajı ve stack trace'i kopyala, hassas veri filtreleme yap
+    const sanitizedError = new Error(data.message);
+    sanitizedError.stack = data.stack;
+    sanitizedError.name = data.name;
+    return sanitizedError;
+  }
+
+  // Obje veya dizi ise, deep copy yaparak temizle
+  if (typeof data === "object") {
+    if (Array.isArray(data)) {
+      return data.map((item) => sanitizeData(item));
+    }
+
+    // Obje ise
+    const sanitized = {};
+    for (const [key, value] of Object.entries(data)) {
+      // Hassas veri içeren field'ları kontrol et
+      const isSensitive = SENSITIVE_DATA_PATTERNS.some((pattern) =>
+        pattern.test(key)
+      );
+
+      if (isSensitive) {
+        sanitized[key] = "[MASKED_SENSITIVE_DATA]";
+      } else {
+        sanitized[key] = sanitizeData(value);
+      }
+    }
+    return sanitized;
+  }
+
+  // Diğer primitif tipler (number, boolean, vs) için direkt döndür
+  return data;
+}
+
 /**
  * Belirli bir log seviyesinin gösterilip gösterilmeyeceğini kontrol eder
  * @param {string} level - Log seviyesi
@@ -63,7 +159,7 @@ export function logInfo(module, message, data = null) {
     console.info(
       `%c[INFO] ${module}: ${message}`,
       "color: #3b82f6; font-weight: bold;",
-      data || ""
+      data ? sanitizeData(data) : ""
     );
   }
 }
@@ -92,7 +188,7 @@ export function logError(module, message, error = null) {
     console.error(
       `%c[ERROR] ${module}: ${message}`,
       "color: #ef4444; font-weight: bold;",
-      error || ""
+      error ? sanitizeData(error) : ""
     );
   }
 }
@@ -105,7 +201,7 @@ export function logWarning(module, message, data = null) {
     console.warn(
       `%c[WARNING] ${module}: ${message}`,
       "color: #f59e0b; font-weight: bold;",
-      data || ""
+      data ? sanitizeData(data) : ""
     );
   }
 }
@@ -118,7 +214,7 @@ export function logDebug(module, message, data = null) {
     console.debug(
       `%c[DEBUG] ${module}: ${message}`,
       "color: #8b5cf6; font-weight: bold;",
-      data || ""
+      data ? sanitizeData(data) : ""
     );
   }
 }
@@ -134,7 +230,7 @@ export function logSuccess(module, message, data = null) {
     console.log(
       `%c[SUCCESS] ${module}: ${message}`,
       "color: #10B981; font-weight: bold;",
-      data || ""
+      data ? sanitizeData(data) : ""
     );
   }
 }

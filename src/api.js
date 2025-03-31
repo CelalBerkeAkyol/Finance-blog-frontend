@@ -5,6 +5,23 @@ import { logError, logSuccess } from "./utils/logger";
 // Ortam değişkenlerinden API URL'sini al
 const API_URL = import.meta.env.VITE_API_URL || "http://localhost:3000/blog";
 
+// Hassas veri içeren endpoint'lerin listesi
+const SENSITIVE_ENDPOINTS = [
+  "/auth/login",
+  "/auth/register",
+  "/auth/refresh-token",
+  "/user",
+  "/payment",
+  "/billing",
+  "/profile",
+];
+
+// Hassas veri içeren bir endpoint olup olmadığını kontrol eden fonksiyon
+const isSensitiveEndpoint = (url) => {
+  if (!url) return false;
+  return SENSITIVE_ENDPOINTS.some((endpoint) => url.includes(endpoint));
+};
+
 // Mobil erişim için daha geniş yetkilendirmeler
 const instance = axios.create({
   baseURL: API_URL,
@@ -16,18 +33,45 @@ const instance = axios.create({
   },
 });
 
+// Request interceptor - hassas veri içeren istekleri loglama
+instance.interceptors.request.use(
+  (config) => {
+    // Hassas veriler içeren endpoint'lere istek yapılıyorsa, veri içeriğini log'a ekleme
+    if (isSensitiveEndpoint(config.url)) {
+      // Bu noktada bir şey loglamıyoruz, sadece config'i değiştirmeden geçiriyoruz
+      // Logger fonksiyonları zaten verileri temizleyecek
+    }
+    return config;
+  },
+  (error) => {
+    return Promise.reject(error);
+  }
+);
+
 // Response interceptor - merkezi hata yönetimi ve başarılı cevapları loglama
 instance.interceptors.response.use(
   (response) => {
     // API başarılı bir yanıt döndürdüğünde logla (sadece geliştirme ortamında)
     if (!import.meta.env.PROD) {
-      logSuccess(
-        "API Response",
-        `[${response.status}] ${response.config.method.toUpperCase()} ${
-          response.config.url
-        }`,
-        response.data
-      );
+      // Hassas endpoint kontrolü
+      const url = response.config.url;
+      const method = response.config.method.toUpperCase();
+
+      // Hassas endpoint için log mesajını düzenle, içeriği değil
+      if (isSensitiveEndpoint(url)) {
+        logSuccess(
+          "API Response",
+          `[${response.status}] ${method} ${url} - Sensitive Data Response`,
+          // Veri logger tarafından sanitize edilecek
+          response.data
+        );
+      } else {
+        logSuccess(
+          "API Response",
+          `[${response.status}] ${method} ${url}`,
+          response.data
+        );
+      }
     }
     return response; // Cevabı döndür
   },
@@ -63,13 +107,27 @@ instance.interceptors.response.use(
 
     // Global logging - sadece geliştirme ortamında
     if (!import.meta.env.PROD) {
-      logError(
-        "API",
-        `[${error.response?.status || "NETWORK_ERROR"}] ${
-          error.config?.method?.toUpperCase() || "REQUEST"
-        } ${error.config?.url || "UNKNOWN_URL"} --> ${errCode} -->`,
-        errMessage
-      );
+      const url = error.config?.url || "UNKNOWN_URL";
+      const method = error.config?.method?.toUpperCase() || "REQUEST";
+
+      // Hassas endpoint kontrolü
+      if (isSensitiveEndpoint(url)) {
+        logError(
+          "API",
+          `[${
+            error.response?.status || "NETWORK_ERROR"
+          }] ${method} ${url} - Sensitive Data Error --> ${errCode}`,
+          errMessage
+        );
+      } else {
+        logError(
+          "API",
+          `[${
+            error.response?.status || "NETWORK_ERROR"
+          }] ${method} ${url} --> ${errCode}`,
+          errMessage
+        );
+      }
     }
 
     return Promise.reject({

@@ -59,11 +59,24 @@ function createLogObject(level, message, data = null) {
 function writeLog(logObject, consoleStyle, shouldDisplay) {
   // Konsola sadece gerektiğinde yaz
   if (shouldDisplay) {
-    console.log(
-      `%c[${logObject.level.toUpperCase()}]: ${logObject.message}`,
-      consoleStyle,
-      logObject
-    );
+    // Basit veri tipiyse veya veri yoksa, sadece mesajı göster
+    if (!logObject.data || typeof logObject.data === "string") {
+      console.log(
+        `%c[${logObject.level.toUpperCase()}]: ${logObject.message}${
+          logObject.data ? ` (${logObject.data})` : ""
+        }`,
+        consoleStyle,
+        logObject
+      );
+    }
+    // Veri karmaşık ise, mesajı ve datayı ayrı ayrı göster
+    else {
+      console.log(
+        `%c[${logObject.level.toUpperCase()}]: ${logObject.message}`,
+        consoleStyle,
+        logObject.data
+      );
+    }
   }
 
   // Her zaman localStorage'a kaydet
@@ -107,14 +120,33 @@ export function logRender(componentName, forceLogging = false) {
 
 /**
  * Bilgi mesajı loglar
+ * @param {string} message - Ana log mesajı
+ * @param {any} data - Ek veri (null veya basit değer ise mesaja eklenir, obje ise ayrı gösterilir)
  */
 export function logInfo(message, data = null) {
-  const logObject = createLogObject("info", message, data);
+  // Basit mesaj kontrolü
+  const isSimpleData =
+    !data ||
+    typeof data === "string" ||
+    typeof data === "number" ||
+    typeof data === "boolean";
+
+  // Eğer basit veri ise, mesajı ve veriyi birleştir
+  const enrichedMessage =
+    isSimpleData && data ? `${message} (${data})` : message;
+
+  const logObject = createLogObject(
+    "info",
+    enrichedMessage,
+    isSimpleData ? null : data
+  );
   writeLog(logObject, "color: #3b82f6;", shouldLog("info"));
 }
 
 /**
  * Hata mesajı loglar
+ * @param {string} message - Ana hata mesajı
+ * @param {Error|any} error - Hata objesi veya ek veri
  */
 export function logError(message, error = null) {
   // İptal edilen istekleri loglama
@@ -126,31 +158,92 @@ export function logError(message, error = null) {
     return;
   }
 
-  const logObject = createLogObject("error", message, error);
+  // Basit hata kontrolü
+  const isSimpleError = error && typeof error === "string";
+
+  // Eğer basit hata ise, mesajı ve hatayı birleştir
+  const enrichedMessage = isSimpleError ? `${message} (${error})` : message;
+
+  const logObject = createLogObject(
+    "error",
+    enrichedMessage,
+    isSimpleError ? null : error
+  );
   writeLog(logObject, "color: #ef4444; font-weight: bold;", shouldLog("error"));
 }
 
 /**
  * Uyarı mesajı loglar
+ * @param {string} message - Ana uyarı mesajı
+ * @param {any} data - Ek veri (null veya basit değer ise mesaja eklenir, obje ise ayrı gösterilir)
  */
 export function logWarning(message, data = null) {
-  const logObject = createLogObject("warning", message, data);
+  // Basit veri kontrolü
+  const isSimpleData =
+    !data ||
+    typeof data === "string" ||
+    typeof data === "number" ||
+    typeof data === "boolean";
+
+  // Eğer basit veri ise, mesajı ve veriyi birleştir
+  const enrichedMessage =
+    isSimpleData && data ? `${message} (${data})` : message;
+
+  const logObject = createLogObject(
+    "warning",
+    enrichedMessage,
+    isSimpleData ? null : data
+  );
   writeLog(logObject, "color: #f59e0b;", shouldLog("warning"));
 }
 
 /**
  * Debug mesajı loglar
+ * @param {string} message - Ana debug mesajı
+ * @param {any} data - Ek veri (null veya basit değer ise mesaja eklenir, obje ise ayrı gösterilir)
  */
 export function logDebug(message, data = null) {
-  const logObject = createLogObject("debug", message, data);
+  // Basit veri kontrolü
+  const isSimpleData =
+    !data ||
+    typeof data === "string" ||
+    typeof data === "number" ||
+    typeof data === "boolean";
+
+  // Eğer basit veri ise, mesajı ve veriyi birleştir
+  const enrichedMessage =
+    isSimpleData && data ? `${message} (${data})` : message;
+
+  const logObject = createLogObject(
+    "debug",
+    enrichedMessage,
+    isSimpleData ? null : data
+  );
   writeLog(logObject, "color: #8b5cf6;", shouldLog("debug"));
 }
 
 /**
  * Başarı mesajı loglar
+ * @param {string} message - Ana başarı mesajı
+ * @param {any} data - Ek veri (null veya basit değer ise mesaja eklenir, obje ise ayrı gösterilir)
  */
 export function logSuccess(message, data = null) {
-  const logObject = createLogObject("success", message, data);
+  // Basit veri kontrolü
+  const isSimpleData =
+    !data ||
+    typeof data === "string" ||
+    typeof data === "number" ||
+    typeof data === "boolean";
+
+  // Eğer basit veri ise, mesajı ve veriyi birleştir
+  const enrichedMessage =
+    isSimpleData && data ? `${message} (${data})` : message;
+
+  const logObject = createLogObject(
+    "success",
+    enrichedMessage,
+    isSimpleData ? null : data
+  );
   writeLog(logObject, "color: #10B981;", shouldLog("success"));
 }
 

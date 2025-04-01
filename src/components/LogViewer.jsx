@@ -10,6 +10,7 @@ function LogViewer() {
   const [levelFilter, setLevelFilter] = useState("all");
   const [expandedLog, setExpandedLog] = useState(null);
   const [loading, setLoading] = useState(false);
+  const [showModal, setShowModal] = useState(false);
 
   // Logları yükle
   useEffect(() => {
@@ -80,6 +81,17 @@ function LogViewer() {
       success: "bg-green-100 text-green-800",
     };
     return colors[level] || "bg-gray-100 text-gray-800";
+  };
+
+  // Detay modalını aç
+  const openDetailModal = (index) => {
+    setExpandedLog(index);
+    setShowModal(true);
+  };
+
+  // Detay modalını kapat
+  const closeDetailModal = () => {
+    setShowModal(false);
   };
 
   return (
@@ -190,12 +202,10 @@ function LogViewer() {
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
                     <button
-                      onClick={() =>
-                        setExpandedLog(expandedLog === index ? null : index)
-                      }
+                      onClick={() => openDetailModal(index)}
                       className="text-indigo-600 hover:text-indigo-900"
                     >
-                      {expandedLog === index ? "Gizle" : "Göster"}
+                      Göster
                     </button>
                   </td>
                 </tr>
@@ -205,13 +215,67 @@ function LogViewer() {
         )}
       </div>
 
-      {/* Detaylı Log Görünümü */}
-      {expandedLog !== null && (
-        <div className="mt-4 p-4 bg-gray-50 rounded border">
-          <h3 className="text-lg font-medium mb-2">Log Detayları</h3>
-          <pre className="p-4 bg-gray-800 text-gray-100 rounded overflow-auto text-sm">
-            {JSON.stringify(filteredLogs[expandedLog], null, 2)}
-          </pre>
+      {/* Log Detayı Modal */}
+      {showModal && expandedLog !== null && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg p-6 w-full max-w-2xl max-h-[80vh] overflow-auto">
+            <div className="flex justify-between items-center mb-4">
+              <h3 className="text-lg font-medium">Log Detayları</h3>
+              <button
+                onClick={closeDetailModal}
+                className="text-gray-500 hover:text-gray-700"
+              >
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  className="h-6 w-6"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M6 18L18 6M6 6l12 12"
+                  />
+                </svg>
+              </button>
+            </div>
+
+            <div className="mb-4">
+              <p className="text-sm text-gray-500 mb-1">
+                <span className="font-semibold">Zaman:</span>{" "}
+                {new Date(filteredLogs[expandedLog].timestamp).toLocaleString()}
+              </p>
+              <p className="text-sm text-gray-500 mb-1">
+                <span className="font-semibold">Seviye:</span>{" "}
+                <span
+                  className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${getLevelColor(
+                    filteredLogs[expandedLog].level
+                  )}`}
+                >
+                  {filteredLogs[expandedLog].level.toUpperCase()}
+                </span>
+              </p>
+              <p className="text-sm text-gray-500 mb-1">
+                <span className="font-semibold">Mesaj:</span>{" "}
+                {filteredLogs[expandedLog].message}
+              </p>
+            </div>
+
+            <pre className="p-4 bg-gray-800 text-gray-100 rounded overflow-auto text-sm">
+              {JSON.stringify(filteredLogs[expandedLog], null, 2)}
+            </pre>
+
+            <div className="mt-4 flex justify-end">
+              <button
+                onClick={closeDetailModal}
+                className="px-4 py-2 bg-gray-300 text-gray-800 rounded hover:bg-gray-400"
+              >
+                Kapat
+              </button>
+            </div>
+          </div>
         </div>
       )}
     </div>

@@ -187,20 +187,20 @@ export function logApiResponse(method, endpoint, statusCode, data = null) {
     status = "INFO";
   }
 
-  // Konsola özel formatlı log
+  // Log objesi oluştur
   const logObject = createLogObject(
     statusCode < 400 ? "success" : "error",
     `API Response [${statusCode}] ${method} ${endpoint}`,
     data
   );
 
-  // Özel stille konsola yazdır (her zaman göster)
+  // API yanıtını formatlı göster
   console.log(
     `%c[${status}] API Response [${statusCode}] ${method} ${endpoint}`,
     `color: ${color}; font-weight: bold; background: ${bgColor}; padding: 2px 6px; border-radius: 3px; border-left: 3px solid ${color};`
   );
 
-  // Veri varsa ve hassas değilse göster
+  // Veri varsa ve gösterilmesi gerekiyorsa
   if (data && shouldLog("debug")) {
     console.log(
       "%cResponse Data:",
@@ -209,11 +209,7 @@ export function logApiResponse(method, endpoint, statusCode, data = null) {
     );
   }
 
-  // Log objesini sakla (tekrar console loglama yapmadan sadece localStorage'a kaydet)
-  // Bu satır yerine aşağıdaki gibi özel bir kayıt fonksiyonu kullanıyoruz
-  // writeLog(logObject, `color: ${color};`, true);
-
-  // Sadece localStorage'a kaydet, konsola tekrar yazdırma
+  // Logları localStorage'a kaydet, konsola tekrar yazdırmadan
   try {
     let logs = [];
     const storedLogs = localStorage.getItem("application_logs");
@@ -227,14 +223,19 @@ export function logApiResponse(method, endpoint, statusCode, data = null) {
       }
     }
 
-    logs.push(logObject);
+    // Logları ekle
+    logs.push({
+      ...logObject,
+      // Özel formatlanmış log için stil bilgisini ekle
+      _styleInfo: { color, bgColor, status },
+    });
 
     // Son 1000 logu tut
     if (logs.length > 1000) logs.shift();
 
     localStorage.setItem("application_logs", JSON.stringify(logs));
   } catch (e) {
-    console.error("Log kaydetme hatası:", e);
+    // Sessizce devam et
   }
 }
 

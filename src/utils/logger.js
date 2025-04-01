@@ -60,7 +60,12 @@ function writeLog(logObject, consoleStyle, shouldDisplay) {
   // Konsola sadece gerektiğinde yaz
   if (shouldDisplay) {
     // Basit veri tipiyse veya veri yoksa, sadece mesajı göster
-    if (!logObject.data || typeof logObject.data === "string") {
+    if (
+      !logObject.data ||
+      typeof logObject.data === "string" ||
+      typeof logObject.data === "number" ||
+      typeof logObject.data === "boolean"
+    ) {
       console.log(
         `%c[${logObject.level.toUpperCase()}]: ${logObject.message}${
           logObject.data ? ` (${logObject.data})` : ""
@@ -69,13 +74,31 @@ function writeLog(logObject, consoleStyle, shouldDisplay) {
         logObject
       );
     }
-    // Veri karmaşık ise, mesajı ve datayı ayrı ayrı göster
+    // Veri karmaşık ise, açılabilir grup kullan
     else {
-      console.log(
+      // Grup başlığı
+      console.groupCollapsed(
         `%c[${logObject.level.toUpperCase()}]: ${logObject.message}`,
-        consoleStyle,
+        consoleStyle
+      );
+
+      // Veri detayları
+      console.log(
+        "%cDetails:",
+        "font-weight: bold; margin-right: 4px;",
         logObject.data
       );
+
+      // Ekstra bilgiler (opsiyonel)
+      if (logObject.timestamp) {
+        console.log(
+          "%cTimestamp:",
+          "font-weight: bold; margin-right: 4px;",
+          new Date(logObject.timestamp).toLocaleTimeString()
+        );
+      }
+
+      console.groupEnd();
     }
   }
 
@@ -287,18 +310,42 @@ export function logApiResponse(method, endpoint, statusCode, data = null) {
     data
   );
 
-  // API yanıtını formatlı göster
-  console.log(
-    `%c[${status}] API Response [${statusCode}] ${method} ${endpoint}`,
-    `color: ${color}; font-weight: bold; background: ${bgColor}; padding: 2px 6px; border-radius: 3px; border-left: 3px solid ${color};`
-  );
+  const baseStyle = `color: ${color}; font-weight: bold; background: ${bgColor}; padding: 2px 6px; border-radius: 3px; border-left: 3px solid ${color};`;
 
-  // Veri varsa ve gösterilmesi gerekiyorsa
+  // Veri varsa, katlanabilir grup kullan
   if (data && shouldLog("debug")) {
+    // Grup başlığını göster (tıklanabilir)
+    console.groupCollapsed(
+      `%c[${status}] API Response [${statusCode}] ${method} ${endpoint}`,
+      baseStyle
+    );
+
+    // Grup içinde detay göster
+    console.log(
+      "%cEndpoint:",
+      "font-weight: bold; margin-right: 4px;",
+      `${method} ${endpoint}`
+    );
+
+    console.log(
+      "%cStatus:",
+      "font-weight: bold; margin-right: 4px;",
+      `${statusCode} (${status})`
+    );
+
     console.log(
       "%cResponse Data:",
-      `color: ${color}; font-style: italic; background: ${bgColor}; padding: 1px 4px; border-radius: 2px;`,
+      `color: ${color}; font-weight: bold; margin-right: 4px;`,
       data
+    );
+
+    // Bitti
+    console.groupEnd();
+  } else {
+    // Veri yoksa sadece normal log göster
+    console.log(
+      `%c[${status}] API Response [${statusCode}] ${method} ${endpoint}`,
+      baseStyle
     );
   }
 

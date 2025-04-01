@@ -204,7 +204,7 @@ export function logApiResponse(method, endpoint, statusCode, data = null) {
   if (data && shouldLog("debug")) {
     console.log(
       "%cResponse Data:",
-      "color: #6b7280; font-style: italic;",
+      `color: ${color}; font-style: italic; background: ${bgColor}; padding: 1px 4px; border-radius: 2px;`,
       data
     );
   }

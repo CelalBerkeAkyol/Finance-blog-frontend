@@ -8,6 +8,7 @@ import CategorySelector from "../helpers/CategorySelector";
 import StatusSelector from "../helpers/StatusSelector";
 import ImageGalleryModal from "../../image/ImageGalleryModal";
 import { useFeedback } from "../../../../context/FeedbackContext";
+import { logError } from "../../../../utils/logger";
 
 import {
   fetchPostById,
@@ -132,7 +133,7 @@ const EditPostComponent = () => {
       success(`"${postData.title}" başlıklı post başarıyla güncellendi.`);
       navigate("/dashboard/posts");
     } catch (err) {
-      console.error("EditPostComponent: Güncelleme hatası:", err);
+      logError("EditPostComponent", "Güncelleme hatası:", err);
       // Yetki hatası özel durumu
       if (err?.code === "OWNER_OR_ADMIN_REQUIRED") {
         showAlert({

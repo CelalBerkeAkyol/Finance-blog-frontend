@@ -23,8 +23,9 @@ const handleRejected = (state, action, defaultMessage) => {
 // Login fulfilled: API yanıtından gelen kullanıcı bilgisini state'e aktarır.
 const handleLoginFulfilled = (state, action) => {
   const user = action.payload.data.user;
-  const userName = user.userName || user.email || "Kullanıcı";
-  logInfo("✅ Giriş", `${userName} kullanıcısı giriş yaptı`);
+
+  // Kullanıcı kimlik bilgileri loglamadan kaçınmak için sadece giriş başarılı mesajı
+  logInfo("✅ Giriş", "Kullanıcı giriş işlemi başarıyla tamamlandı");
   state.userInfo = user;
   state.isAdmin = user.role === "admin";
   state.isAuthor = user.role === "author";
@@ -37,8 +38,8 @@ const handleLoginFulfilled = (state, action) => {
 const handleRegisterFulfilled = (state, action) => {
   if (action.payload.success && action.payload.data?.user) {
     const user = action.payload.data.user;
-    const userName = user.userName || user.email || "Kullanıcı";
-    logInfo("✅ Kayıt", `${userName} kullanıcısı kaydedildi`);
+    // Kullanıcı kimlik bilgileri loglamadan kaçınmak için sadece kayıt başarılı mesajı
+    logInfo("✅ Kayıt", "Kullanıcı kaydı başarıyla tamamlandı");
     state.userInfo = user;
     state.isAdmin = user.role === "admin";
     state.isAuthor = user.role === "author" || user.role === "admin";
@@ -65,7 +66,11 @@ const handleLogoutFulfilled = (state) => {
 // FetchUser fulfilled: Kullanıcı bilgisi güncel bilgileri state'e aktarır.
 const handleFetchUserFulfilled = (state, action) => {
   const user = action.payload.user;
-  logInfo("✅ Kullanıcı", `${user.userName} bilgisi alındı`);
+  // Yalnızca rol bilgisini loglayalım, kişisel bilgileri değil
+  logInfo(
+    "✅ Kullanıcı",
+    `Kullanıcı bilgisi alındı (rol: ${user.role || "user"})`
+  );
   state.userInfo = user;
   state.isAdmin = user.role === "admin";
   state.isAuthor = user.role === "author";
@@ -78,8 +83,8 @@ const handleFetchUserFulfilled = (state, action) => {
 const handleUpdateProfileFulfilled = (state, action) => {
   if (action.payload.success && action.payload.data) {
     const user = action.payload.data;
-    const userName = user.userName || user.email || "Kullanıcı";
-    logInfo("✅ Profil", `${userName} profili güncellendi`);
+    // Kullanıcı ID'si yerine sadece güncelleme bilgisini logla
+    logInfo("✅ Profil", "Kullanıcı profili başarıyla güncellendi");
     state.userInfo = user;
     state.isAdmin = user.role === "admin";
     state.isAuthor = user.role === "author" || user.role === "admin";
@@ -150,11 +155,36 @@ export const fetchUser = createAsyncThunk(
   "user/fetchUser",
   async (_, thunkAPI) => {
     try {
-      const tokenResponse = await axios.post(
-        "/auth/verify-token",
-        {},
-        { withCredentials: true }
-      );
+      // Önce token doğrulama deneyin
+      let tokenResponse;
+      try {
+        tokenResponse = await axios.post(
+          "/auth/verify-token",
+          {},
+          { withCredentials: true }
+        );
+      } catch (tokenError) {
+        // Token doğrulama başarısız olursa, refresh token ile yenilemeyi deneyin
+        console.log("Token doğrulama başarısız, refresh token deneniyor...");
+        const refreshResponse = await axios.post(
+          "/auth/refresh-token",
+          {},
+          { withCredentials: true }
+        );
+
+        if (!refreshResponse.data.success) {
+          throw new Error(
+            "Refresh token geçersiz, yeniden giriş yapmalısınız."
+          );
+        }
+
+        // Refresh başarılı olduysa verify-token'ı tekrar deneyin
+        tokenResponse = await axios.post(
+          "/auth/verify-token",
+          {},
+          { withCredentials: true }
+        );
+      }
 
       if (!tokenResponse.data.success) {
         throw new Error("Token geçersiz.");
@@ -176,10 +206,14 @@ export const fetchUser = createAsyncThunk(
           }
         } catch (userError) {
           // Hata durumunda token'dan gelen bilgileri kullanmaya devam edelim
+          console.log(
+            "Kullanıcı detayları alınamadı, token bilgileri kullanılıyor."
+          );
         }
       }
       return { valid: true, user: userData.user };
     } catch (error) {
+      console.error("Kullanıcı bilgileri alınamadı:", error);
       const errMessage = error.message || "Kullanıcı bilgileri alınamadı.";
       const errCode = error.code || "UNKNOWN_ERROR";
       return thunkAPI.rejectWithValue({ message: errMessage, code: errCode });

@@ -1,6 +1,6 @@
 // src/api.js
 import axios from "axios";
-import { logError, logSuccess } from "./utils/logger";
+import { logApiResponse } from "./utils/logger";
 
 // Ortam değişkenlerinden API URL'sini al
 const API_URL = import.meta.env.VITE_API_URL || "http://localhost:3000/blog";
@@ -51,28 +51,26 @@ instance.interceptors.request.use(
 // Response interceptor - merkezi hata yönetimi ve başarılı cevapları loglama
 instance.interceptors.response.use(
   (response) => {
-    // API başarılı bir yanıt döndürdüğünde logla (sadece geliştirme ortamında)
-    if (!import.meta.env.PROD) {
-      // Hassas endpoint kontrolü
-      const url = response.config.url;
-      const method = response.config.method.toUpperCase();
+    // API yanıtını al
+    const url = response.config.url;
+    const method = response.config.method.toUpperCase();
+    const status = response.status;
 
-      // Hassas endpoint için log mesajını düzenle, içeriği değil
-      if (isSensitiveEndpoint(url)) {
-        logSuccess(
-          "API Response",
-          `[${response.status}] ${method} ${url} - Sensitive Data Response`,
-          // Veri logger tarafından sanitize edilecek
-          response.data
-        );
-      } else {
-        logSuccess(
-          "API Response",
-          `[${response.status}] ${method} ${url}`,
-          response.data
-        );
-      }
-    }
+    // URL'den endpoint'i çıkar
+    const endpoint = url.replace(API_URL, "");
+
+    // Hassas veri kontrolü
+    const isSensitive = isSensitiveEndpoint(url);
+
+    // Daha okunabilir formatlı loglama
+    logApiResponse(
+      method,
+      endpoint,
+      status,
+      // Hassas verileri loglamıyoruz
+      isSensitive ? "[ Sensitive Data Redacted ]" : response.data
+    );
+
     return response; // Cevabı döndür
   },
   (error) => {
@@ -105,30 +103,27 @@ instance.interceptors.response.use(
       errCode = error.response?.data?.error?.code || "UNKNOWN_ERROR";
     }
 
-    // Global logging - sadece geliştirme ortamında
-    if (!import.meta.env.PROD) {
-      const url = error.config?.url || "UNKNOWN_URL";
-      const method = error.config?.method?.toUpperCase() || "REQUEST";
+    // Global logging - üretim ortamında da hataları göster
+    const url = error.config?.url || "UNKNOWN_URL";
+    const method = error.config?.method?.toUpperCase() || "REQUEST";
+    const status = error.response?.status || 0;
 
-      // Hassas endpoint kontrolü
-      if (isSensitiveEndpoint(url)) {
-        logError(
-          "API",
-          `[${
-            error.response?.status || "NETWORK_ERROR"
-          }] ${method} ${url} - Sensitive Data Error --> ${errCode}`,
-          errMessage
-        );
-      } else {
-        logError(
-          "API",
-          `[${
-            error.response?.status || "NETWORK_ERROR"
-          }] ${method} ${url} --> ${errCode}`,
-          errMessage
-        );
-      }
-    }
+    // URL'den endpoint'i çıkar
+    const endpoint = url.replace(API_URL, "") || "/unknown";
+
+    // Hassas veri kontrolü
+    const isSensitive = isSensitiveEndpoint(url);
+
+    // Daha okunabilir formatlı hata loglaması
+    logApiResponse(
+      method,
+      endpoint,
+      status,
+      // Hassas verileri loglamıyoruz, sadece hata kodu
+      isSensitive
+        ? { code: errCode, message: "[ Sensitive Data Redacted ]" }
+        : { code: errCode, message: errMessage }
+    );
 
     return Promise.reject({
       message: errMessage,

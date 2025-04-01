@@ -155,6 +155,90 @@ export function logSuccess(message, data = null) {
 }
 
 /**
+ * API Response loglarını formatlı ve renkli gösterir
+ * @param {string} method - HTTP method (GET, POST, PUT, DELETE)
+ * @param {string} endpoint - API endpoint (/auth/login, /posts, etc.)
+ * @param {number} statusCode - HTTP status code (200, 201, 404, etc.)
+ * @param {any} data - Opsiyonel response verisi (hassas veriler için null geçilebilir)
+ */
+export function logApiResponse(method, endpoint, statusCode, data = null) {
+  // Status code'a göre renk ve durum belirle
+  let color, status, bgColor;
+
+  if (statusCode >= 200 && statusCode < 300) {
+    color = "#10B981"; // yeşil
+    bgColor = "rgba(16, 185, 129, 0.1)";
+    status = "SUCCESS";
+  } else if (statusCode >= 300 && statusCode < 400) {
+    color = "#3b82f6"; // mavi
+    bgColor = "rgba(59, 130, 246, 0.1)";
+    status = "REDIRECT";
+  } else if (statusCode >= 400 && statusCode < 500) {
+    color = "#f59e0b"; // turuncu
+    bgColor = "rgba(245, 158, 11, 0.1)";
+    status = "CLIENT ERROR";
+  } else if (statusCode >= 500) {
+    color = "#ef4444"; // kırmızı
+    bgColor = "rgba(239, 68, 68, 0.1)";
+    status = "SERVER ERROR";
+  } else {
+    color = "#8b5cf6"; // mor
+    bgColor = "rgba(139, 92, 246, 0.1)";
+    status = "INFO";
+  }
+
+  // Konsola özel formatlı log
+  const logObject = createLogObject(
+    statusCode < 400 ? "success" : "error",
+    `API Response [${statusCode}] ${method} ${endpoint}`,
+    data
+  );
+
+  // Özel stille konsola yazdır (her zaman göster)
+  console.log(
+    `%c[${status}] API Response [${statusCode}] ${method} ${endpoint}`,
+    `color: ${color}; font-weight: bold; background: ${bgColor}; padding: 2px 6px; border-radius: 3px; border-left: 3px solid ${color};`
+  );
+
+  // Veri varsa ve hassas değilse göster
+  if (data && shouldLog("debug")) {
+    console.log(
+      "%cResponse Data:",
+      "color: #6b7280; font-style: italic;",
+      data
+    );
+  }
+
+  // Log objesini sakla (tekrar console loglama yapmadan sadece localStorage'a kaydet)
+  // Bu satır yerine aşağıdaki gibi özel bir kayıt fonksiyonu kullanıyoruz
+  // writeLog(logObject, `color: ${color};`, true);
+
+  // Sadece localStorage'a kaydet, konsola tekrar yazdırma
+  try {
+    let logs = [];
+    const storedLogs = localStorage.getItem("application_logs");
+
+    if (storedLogs) {
+      try {
+        logs = JSON.parse(storedLogs);
+        if (!Array.isArray(logs)) logs = [];
+      } catch (e) {
+        logs = [];
+      }
+    }
+
+    logs.push(logObject);
+
+    // Son 1000 logu tut
+    if (logs.length > 1000) logs.shift();
+
+    localStorage.setItem("application_logs", JSON.stringify(logs));
+  } catch (e) {
+    console.error("Log kaydetme hatası:", e);
+  }
+}
+
+/**
  * Logları dışa aktarır
  */
 export function exportLogs() {
@@ -198,6 +282,7 @@ export default {
   logWarning,
   logDebug,
   logSuccess,
+  logApiResponse,
   exportLogs,
   clearLogs,
 };

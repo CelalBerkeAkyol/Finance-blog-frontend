@@ -2,40 +2,37 @@ import { useState, useEffect } from "react";
 import { exportLogs, clearLogs } from "../utils/logger";
 
 /**
- * Log Görüntüleyici Bileşeni
- * Bu bileşen, uygulamadaki logları görüntülemek, filtrelemek ve dışa aktarmak için kullanılır.
+ * Basitleştirilmiş Log Görüntüleyici
  */
 function LogViewer() {
-  // State değişkenleri
   const [logs, setLogs] = useState([]);
   const [filter, setFilter] = useState("");
   const [levelFilter, setLevelFilter] = useState("all");
-  const [moduleFilter, setModuleFilter] = useState("");
-  const [moduleOptions, setModuleOptions] = useState([]);
   const [expandedLog, setExpandedLog] = useState(null);
+  const [loading, setLoading] = useState(false);
 
-  // Kayıtlı logları yükle
+  // Logları yükle
   useEffect(() => {
     loadLogs();
   }, []);
 
-  // Modül seçeneklerini belirle
-  useEffect(() => {
-    if (logs.length > 0) {
-      const modules = [...new Set(logs.map((log) => log.module))].sort();
-      setModuleOptions(modules);
-    }
-  }, [logs]);
-
   // Logları yükle
   const loadLogs = () => {
     try {
-      const storedLogs = localStorage.getItem("application_logs") || "[]";
-      const parsedLogs = JSON.parse(storedLogs);
-      setLogs(parsedLogs.reverse()); // En yeni loglar üstte
+      setLoading(true);
+      const storedLogs = localStorage.getItem("application_logs");
+
+      if (storedLogs) {
+        const parsedLogs = JSON.parse(storedLogs);
+        setLogs(parsedLogs.reverse()); // En yeni loglar üstte
+      } else {
+        setLogs([]);
+      }
     } catch (e) {
       console.error("Logları yükleme hatası:", e);
       setLogs([]);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -61,107 +58,78 @@ function LogViewer() {
   };
 
   // Filtreli logları getir
-  const getFilteredLogs = () => {
-    return logs.filter((log) => {
-      // Metin filtresi
-      const textMatch =
-        filter === "" ||
-        JSON.stringify(log).toLowerCase().includes(filter.toLowerCase());
+  const filteredLogs = logs.filter((log) => {
+    // Metin filtresi
+    const textMatch =
+      filter === "" ||
+      JSON.stringify(log).toLowerCase().includes(filter.toLowerCase());
 
-      // Seviye filtresi
-      const levelMatch = levelFilter === "all" || log.level === levelFilter;
+    // Seviye filtresi
+    const levelMatch = levelFilter === "all" || log.level === levelFilter;
 
-      // Modül filtresi
-      const moduleMatch = moduleFilter === "" || log.module === moduleFilter;
-
-      return textMatch && levelMatch && moduleMatch;
-    });
-  };
+    return textMatch && levelMatch;
+  });
 
   // Log seviyesine göre renk belirle
   const getLevelColor = (level) => {
-    switch (level) {
-      case "debug":
-        return "bg-purple-100 text-purple-800";
-      case "info":
-        return "bg-blue-100 text-blue-800";
-      case "warning":
-        return "bg-yellow-100 text-yellow-800";
-      case "error":
-        return "bg-red-100 text-red-800";
-      case "success":
-        return "bg-green-100 text-green-800";
-      default:
-        return "bg-gray-100 text-gray-800";
-    }
+    const colors = {
+      debug: "bg-purple-100 text-purple-800",
+      info: "bg-blue-100 text-blue-800",
+      warning: "bg-yellow-100 text-yellow-800",
+      error: "bg-red-100 text-red-800",
+      success: "bg-green-100 text-green-800",
+    };
+    return colors[level] || "bg-gray-100 text-gray-800";
   };
-
-  // Filtrelenmiş loglar
-  const filteredLogs = getFilteredLogs();
 
   return (
     <div className="max-w-7xl mx-auto p-4 bg-white rounded-lg shadow">
       <div className="mb-4">
         <h2 className="text-2xl font-bold mb-2">Uygulama Logları</h2>
-        <p className="text-gray-600 mb-4">
-          Uygulama loglarını görüntüleyebilir, filtreleyebilir ve dışa
-          aktarabilirsiniz.
-        </p>
 
         {/* Kontrol ve Filtre Bölümü */}
         <div className="flex flex-wrap gap-2 mb-4">
-          <div className="flex-1 min-w-[200px]">
-            <input
-              type="text"
-              placeholder="Loglarda ara..."
-              value={filter}
-              onChange={(e) => setFilter(e.target.value)}
-              className="w-full p-2 border rounded"
-            />
-          </div>
+          <input
+            type="text"
+            placeholder="Loglarda ara..."
+            value={filter}
+            onChange={(e) => setFilter(e.target.value)}
+            className="flex-1 min-w-[200px] p-2 border rounded"
+          />
 
-          <div>
-            <select
-              value={levelFilter}
-              onChange={(e) => setLevelFilter(e.target.value)}
-              className="p-2 border rounded bg-white"
-            >
-              <option value="all">Tüm Seviyeler</option>
-              <option value="debug">Debug</option>
-              <option value="info">Info</option>
-              <option value="warning">Warning</option>
-              <option value="error">Error</option>
-              <option value="success">Success</option>
-            </select>
-          </div>
+          <select
+            value={levelFilter}
+            onChange={(e) => setLevelFilter(e.target.value)}
+            className="p-2 border rounded bg-white"
+          >
+            <option value="all">Tüm Seviyeler</option>
+            <option value="debug">Debug</option>
+            <option value="info">Info</option>
+            <option value="warning">Warning</option>
+            <option value="error">Error</option>
+            <option value="success">Success</option>
+          </select>
 
-          <div>
-            <select
-              value={moduleFilter}
-              onChange={(e) => setModuleFilter(e.target.value)}
-              className="p-2 border rounded bg-white"
-            >
-              <option value="">Tüm Modüller</option>
-              {moduleOptions.map((module) => (
-                <option key={module} value={module}>
-                  {module}
-                </option>
-              ))}
-            </select>
-          </div>
+          <button
+            onClick={loadLogs}
+            className="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600"
+            disabled={loading}
+          >
+            {loading ? "Yükleniyor..." : "Yenile"}
+          </button>
 
           <button
             onClick={handleExportLogs}
             className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600"
           >
-            Logları Dışa Aktar
+            Dışa Aktar
           </button>
 
           <button
             onClick={handleClearLogs}
             className="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600"
           >
-            Logları Temizle
+            Temizle
           </button>
         </div>
 
@@ -174,8 +142,15 @@ function LogViewer() {
       {/* Log Listesi */}
       <div className="overflow-auto rounded border">
         {filteredLogs.length === 0 ? (
-          <div className="p-4 text-center text-gray-500">
-            Görüntülenecek log bulunamadı.
+          <div className="p-8 text-center text-gray-500">
+            <h3 className="text-lg font-medium mb-2">
+              Görüntülenecek log bulunamadı
+            </h3>
+            <p className="mb-4">
+              {logs.length === 0
+                ? "Henüz kaydedilmiş log bulunmuyor."
+                : "Filtrelere uygun log bulunamadı. Lütfen filtreleri değiştirin."}
+            </p>
           </div>
         ) : (
           <table className="min-w-full divide-y divide-gray-200">
@@ -188,13 +163,10 @@ function LogViewer() {
                   Seviye
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Modül
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                   Mesaj
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Detaylar
+                  Detay
                 </th>
               </tr>
             </thead>
@@ -212,9 +184,6 @@ function LogViewer() {
                     >
                       {log.level.toUpperCase()}
                     </span>
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                    {log.module}
                   </td>
                   <td className="px-6 py-4 text-sm text-gray-500 max-w-xs truncate">
                     {log.message}

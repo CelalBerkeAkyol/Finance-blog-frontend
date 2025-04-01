@@ -278,6 +278,14 @@ export function logSuccess(message, data = null) {
  * @param {any} data - Opsiyonel response verisi (hassas veriler için null geçilebilir)
  */
 export function logApiResponse(method, endpoint, statusCode, data = null) {
+  // Determine log level based on status code
+  const level = statusCode < 400 ? "success" : "error";
+
+  // Check if logging should be performed using the existing shouldLog function
+  if (!shouldLog(level)) {
+    return; // Skip logging if not meeting log level requirements
+  }
+
   // Status code'a göre renk ve durum belirle
   let color, status, bgColor;
 
@@ -305,7 +313,7 @@ export function logApiResponse(method, endpoint, statusCode, data = null) {
 
   // Log objesi oluştur
   const logObject = createLogObject(
-    statusCode < 400 ? "success" : "error",
+    level,
     `API Response [${statusCode}] ${method} ${endpoint}`,
     data
   );

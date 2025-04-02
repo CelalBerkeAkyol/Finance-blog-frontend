@@ -28,8 +28,6 @@ export default function VerifyEmailComponent() {
         if (!data.success) {
           throw new Error(data.message);
         }
-
-        window.location.href = "/";
       } catch (err) {
         setError(err.message);
       } finally {

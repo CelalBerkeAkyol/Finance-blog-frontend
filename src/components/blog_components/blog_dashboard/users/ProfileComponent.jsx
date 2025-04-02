@@ -60,6 +60,10 @@ const ProfileComponent = () => {
     if (!isLoading && !userInfo) {
       dispatch(fetchUser());
     }
+    // userInfo geldiğinde, isUserDataReady'i true yap
+    if (userInfo) {
+      setIsUserDataReady(true);
+    }
   }, [isLoading, userInfo, dispatch]);
 
   // Form verilerini başlat
@@ -104,22 +108,10 @@ const ProfileComponent = () => {
   };
 
   // Düzenleme modunu başlat
-  const handleStartEdit = async () => {
-    if (!isUserDataReady) {
-      try {
-        await dispatch(fetchUser());
-        setEditMode(true);
-        onOpen();
-      } catch (error) {
-        showError(
-          "Kullanıcı bilgileri getirilemedi. Lütfen sayfayı yenileyip tekrar deneyin."
-        );
-      }
-    } else {
-      logInfo("👤 Profil", "Düzenleme modu başlatıldı");
-      setEditMode(true);
-      onOpen();
-    }
+  const handleStartEdit = () => {
+    logInfo("👤 Profil", "Düzenleme modu başlatıldı");
+    setEditMode(true);
+    onOpen();
   };
 
   // Profil güncelleme işlevi
@@ -271,8 +263,11 @@ const ProfileComponent = () => {
 
       {/* Profil Düzenleme Modalı */}
       <Modal
-        isOpen={isOpen && editMode}
-        onClose={onClose}
+        isOpen={isOpen}
+        onClose={() => {
+          setEditMode(false);
+          onClose();
+        }}
         size="2xl"
         scrollBehavior="inside"
         placement="center"
@@ -305,7 +300,7 @@ const ProfileComponent = () => {
         }}
       >
         <ModalContent>
-          {(onClose) => (
+          {(_) => (
             <>
               <ModalHeader className="flex flex-col gap-1">
                 Profil Düzenle
@@ -330,7 +325,13 @@ const ProfileComponent = () => {
                 {saveError && <p className="text-danger mt-4">{saveError}</p>}
               </ModalBody>
               <ModalFooter>
-                <Button variant="flat" onPress={onClose}>
+                <Button
+                  variant="flat"
+                  onPress={() => {
+                    setEditMode(false);
+                    onClose();
+                  }}
+                >
                   İptal
                 </Button>
                 <Button

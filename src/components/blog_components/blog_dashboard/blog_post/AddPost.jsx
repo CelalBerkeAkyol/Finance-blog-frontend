@@ -16,6 +16,7 @@ import CategorySelector from "../helpers/CategorySelector";
 import ImageGalleryModal from "../../image/ImageGalleryModal";
 import { useFeedback } from "../../../../context/FeedbackContext";
 import { useNavigate } from "react-router-dom";
+import { logError } from "../../../../utils/logger";
 
 const AddPost = () => {
   const dispatch = useDispatch();
@@ -96,7 +97,7 @@ const AddPost = () => {
         }
       })
       .catch((error) => {
-        console.error("AddPost: Hata oluştu:", error);
+        logError("AddPost", "Hata oluştu:", error);
         showError("Yazı eklenirken bir hata oluştu: " + error.message);
       })
       .finally(() => {

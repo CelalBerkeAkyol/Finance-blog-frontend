@@ -1,5 +1,6 @@
 import { useState, useRef, useCallback, useEffect } from "react";
 import axios from "../api";
+import { logError } from "../utils/logger";
 
 /**
  * Arama işlemlerini yöneten custom hook
@@ -83,7 +84,7 @@ function useSearch(searchTerm, minChars = 3) {
           searched: true,
         }));
 
-        console.error("Arama hatası:", error);
+        logError("useSearch", "Arama hatası:", error);
       }
     },
     [searchTerm, minChars]

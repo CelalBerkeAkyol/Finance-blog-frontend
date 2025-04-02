@@ -1,4 +1,5 @@
 import React, { Component } from "react";
+import { logError } from "../../utils/logger";
 
 class ErrorBoundary extends Component {
   constructor(props) {
@@ -23,7 +24,10 @@ class ErrorBoundary extends Component {
     });
 
     // Hata loglaması yapabilirsiniz
-    console.error("Error Boundary caught an error:", error, errorInfo);
+    logError("ErrorBoundary", "Error Boundary caught an error:", {
+      error,
+      errorInfo,
+    });
   }
 
   handleGoBack = () => {

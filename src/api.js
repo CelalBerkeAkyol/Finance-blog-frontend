@@ -3,7 +3,7 @@ import axios from "axios";
 import { logApiResponse } from "./utils/logger";
 
 // Ortam değişkenlerinden API URL'sini al
-const API_URL = import.meta.env.VITE_API_URL || "http://localhost:3000/blog";
+const API_URL = import.meta.env.VITE_API_URL;
 
 // Hassas veri içeren alanların listesi (maskelenecek)
 const SENSITIVE_FIELDS = [

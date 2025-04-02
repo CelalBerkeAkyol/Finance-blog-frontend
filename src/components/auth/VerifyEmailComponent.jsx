@@ -14,10 +14,11 @@ export default function VerifyEmailComponent() {
     const verifyEmail = async () => {
       const params = new URLSearchParams(window.location.search);
       const token = params.get("token");
+      const API_URL = import.meta.env.VITE_API_URL || "http://localhost:3000";
 
       try {
         const response = await fetch(
-          `http://localhost:3000/blog/auth/verify-email?token=${token}`,
+          `${API_URL}/blog/auth/verify-email?token=${token}`,
           {
             method: "GET",
             credentials: "include",

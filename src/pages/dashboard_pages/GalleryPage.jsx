@@ -9,7 +9,7 @@ import { Button, Pagination, Checkbox } from "@nextui-org/react";
 import { Icon } from "@iconify/react";
 import ImageUploaderModal from "../../components/blog_components/image/ImageUploaderModal";
 import BlogSidebarComponent from "../../components/blog_components/blog_dashboard/BlogSidebarComponent";
-import ErrorBoundary from "../../components/Error/ErrorBoundary";
+import ErrorBoundary from "../../components/error/ErrorBoundary";
 import { useFeedback } from "../../context/FeedbackContext";
 import useScrollToTop from "../../hooks/useScrollToTop";
 import { scrollToTop } from "../../utils/scrollHelpers";

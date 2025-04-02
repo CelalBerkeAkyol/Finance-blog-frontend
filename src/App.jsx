@@ -8,7 +8,7 @@ import React, { useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { fetchUser } from "./app/features/user/userSlice"; // Adjust the path as necessary
 import { logRender } from "./utils/logger";
-import ErrorBoundary from "./components/Error/ErrorBoundary";
+import ErrorBoundary from "./components/error/ErrorBoundary";
 import { FeedbackProvider } from "./context/FeedbackContext";
 import usePageNavigation from "./hooks/usePageNavigation";
 

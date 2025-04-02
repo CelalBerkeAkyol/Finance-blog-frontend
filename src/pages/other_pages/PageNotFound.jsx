@@ -1,7 +1,7 @@
 import React from "react";
 import BannerComponent from "../../components/header/BannerComponent";
 import CustomNavbar from "../../components/header/CustomNavbar";
-import ErrorComponent from "../../components/error/ErrorComponent";
+import ErrorComponent from "../../components/error-temp/ErrorComponent";
 
 export default function PageNotFound() {
   return (

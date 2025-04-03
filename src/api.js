@@ -1,6 +1,6 @@
 // src/api.js
 import axios from "axios";
-import { logApiResponse } from "./utils/logger";
+import { logApiResponse, logApiRequest } from "./utils/logger";
 
 // Ortam değişkenlerinden API URL'sini al veya proxy kullan
 // Proxy kullanırken, doğrudan URL'e "/api" ekleyerek aynı origin'de kalıyoruz
@@ -72,15 +72,25 @@ const instance = axios.create({
 // Request interceptor ekliyoruz
 instance.interceptors.request.use(
   (config) => {
-    console.log("API Request Config:", {
-      url: config.url,
-      method: config.method,
-      withCredentials: config.withCredentials,
-      headers: config.headers,
-    });
+    // URL'den endpoint'i çıkar
+    const url = config.url;
+    const method = config.method?.toUpperCase() || "GET";
+    const endpoint = url.replace(API_URL, "");
 
-    // Cookie bilgilerini kontrol et
-    console.log("Document Cookies:", document.cookie);
+    // Request verilerini maskele (varsa)
+    let maskedData = null;
+    if (config.data) {
+      maskedData = maskSensitiveData(config.data);
+    }
+
+    // Tüm config içeriğini de maskele
+    const maskedConfig = { ...config };
+    if (maskedConfig.headers) {
+      maskedConfig.headers = { ...maskSensitiveData(maskedConfig.headers) };
+    }
+
+    // İstek formatlı log
+    logApiRequest(method, endpoint, maskedConfig, maskedData);
 
     return config;
   },

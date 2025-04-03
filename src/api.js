@@ -2,8 +2,10 @@
 import axios from "axios";
 import { logApiResponse } from "./utils/logger";
 
-// Ortam değişkenlerinden API URL'sini al
-const API_URL = import.meta.env.VITE_API_URL || "http://localhost:3000/blog";
+// Ortam değişkenlerinden API URL'sini al veya proxy kullan
+// Proxy kullanırken, doğrudan URL'e "/api" ekleyerek aynı origin'de kalıyoruz
+// Bu şekilde third-party cookie sorununu çözüyoruz
+const API_URL = "/api"; // Doğrudan /api ile başlayan istek yapacağız, vite proxy bu istekleri yönlendirecek
 
 // Hassas veri içeren alanların listesi (maskelenecek)
 const SENSITIVE_FIELDS = [
@@ -66,6 +68,27 @@ const instance = axios.create({
     Accept: "application/json",
   },
 });
+
+// Request interceptor ekliyoruz
+instance.interceptors.request.use(
+  (config) => {
+    console.log("API Request Config:", {
+      url: config.url,
+      method: config.method,
+      withCredentials: config.withCredentials,
+      headers: config.headers,
+    });
+
+    // Cookie bilgilerini kontrol et
+    console.log("Document Cookies:", document.cookie);
+
+    return config;
+  },
+  (error) => {
+    console.error("API Request Error:", error);
+    return Promise.reject(error);
+  }
+);
 
 // Response interceptor
 instance.interceptors.response.use(

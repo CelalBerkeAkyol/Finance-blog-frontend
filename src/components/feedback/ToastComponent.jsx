@@ -14,7 +14,7 @@ import { Button } from "@nextui-org/react";
 export default function ToastComponent({
   message,
   type = "success",
-  duration = 3000,
+  duration = 10000,
   onClose,
   showCloseButton = true,
 }) {

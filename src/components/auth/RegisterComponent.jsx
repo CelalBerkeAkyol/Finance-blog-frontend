@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { registerUser, clearState } from "../../app/features/user/userSlice";
 import { Button, Input, Checkbox, Link, Divider } from "@heroui/react";
@@ -49,7 +49,9 @@ export default function RegisterComponent() {
   // Kayıt başarılı olduğunda yönlendirme ve state temizleme
   useEffect(() => {
     if (isSuccess) {
-      success("Hesabınız başarıyla oluşturuldu!");
+      success(
+        "Hesabınız başarıyla oluşturuldu!\nE-postanızı kontrol ederek hesabınızı doğrulayın."
+      );
       dispatch(clearState()); // State temizliği
       navigate("/"); // Login sayfasına yönlendirme
     }

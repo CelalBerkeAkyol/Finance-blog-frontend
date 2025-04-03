@@ -5,7 +5,7 @@ import { logApiResponse, logApiRequest } from "./utils/logger";
 // Ortam değişkenlerinden API URL'sini al veya proxy kullan
 // Proxy kullanırken, doğrudan URL'e "/api" ekleyerek aynı origin'de kalıyoruz
 // Bu şekilde third-party cookie sorununu çözüyoruz
-const API_URL = "/api"; // Doğrudan /api ile başlayan istek yapacağız, vite proxy bu istekleri yönlendirecek
+const VITE_API_URL = import.meta.env.VITE_API_URL;
 
 // Hassas veri içeren alanların listesi (maskelenecek)
 const SENSITIVE_FIELDS = [
@@ -60,7 +60,7 @@ const maskSensitiveData = (data) => {
 
 // Axios instance oluştur
 const instance = axios.create({
-  baseURL: API_URL,
+  baseURL: VITE_API_URL,
   withCredentials: true,
   timeout: 30000,
   headers: {
@@ -75,7 +75,7 @@ instance.interceptors.request.use(
     // URL'den endpoint'i çıkar
     const url = config.url;
     const method = config.method?.toUpperCase() || "GET";
-    const endpoint = url.replace(API_URL, "");
+    const endpoint = url.replace(VITE_API_URL, "");
 
     // Request verilerini maskele (varsa)
     let maskedData = null;
@@ -107,7 +107,7 @@ instance.interceptors.response.use(
     const url = response.config.url;
     const method = response.config.method.toUpperCase();
     const status = response.status;
-    const endpoint = url.replace(API_URL, "");
+    const endpoint = url.replace(VITE_API_URL, "");
 
     // Yanıt verilerinde hassas bilgileri maskele
     const maskedData = maskSensitiveData(response.data);
@@ -133,7 +133,7 @@ instance.interceptors.response.use(
       const method = error.config.method?.toUpperCase() || "REQUEST";
       const url = error.config.url || "UNKNOWN_URL";
       const status = error.response?.status || 0;
-      const endpoint = url.replace(API_URL, "") || "/unknown";
+      const endpoint = url.replace(VITE_API_URL, "") || "/unknown";
 
       // Hata verilerinde de hassas bilgileri maskele
       const errorData = {

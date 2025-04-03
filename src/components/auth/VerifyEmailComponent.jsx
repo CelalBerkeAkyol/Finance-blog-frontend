@@ -4,6 +4,7 @@ import { clearState } from "../../app/features/user/userSlice";
 import ErrorComponent from "../error/ErrorComponent";
 import BannerComponent from "../header/BannerComponent";
 import CustomNavbar from "../header/CustomNavbar";
+import api from "../../api";
 
 export default function VerifyEmailComponent() {
   const dispatch = useDispatch();
@@ -14,23 +15,16 @@ export default function VerifyEmailComponent() {
     const verifyEmail = async () => {
       const params = new URLSearchParams(window.location.search);
       const token = params.get("token");
-      const API_URL = import.meta.env.VITE_API_URL || "http://localhost:3000";
 
       try {
-        const response = await fetch(
-          `${API_URL}/blog/auth/verify-email?token=${token}`,
-          {
-            method: "GET",
-            credentials: "include",
-          }
-        );
-        const data = await response.json();
+        const response = await api.get(`/auth/verify-email?token=${token}`);
+        const data = response.data;
 
         if (!data.success) {
           throw new Error(data.message);
         }
       } catch (err) {
-        setError(err.message);
+        setError(err.message || "Email verification failed");
       } finally {
         setLoading(false);
         dispatch(clearState());

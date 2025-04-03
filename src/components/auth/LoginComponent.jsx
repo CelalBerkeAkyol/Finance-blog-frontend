@@ -4,6 +4,7 @@ import { Icon } from "@iconify/react";
 import { useDispatch, useSelector } from "react-redux";
 import { loginUser, clearState } from "../../app/features/user/userSlice";
 import { useNavigate } from "react-router-dom";
+import api from "../../api";
 
 export default function LoginComponent() {
   const dispatch = useDispatch();
@@ -47,21 +48,14 @@ export default function LoginComponent() {
   };
 
   const resendVerificationEmail = async () => {
-    const API_URL = import.meta.env.VITE_API_URL || "http://localhost:3000";
-
-    const response = await fetch(
-      `${API_URL}/blog/auth/resend-verification-email`,
-      {
-        method: "POST",
-        credentials: "include",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ email: formData.email }),
-      }
-    );
-    const data = await response.json();
-    setLoginError(data.message);
+    try {
+      const response = await api.post("/auth/resend-verification-email", {
+        email: formData.email,
+      });
+      setLoginError(response.data.message);
+    } catch (error) {
+      setLoginError(error.message || "Failed to resend verification email");
+    }
   };
 
   return (

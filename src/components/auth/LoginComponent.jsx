@@ -96,7 +96,7 @@ export default function LoginComponent() {
             <Checkbox name="remember" size="sm">
               Remember me
             </Checkbox>
-            <Link className="text-default-500" href="#" size="sm">
+            <Link className="text-default-500" href="/forget" size="sm">
               Forgot password?
             </Link>
           </div>

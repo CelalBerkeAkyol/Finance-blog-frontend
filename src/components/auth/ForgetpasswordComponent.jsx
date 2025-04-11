@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import { Button, Input, Checkbox, Link } from "@nextui-org/react";
 import { Icon } from "@iconify/react";
 import { useDispatch, useSelector } from "react-redux";
-import { loginUser, clearState } from "../../app/features/user/userSlice";
+import { forgotPasswordUser, clearState } from "../../app/features/user/userSlice";
 import { useNavigate } from "react-router-dom";
 
 export default function ForgetpasswordComponent() {
@@ -32,7 +32,7 @@ export default function ForgetpasswordComponent() {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    dispatch(forgetPassword(formData));
+    dispatch(forgotPasswordUser(formData));
   };
 
   return (

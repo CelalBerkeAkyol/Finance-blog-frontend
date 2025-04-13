@@ -48,6 +48,7 @@ import CategoryBasePostsPage from "./pages/blog_pages/CategoryBasePostsPage";
 import CategoriesPage from "./pages/blog_pages/CategoriesPage";
 
 import CheatSheet from "./components/blog_components/blog_dashboard/helpers/CheatSheet";
+import VerifyEmailComponent from "./components/auth/VerifyEmailComponent";
 
 // Sayfa navigasyonu ve scroll yönetimini sağlayan bileşen
 function AppContent() {
@@ -78,6 +79,8 @@ function AppContent() {
 	  <Route path="/forget" element={<ForgetPassword />} />
 	  <Route path="/reset" element={<ResetPassword />} />
           <Route path="/register" element={<RegisterPage />} />
+          <Route path="/verify-email" element={<VerifyEmailComponent />} />
+
           <Route path="/team" element={<TeamPage />} />
           <Route
             path="/delete-account"

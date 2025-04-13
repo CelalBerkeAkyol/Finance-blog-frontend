@@ -16,6 +16,14 @@ export default defineConfig(({ mode }) => {
       strictPort: false,
       open: false,
       cors: true,
+      proxy: {
+        // Tüm /api isteklerini backend sunucusuna yönlendir
+        "/api": {
+          target: "http://localhost:3000", // Backend sunucu adresi
+          changeOrigin: true,
+          secure: false,
+        },
+      },
     },
   };
 });

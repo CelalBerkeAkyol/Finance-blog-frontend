@@ -1,9 +1,10 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { Button, Input, Checkbox, Link } from "@nextui-org/react";
 import { Icon } from "@iconify/react";
 import { useDispatch, useSelector } from "react-redux";
 import { loginUser, clearState } from "../../app/features/user/userSlice";
 import { useNavigate } from "react-router-dom";
+import api from "../../api";
 
 export default function LoginComponent() {
   const dispatch = useDispatch();
@@ -12,6 +13,7 @@ export default function LoginComponent() {
     useSelector((state) => state.user);
   const [isVisible, setIsVisible] = useState(false);
   const [formData, setFormData] = useState({ email: "", password: "" });
+  const [loginError, setLoginError] = useState("");
 
   // Redirects to the home page when `isSuccess` becomes true.
   useEffect(() => {
@@ -36,9 +38,24 @@ export default function LoginComponent() {
     setFormData({ ...formData, [name]: value });
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    dispatch(loginUser(formData));
+    const res = await dispatch(loginUser(formData));
+
+    if (res.payload.code === "ACCOUNT_NOT_VERIFIED") {
+      setLoginError(res.payload.code);
+    }
+  };
+
+  const resendVerificationEmail = async () => {
+    try {
+      const response = await api.post("/auth/resend-verification-email", {
+        email: formData.email,
+      });
+      setLoginError(response.data.message);
+    } catch (error) {
+      setLoginError(error.message || "Failed to resend verification email");
+    }
   };
 
   return (
@@ -90,8 +107,16 @@ export default function LoginComponent() {
               errorCode === "INVALID_PASSWORD" ||
               errorCode === "SERVER_ERROR" ||
               errorCode === "ACCOUNT_DEACTIVATED") && (
-              <p className="text-red-500 text-sm">{errorMessage}</p>
+              <p className="bg-red-500 text-white p-2 rounded-md text-sm">
+                {errorMessage}
+              </p>
             )}
+
+          {loginError && (
+            <p className="bg-red-500 text-white text-center p-2 rounded-md text-sm">
+              {loginError}
+            </p>
+          )}
           <div className="flex items-center justify-between px-1 py-2">
             <Checkbox name="remember" size="sm">
               Remember me
@@ -100,6 +125,15 @@ export default function LoginComponent() {
               Forgot password?
             </Link>
           </div>
+          {loginError === "ACCOUNT_NOT_VERIFIED" && (
+            <Button
+              className="bg-primary-600 text-white hover:bg-primary-700"
+              onClick={resendVerificationEmail}
+              type="button"
+            >
+              {isLoading ? "Loading..." : "Resend Verification Email?"}
+            </Button>
+          )}
           <Button
             className="bg-primary-600 text-white hover:bg-primary-700"
             type="submit"

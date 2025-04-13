@@ -2,10 +2,12 @@
 import axios from "axios";
 import { logApiResponse, logApiRequest } from "./utils/logger";
 
+
 // Ortam değişkenlerinden API URL'sini al veya proxy kullan
 // Proxy kullanırken, doğrudan URL'e "/api" ekleyerek aynı origin'de kalıyoruz
 // Bu şekilde third-party cookie sorununu çözüyoruz
 const VITE_API_URL = import.meta.env.VITE_API_URL;
+
 
 // Hassas veri içeren alanların listesi (maskelenecek)
 const SENSITIVE_FIELDS = [

@@ -23,6 +23,7 @@ import DisclaimerPage from "./pages/other_pages/DisclaimerPage";
 import PrivacyPolicyPage from "./pages/other_pages/PrivacyPolicyPage";
 import AdminLogsPage from "./pages/AdminLogsPage";
 
+
 {
   /* dashboard pages */
 }
@@ -36,6 +37,8 @@ import UsersPage from "./pages/dashboard_pages/UsersPage";
 
 import LoginPage from "./pages/auth/LoginPage";
 import RegisterPage from "./pages/auth/RegisterPage";
+import ForgetPassword from "./pages/auth/ForgetPassword";
+import ResetPassword from "./pages/auth/ResetPassword";
 
 import ProtectedRoute from "./components/auth/ProtectedRoute";
 import BlogPostPage from "./pages/blog_pages/BlogPostPage";
@@ -73,6 +76,8 @@ function AppContent() {
           <Route path="/disclaimer" element={<DisclaimerPage />} />
           <Route path="/privacy-policy" element={<PrivacyPolicyPage />} />
           <Route path="/login" element={<LoginPage />} />
+	  <Route path="/forget" element={<ForgetPassword />} />
+	  <Route path="/reset" element={<ResetPassword />} />
           <Route path="/register" element={<RegisterPage />} />
           <Route path="/verify-email" element={<VerifyEmailComponent />} />
 

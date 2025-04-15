@@ -13,7 +13,7 @@ export default function RegisterComponent() {
   // Feedback context'i kullan
   const { error: showError, success, warning } = useFeedback();
 
-  const { isSuccess, isError, errorMessage } = useSelector(
+  const { isSuccess, isError, errorMessage, errorCode } = useSelector(
     (state) => state.user
   );
 
@@ -53,11 +53,17 @@ export default function RegisterComponent() {
         "Hesabınız başarıyla oluşturuldu!\nE-postanızı kontrol ederek hesabınızı doğrulayın."
       );
       dispatch(clearState()); // State temizliği
-      navigate("/"); // Login sayfasına yönlendirme
+      navigate("/");
     }
 
     if (isError) {
-      showError(errorMessage || "Kayıt işlemi sırasında bir hata oluştu.");
+      // Auth_required hatası kullanıcıya gösterilmeyecek
+      if (errorMessage && errorCode === "AUTH_REQUIRED") {
+        // Sessizce işlem yap, kullanıcıya gösterme
+        dispatch(clearState());
+      } else {
+        showError(errorMessage || "Kayıt işlemi sırasında bir hata oluştu.");
+      }
     }
 
     return () => {
@@ -165,30 +171,7 @@ export default function RegisterComponent() {
           </Button>
         </form>
 
-        <div className="flex items-center gap-4 py-2">
-          <Divider className="flex-1" />
-          <p className="shrink-0 text-tiny text-default-500">OR</p>
-          <Divider className="flex-1" />
-        </div>
-
-        <div className="flex flex-col gap-2">
-          <Button
-            startContent={<Icon icon="flat-color-icons:google" width={24} />}
-            variant="bordered"
-          >
-            Sign Up with Google
-          </Button>
-          <Button
-            startContent={
-              <Icon className="text-default-500" icon="fe:github" width={24} />
-            }
-            variant="bordered"
-          >
-            Sign Up with Github
-          </Button>
-        </div>
-
-        <p className="text-center text-small">
+        <p className="text-center text-small mt-4">
           Already have an account?&nbsp;
           <Link href="/login" size="sm">
             Log In

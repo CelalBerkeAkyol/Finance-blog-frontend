@@ -52,9 +52,9 @@ const handleRegisterFulfilled = (state, action) => {
   state.isSuccess = true;
 };
 
-
 const handleForgotPasswordFulfilled = (state, action) => {
-  const message = action.payload?.message || "Şifre sıfırlama e-postası gönderildi.";
+  const message =
+    action.payload?.message || "Şifre sıfırlama e-postası gönderildi.";
 
   // Şifre sıfırlama e-postasının başarıyla gönderildiğini bildir
   logInfo("✉️ Şifre Sıfırlama", message);
@@ -65,7 +65,8 @@ const handleForgotPasswordFulfilled = (state, action) => {
 };
 
 const handleResetPasswordFulfilled = (state, action) => {
-  const message = action.payload?.message || "Password has been successfully reset.";
+  const message =
+    action.payload?.message || "Password has been successfully reset.";
 
   // Notify that the password has been reset successfully
   logInfo("🔒 Password Reset Successful", message);
@@ -75,8 +76,6 @@ const handleResetPasswordFulfilled = (state, action) => {
   state.isSuccess = true;
   state.message = message;
 };
-
-
 
 // Logout fulfilled: Kullanıcı çıkışı sonrası state sıfırlanır.
 const handleLogoutFulfilled = (state) => {
@@ -188,7 +187,8 @@ export const forgotPasswordUser = createAsyncThunk(
       );
       return response.data;
     } catch (error) {
-      const errMessage = error.response?.data?.message || "Password reset failed.";
+      const errMessage =
+        error.response?.data?.message || "Password reset failed.";
       const errCode = error.code || "UNKNOWN_ERROR";
       return thunkAPI.rejectWithValue({ message: errMessage, code: errCode });
     }
@@ -198,23 +198,22 @@ export const forgotPasswordUser = createAsyncThunk(
 // Reset Password thunk – used to set new password with token
 export const resetPasswordUser = createAsyncThunk(
   "user/resetPasswordUser",
-  async ({ token, password }, thunkAPI) => {
+  async ({ token, newPassword }, thunkAPI) => {
     try {
       const response = await axios.post(
-        `/auth/reset-password/${token}`,
-        { password },
+        "/auth/reset-password",
+        { token, newPassword },
         { withCredentials: true }
       );
       return response.data;
     } catch (error) {
-      const errMessage = error.response?.data?.message || "Password reset failed.";
+      const errMessage =
+        error.response?.data?.message || "Password reset failed.";
       const errCode = error.code || "UNKNOWN_ERROR";
       return thunkAPI.rejectWithValue({ message: errMessage, code: errCode });
     }
   }
 );
-
-
 
 // Kullanıcı bilgisi getirme thunk'ı
 export const fetchUser = createAsyncThunk(
@@ -416,12 +415,14 @@ const userSlice = createSlice({
       .addCase(forgotPasswordUser.pending, handlePending)
       .addCase(forgotPasswordUser.fulfilled, handleForgotPasswordFulfilled)
       .addCase(forgotPasswordUser.rejected, (state, action) =>
-	handleRejected(state, action, "Forget password failed.")
+        handleRejected(state, action, "Forget password failed.")
       )
       //resetPasswordUser
       .addCase(resetPasswordUser.pending, handlePending)
       .addCase(resetPasswordUser.fulfilled, handleResetPasswordFulfilled)
-      .addCase(resetPasswordUser.rejected, (state, action) =>                handleRejected(state, action, "Reset password failed.")            )
+      .addCase(resetPasswordUser.rejected, (state, action) =>
+        handleRejected(state, action, "Reset password failed.")
+      )
       // logoutUser
       .addCase(logoutUser.pending, handlePending)
       .addCase(logoutUser.fulfilled, handleLogoutFulfilled)

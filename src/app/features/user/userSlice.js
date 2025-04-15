@@ -198,11 +198,11 @@ export const forgotPasswordUser = createAsyncThunk(
 // Reset Password thunk – used to set new password with token
 export const resetPasswordUser = createAsyncThunk(
   "user/resetPasswordUser",
-  async ({ token, newPassword }, thunkAPI) => {
+  async ({ token, newPassword, email }, thunkAPI) => {
     try {
       const response = await axios.post(
         "/auth/reset-password",
-        { token, newPassword },
+        { token, newPassword, email },
         { withCredentials: true }
       );
       return response.data;

@@ -76,7 +76,7 @@ function AppContent() {
           <Route path="/privacy-policy" element={<PrivacyPolicyPage />} />
           <Route path="/login" element={<LoginPage />} />
           <Route path="/forget" element={<ForgetPassword />} />
-          <Route path="/reset/:token" element={<ResetPassword />} />
+          <Route path="/reset" element={<ResetPassword />} />
           <Route path="/register" element={<RegisterPage />} />
           <Route path="/verify-email" element={<VerifyEmailComponent />} />
 

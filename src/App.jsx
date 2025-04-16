@@ -13,7 +13,6 @@ import { FeedbackProvider } from "./context/FeedbackContext";
 import usePageNavigation from "./hooks/usePageNavigation";
 
 import HomePage from "./pages/HomePage";
-import PricePage from "./pages/other_pages/PricePage";
 import PageNotFound from "./pages/other_pages/PageNotFound";
 import ProfilePage from "./pages/other_pages/ProfilePage";
 import DeleteAccountPage from "./pages/other_pages/DeleteAccountPage";
@@ -70,7 +69,6 @@ function AppContent() {
 
           {/* Blog yazarları için */}
 
-          <Route path="/plans" element={<PricePage />} />
           <Route path="/about-us" element={<AboutUsPage />} />
           <Route path="/disclaimer" element={<DisclaimerPage />} />
           <Route path="/privacy-policy" element={<PrivacyPolicyPage />} />

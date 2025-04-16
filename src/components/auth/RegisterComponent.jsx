@@ -83,18 +83,18 @@ export default function RegisterComponent() {
     <div className="flex h-full w-full items-center justify-center py-8">
       <div className="flex w-full max-w-sm flex-col gap-4 rounded-large bg-gray-50 p-8 shadow-small">
         <div className="flex flex-col items-center pb-6">
-          <p className="text-xl font-medium">Welcome</p>
+          <p className="text-xl font-medium">Hoş Geldiniz</p>
           <p className="text-small text-default-500">
-            Create an account to get started
+            Başlamak için bir hesap oluşturun
           </p>
         </div>
 
         <form className="flex flex-col gap-3" onSubmit={handleSubmit}>
           <Input
             isRequired
-            label="Username"
+            label="Kullanıcı Adı"
             name="userName"
-            placeholder="Enter your userName"
+            placeholder="Kullanıcı adınızı girin"
             type="text"
             variant="bordered"
             onChange={handleChange}
@@ -102,9 +102,9 @@ export default function RegisterComponent() {
 
           <Input
             isRequired
-            label="Email Address"
+            label="E-posta Adresi"
             name="email"
-            placeholder="Enter your email"
+            placeholder="E-posta adresinizi girin"
             type="email"
             variant="bordered"
             onChange={handleChange}
@@ -112,9 +112,9 @@ export default function RegisterComponent() {
 
           <Input
             isRequired
-            label="Password"
+            label="Şifre"
             name="password"
-            placeholder="Enter your password"
+            placeholder="Şifrenizi girin"
             type={isVisible ? "text" : "password"}
             variant="bordered"
             endContent={
@@ -132,9 +132,9 @@ export default function RegisterComponent() {
 
           <Input
             isRequired
-            label="Confirm Password"
+            label="Şifreyi Onayla"
             name="confirmPassword"
-            placeholder="Confirm your password"
+            placeholder="Şifrenizi tekrar girin"
             type={isConfirmVisible ? "text" : "password"}
             variant="bordered"
             endContent={
@@ -153,13 +153,13 @@ export default function RegisterComponent() {
           />
 
           <Checkbox isRequired className="py-4" size="sm">
-            I agree with the&nbsp;
+            Kabul ediyorum&nbsp;
             <Link href="#" size="sm">
-              Terms
+              Kullanım Koşulları
             </Link>
-            &nbsp;and&nbsp;
+            &nbsp;ve&nbsp;
             <Link href="#" size="sm">
-              Privacy Policy
+              Gizlilik Politikası
             </Link>
           </Checkbox>
 
@@ -167,14 +167,14 @@ export default function RegisterComponent() {
             className="bg-primary-600 text-white hover:bg-primary-700"
             type="submit"
           >
-            Sign Up
+            Kayıt Ol
           </Button>
         </form>
 
         <p className="text-center text-small mt-4">
-          Already have an account?&nbsp;
+          Zaten bir hesabınız var mı?&nbsp;
           <Link href="/login" size="sm">
-            Log In
+            Giriş Yap
           </Link>
         </p>
       </div>

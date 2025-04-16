@@ -14,9 +14,9 @@ export default function Footer() {
 
   const companyLinks = [
     { name: "Yazarlar", path: "/team" },
-    { name: "About us", path: "/about-us" },
-    { name: "Privacy Policy", path: "/privacy-policy" },
-    { name: "Terms of Service", path: "/disclaimer" },
+    { name: "Hakkımızda", path: "/about-us" },
+    { name: "Gizlilik Politikası", path: "/privacy-policy" },
+    { name: "Kullanım Koşulları", path: "/disclaimer" },
   ];
 
   return (
@@ -66,7 +66,7 @@ export default function Footer() {
 
       {/* Footer Bottom */}
       <div className="mt-8 border-t border-gray-600 text-center py-4 text-sm">
-        <p>© 2024 Learn Deep Invest. All rights reserved.</p>
+        <p>© 2024 Learn Deep Invest. Tüm hakları saklıdır.</p>
       </div>
     </footer>
   );

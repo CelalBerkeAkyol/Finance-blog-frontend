@@ -221,7 +221,7 @@ function CustomNavbar() {
                   className="px-3 py-1 hover:text-primary"
                   style={navTextStyle}
                 >
-                  Login
+                  Giriş Yap
                 </button>
               </NavbarItem>
 
@@ -231,7 +231,7 @@ function CustomNavbar() {
                   className="px-3 py-1 hover:text-primary"
                   style={navTextStyle}
                 >
-                  Register
+                  Kayıt Ol
                 </button>
               </NavbarItem>
             </>
@@ -282,7 +282,7 @@ function CustomNavbar() {
                       className="w-full text-left py-4 hover:text-primary"
                       style={navTextStyle}
                     >
-                      Profile ({userName})
+                      Profil ({userName})
                     </button>
                   </NavbarMenuItem>
                 )}
@@ -298,7 +298,7 @@ function CustomNavbar() {
                     className="w-full text-left py-4 hover:text-primary"
                     style={navTextStyle}
                   >
-                    Login
+                    Giriş Yap
                   </button>
                 </NavbarMenuItem>
                 <NavbarMenuItem>
@@ -307,7 +307,7 @@ function CustomNavbar() {
                     className="w-full text-left py-4 hover:text-primary"
                     style={navTextStyle}
                   >
-                    Register
+                    Kayıt Ol
                   </button>
                 </NavbarMenuItem>
               </>

@@ -54,19 +54,21 @@ export default function LoginComponent() {
       });
       setLoginError(response.data.message);
     } catch (error) {
-      setLoginError(error.message || "Failed to resend verification email");
+      setLoginError(
+        error.message || "Doğrulama e-postası gönderilirken hata oluştu"
+      );
     }
   };
 
   return (
     <div className="flex h-full justify-center my-14">
       <div className="flex w-full max-w-sm flex-col gap-4 rounded-large bg-gray-50 px-8 pb-10 pt-6 shadow-small">
-        <p className="pb-2 text-xl font-medium">Log In</p>
+        <p className="pb-2 text-xl font-medium">Giriş Yap</p>
         <form className="flex flex-col gap-3" onSubmit={handleSubmit}>
           <Input
-            label="email"
+            label="E-posta"
             name="email"
-            placeholder="Enter your email"
+            placeholder="E-posta adresinizi girin"
             type="text"
             variant="bordered"
             value={formData.email}
@@ -93,9 +95,9 @@ export default function LoginComponent() {
                 )}
               </button>
             }
-            label="Password"
+            label="Şifre"
             name="password"
-            placeholder="Enter your password"
+            placeholder="Şifrenizi girin"
             type={isVisible ? "text" : "password"}
             variant="bordered"
             value={formData.password}
@@ -119,10 +121,10 @@ export default function LoginComponent() {
           )}
           <div className="flex items-center justify-between px-1 py-2">
             <Checkbox name="remember" size="sm">
-              Remember me
+              Beni hatırla
             </Checkbox>
             <Link className="text-default-500" href="/forget" size="sm">
-              Forgot password?
+              Şifremi unuttum
             </Link>
           </div>
           {loginError === "ACCOUNT_NOT_VERIFIED" && (
@@ -131,7 +133,9 @@ export default function LoginComponent() {
               onClick={resendVerificationEmail}
               type="button"
             >
-              {isLoading ? "Loading..." : "Resend Verification Email?"}
+              {isLoading
+                ? "Yükleniyor..."
+                : "Doğrulama E-postasını Tekrar Gönder"}
             </Button>
           )}
           <Button
@@ -139,7 +143,7 @@ export default function LoginComponent() {
             type="submit"
             isDisabled={isLoading}
           >
-            {isLoading ? "Loading..." : "Log In"}
+            {isLoading ? "Yükleniyor..." : "Giriş Yap"}
           </Button>
         </form>
       </div>

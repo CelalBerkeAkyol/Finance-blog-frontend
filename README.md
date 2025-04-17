@@ -60,7 +60,7 @@ The project uses environment variables for configuration. Create a `.env` file i
 
 ```
 # API URL'leri
-VITE_API_URL=http://localhost:3000/blog
+VITE_API_URL=http://localhost:3000/api
 
 # Loglama ayarları
 VITE_ENABLE_LOGGING=true
@@ -75,7 +75,7 @@ For production, create a `.env.production` file with appropriate values:
 
 ```
 # API URL'leri - Üretim ortamında gerçek API URL'nizi kullanın
-VITE_API_URL=https://api.finai.com/blog
+VITE_API_URL=https://api.finai.com/api
 
 # Loglama ayarları - Üretim ortamında loglama kapalı
 VITE_ENABLE_LOGGING=false

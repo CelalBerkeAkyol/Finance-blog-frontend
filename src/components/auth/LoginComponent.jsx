@@ -1,9 +1,10 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { Button, Input, Checkbox, Link } from "@nextui-org/react";
 import { Icon } from "@iconify/react";
 import { useDispatch, useSelector } from "react-redux";
 import { loginUser, clearState } from "../../app/features/user/userSlice";
 import { useNavigate } from "react-router-dom";
+import api from "../../api";
 
 export default function LoginComponent() {
   const dispatch = useDispatch();
@@ -12,6 +13,7 @@ export default function LoginComponent() {
     useSelector((state) => state.user);
   const [isVisible, setIsVisible] = useState(false);
   const [formData, setFormData] = useState({ email: "", password: "" });
+  const [loginError, setLoginError] = useState("");
 
   // Redirects to the home page when `isSuccess` becomes true.
   useEffect(() => {
@@ -36,20 +38,37 @@ export default function LoginComponent() {
     setFormData({ ...formData, [name]: value });
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    dispatch(loginUser(formData));
+    const res = await dispatch(loginUser(formData));
+
+    if (res.payload.code === "ACCOUNT_NOT_VERIFIED") {
+      setLoginError(res.payload.code);
+    }
+  };
+
+  const resendVerificationEmail = async () => {
+    try {
+      const response = await api.post("/auth/resend-verification-email", {
+        email: formData.email,
+      });
+      setLoginError(response.data.message);
+    } catch (error) {
+      setLoginError(
+        error.message || "Doğrulama e-postası gönderilirken hata oluştu"
+      );
+    }
   };
 
   return (
     <div className="flex h-full justify-center my-14">
       <div className="flex w-full max-w-sm flex-col gap-4 rounded-large bg-gray-50 px-8 pb-10 pt-6 shadow-small">
-        <p className="pb-2 text-xl font-medium">Log In</p>
+        <p className="pb-2 text-xl font-medium">Giriş Yap</p>
         <form className="flex flex-col gap-3" onSubmit={handleSubmit}>
           <Input
-            label="email"
+            label="E-posta"
             name="email"
-            placeholder="Enter your email"
+            placeholder="E-posta adresinizi girin"
             type="text"
             variant="bordered"
             value={formData.email}
@@ -76,9 +95,9 @@ export default function LoginComponent() {
                 )}
               </button>
             }
-            label="Password"
+            label="Şifre"
             name="password"
-            placeholder="Enter your password"
+            placeholder="Şifrenizi girin"
             type={isVisible ? "text" : "password"}
             variant="bordered"
             value={formData.password}
@@ -90,22 +109,41 @@ export default function LoginComponent() {
               errorCode === "INVALID_PASSWORD" ||
               errorCode === "SERVER_ERROR" ||
               errorCode === "ACCOUNT_DEACTIVATED") && (
-              <p className="text-red-500 text-sm">{errorMessage}</p>
+              <p className="bg-red-500 text-white p-2 rounded-md text-sm">
+                {errorMessage}
+              </p>
             )}
+
+          {loginError && (
+            <p className="bg-red-500 text-white text-center p-2 rounded-md text-sm">
+              {loginError}
+            </p>
+          )}
           <div className="flex items-center justify-between px-1 py-2">
             <Checkbox name="remember" size="sm">
-              Remember me
+              Beni hatırla
             </Checkbox>
-            <Link className="text-default-500" href="#" size="sm">
-              Forgot password?
+            <Link className="text-default-500" href="/forget" size="sm">
+              Şifremi unuttum
             </Link>
           </div>
+          {loginError === "ACCOUNT_NOT_VERIFIED" && (
+            <Button
+              className="bg-primary-600 text-white hover:bg-primary-700"
+              onClick={resendVerificationEmail}
+              type="button"
+            >
+              {isLoading
+                ? "Yükleniyor..."
+                : "Doğrulama E-postasını Tekrar Gönder"}
+            </Button>
+          )}
           <Button
             className="bg-primary-600 text-white hover:bg-primary-700"
             type="submit"
             isDisabled={isLoading}
           >
-            {isLoading ? "Loading..." : "Log In"}
+            {isLoading ? "Yükleniyor..." : "Giriş Yap"}
           </Button>
         </form>
       </div>

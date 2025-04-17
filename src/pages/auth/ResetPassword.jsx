@@ -1,15 +1,15 @@
+import ResetPasswordComponent from "../../components/auth/ResetPasswordComponent";
 import BannerComponent from "../../components/header/BannerComponent";
 import CustomNavbar from "../../components/header/CustomNavbar";
-import PriceTableComponent from "../../components/tanıtım_page/PriceTableComponent";
 
-function PricePage() {
+function ResetPassword() {
   return (
     <>
       <BannerComponent />
       <CustomNavbar />
-      <PriceTableComponent />
+      <ResetPasswordComponent />
     </>
   );
 }
 
-export default PricePage;
+export default ResetPassword;

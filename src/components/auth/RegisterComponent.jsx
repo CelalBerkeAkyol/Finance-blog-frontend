@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { registerUser, clearState } from "../../app/features/user/userSlice";
 import { Button, Input, Checkbox, Link, Divider } from "@heroui/react";
@@ -13,7 +13,7 @@ export default function RegisterComponent() {
   // Feedback context'i kullan
   const { error: showError, success, warning } = useFeedback();
 
-  const { isSuccess, isError, errorMessage } = useSelector(
+  const { isSuccess, isError, errorMessage, errorCode } = useSelector(
     (state) => state.user
   );
 
@@ -49,13 +49,21 @@ export default function RegisterComponent() {
   // Kayıt başarılı olduğunda yönlendirme ve state temizleme
   useEffect(() => {
     if (isSuccess) {
-      success("Hesabınız başarıyla oluşturuldu!");
+      success(
+        "Hesabınız başarıyla oluşturuldu!\nE-postanızı kontrol ederek hesabınızı doğrulayın."
+      );
       dispatch(clearState()); // State temizliği
-      navigate("/"); // Login sayfasına yönlendirme
+      navigate("/");
     }
 
     if (isError) {
-      showError(errorMessage || "Kayıt işlemi sırasında bir hata oluştu.");
+      // Auth_required hatası kullanıcıya gösterilmeyecek
+      if (errorMessage && errorCode === "AUTH_REQUIRED") {
+        // Sessizce işlem yap, kullanıcıya gösterme
+        dispatch(clearState());
+      } else {
+        showError(errorMessage || "Kayıt işlemi sırasında bir hata oluştu.");
+      }
     }
 
     return () => {
@@ -75,18 +83,18 @@ export default function RegisterComponent() {
     <div className="flex h-full w-full items-center justify-center py-8">
       <div className="flex w-full max-w-sm flex-col gap-4 rounded-large bg-gray-50 p-8 shadow-small">
         <div className="flex flex-col items-center pb-6">
-          <p className="text-xl font-medium">Welcome</p>
+          <p className="text-xl font-medium">Hoş Geldiniz</p>
           <p className="text-small text-default-500">
-            Create an account to get started
+            Başlamak için bir hesap oluşturun
           </p>
         </div>
 
         <form className="flex flex-col gap-3" onSubmit={handleSubmit}>
           <Input
             isRequired
-            label="Username"
+            label="Kullanıcı Adı"
             name="userName"
-            placeholder="Enter your userName"
+            placeholder="Kullanıcı adınızı girin"
             type="text"
             variant="bordered"
             onChange={handleChange}
@@ -94,9 +102,9 @@ export default function RegisterComponent() {
 
           <Input
             isRequired
-            label="Email Address"
+            label="E-posta Adresi"
             name="email"
-            placeholder="Enter your email"
+            placeholder="E-posta adresinizi girin"
             type="email"
             variant="bordered"
             onChange={handleChange}
@@ -104,9 +112,9 @@ export default function RegisterComponent() {
 
           <Input
             isRequired
-            label="Password"
+            label="Şifre"
             name="password"
-            placeholder="Enter your password"
+            placeholder="Şifrenizi girin"
             type={isVisible ? "text" : "password"}
             variant="bordered"
             endContent={
@@ -124,9 +132,9 @@ export default function RegisterComponent() {
 
           <Input
             isRequired
-            label="Confirm Password"
+            label="Şifreyi Onayla"
             name="confirmPassword"
-            placeholder="Confirm your password"
+            placeholder="Şifrenizi tekrar girin"
             type={isConfirmVisible ? "text" : "password"}
             variant="bordered"
             endContent={
@@ -145,13 +153,13 @@ export default function RegisterComponent() {
           />
 
           <Checkbox isRequired className="py-4" size="sm">
-            I agree with the&nbsp;
+            Kabul ediyorum&nbsp;
             <Link href="#" size="sm">
-              Terms
+              Kullanım Koşulları
             </Link>
-            &nbsp;and&nbsp;
+            &nbsp;ve&nbsp;
             <Link href="#" size="sm">
-              Privacy Policy
+              Gizlilik Politikası
             </Link>
           </Checkbox>
 
@@ -159,37 +167,14 @@ export default function RegisterComponent() {
             className="bg-primary-600 text-white hover:bg-primary-700"
             type="submit"
           >
-            Sign Up
+            Kayıt Ol
           </Button>
         </form>
 
-        <div className="flex items-center gap-4 py-2">
-          <Divider className="flex-1" />
-          <p className="shrink-0 text-tiny text-default-500">OR</p>
-          <Divider className="flex-1" />
-        </div>
-
-        <div className="flex flex-col gap-2">
-          <Button
-            startContent={<Icon icon="flat-color-icons:google" width={24} />}
-            variant="bordered"
-          >
-            Sign Up with Google
-          </Button>
-          <Button
-            startContent={
-              <Icon className="text-default-500" icon="fe:github" width={24} />
-            }
-            variant="bordered"
-          >
-            Sign Up with Github
-          </Button>
-        </div>
-
-        <p className="text-center text-small">
-          Already have an account?&nbsp;
+        <p className="text-center text-small mt-4">
+          Zaten bir hesabınız var mı?&nbsp;
           <Link href="/login" size="sm">
-            Log In
+            Giriş Yap
           </Link>
         </p>
       </div>

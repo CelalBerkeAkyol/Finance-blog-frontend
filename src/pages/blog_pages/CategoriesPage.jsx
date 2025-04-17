@@ -2,11 +2,13 @@
 import React, { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import axios from "../../api";
-import { Spinner } from "@nextui-org/react";
+import { Spinner, Pagination } from "@nextui-org/react";
 import CustomNavbar from "../../components/header/CustomNavbar";
 import { useFeedback } from "../../context/FeedbackContext";
 import { Icon } from "@iconify/react";
 import ErrorComponent from "../../components/error/ErrorComponent";
+import useScrollToTop from "../../hooks/useScrollToTop";
+import { scrollToTop } from "../../utils/scrollHelpers";
 
 // Kategori isimlerini okunabilir hale getiriyor
 function slugToReadable(slug) {
@@ -37,8 +39,15 @@ const CategoriesPage = () => {
   const [categories, setCategories] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [page, setPage] = useState(1);
   const { error: showError } = useFeedback();
   const navigate = useNavigate();
+
+  // Items per page
+  const itemsPerPage = 9;
+
+  // Page değiştiğinde sayfayı en üste kaydır
+  useScrollToTop(page, { behavior: "auto", delay: 100 });
 
   useEffect(() => {
     const fetchCategories = async () => {
@@ -60,26 +69,32 @@ const CategoriesPage = () => {
     fetchCategories();
   }, [showError]);
 
+  const handlePageChange = (newPage) => {
+    // Önce sayfayı tam olarak en üste kaydır, sonra sayfa değişimini gerçekleştir
+    scrollToTop({ behavior: "instant", delay: 0 });
+    setPage(newPage);
+  };
+
   if (loading) {
     return (
-      <>
+      <div className="flex flex-col min-h-screen">
         <CustomNavbar />
-        <div className="min-h-screen bg-gray-50 flex justify-center items-center">
+        <div className="flex-grow flex justify-center items-center">
           <Spinner
             size="lg"
             color="primary"
             label="Kategoriler yükleniyor..."
           />
         </div>
-      </>
+      </div>
     );
   }
 
   if (error) {
     return (
-      <>
+      <div className="flex flex-col min-h-screen">
         <CustomNavbar />
-        <div className="min-h-screen bg-gray-50 flex flex-col justify-center items-center px-4">
+        <div className="flex-grow flex justify-center items-center px-4">
           <ErrorComponent
             message={error}
             code="FETCH_ERROR"
@@ -87,64 +102,94 @@ const CategoriesPage = () => {
             actionText="Tekrar Dene"
           />
         </div>
-      </>
+      </div>
     );
   }
 
+  // Paginate categories
+  const totalPages = Math.ceil(categories.length / itemsPerPage);
+  const startIndex = (page - 1) * itemsPerPage;
+  const endIndex = startIndex + itemsPerPage;
+  const paginatedCategories = categories.slice(startIndex, endIndex);
+
   return (
-    <>
+    <div className="flex flex-col min-h-screen">
       <CustomNavbar />
-      <div className="min-h-screen bg-gray-50 py-16 px-4 sm:px-6 lg:px-8">
-        <div className="max-w-7xl mx-auto">
-          <div className="text-center mb-12">
-            <h1 className="text-3xl font-bold text-gray-900 sm:text-4xl mb-3">
-              Kategorilerimizi Keşfedin
-            </h1>
-            <p className="text-lg text-gray-600 max-w-2xl mx-auto">
-              İlgi alanınıza uygun kategorilere göz atın ve en güncel makaleleri
-              keşfedin.
-            </p>
-          </div>
+      <main className="flex-grow">
+        <div
+          className="bg-white py-2 mb-12 min-h-full"
+          id="categories-list-top"
+        >
+          <div className="mx-auto max-w-7xl px-3 sm:px-6 lg:px-8">
+            <div className="mx-auto my-4 sm:my-6 text-start bg-gradient-to-r from-gray-800 to-gray-700 text-white py-4 px-4 rounded-lg shadow-lg">
+              <h1 className="text-2xl sm:text-3xl font-bold">Kategoriler</h1>
+              <p className="mt-2 text-sm sm:text-base text-gray-300">
+                İlgi alanlarınıza göre içerikleri keşfedin.
+              </p>
+            </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {categories.map((category) => {
-              const { icon, color } = getCategoryIcon(category);
+            <div className="border-t border-gray-200 pt-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-3 sm:gap-4 md:gap-5">
+                {paginatedCategories.map((category) => {
+                  const { icon, color } = getCategoryIcon(category);
 
-              return (
-                <Link
-                  key={category}
-                  to={`/blog/category/${encodeURIComponent(category)}`}
-                  className="transform transition-all duration-300 hover:scale-105"
-                >
-                  <div className="bg-white rounded-xl shadow-md overflow-hidden h-full border border-gray-100">
-                    <div className="px-6 py-8 sm:p-10 h-full flex flex-col">
-                      <div className="flex items-center mb-4">
-                        <div className={`p-2 rounded-lg ${color} mr-4`}>
-                          <Icon icon={icon} className="text-white text-2xl" />
+                  return (
+                    <article
+                      key={category}
+                      className="flex flex-col w-full h-full bg-white shadow-sm hover:shadow-md rounded-md overflow-hidden transition-all border border-gray-100 cursor-pointer"
+                      onClick={() =>
+                        navigate(
+                          `/blog/category/${encodeURIComponent(category)}`
+                        )
+                      }
+                    >
+                      <div className="p-3 sm:p-4 flex-grow">
+                        <div className="flex items-center mb-3">
+                          <div className={`p-2 rounded-lg ${color} mr-3`}>
+                            <Icon icon={icon} className="text-white text-xl" />
+                          </div>
+                          <h3 className="text-lg font-semibold text-gray-900">
+                            {slugToReadable(category)}
+                          </h3>
                         </div>
-                        <h3 className="text-xl font-semibold text-gray-800">
-                          {slugToReadable(category)}
-                        </h3>
+                        <div className="text-gray-600 text-sm line-clamp-3">
+                          {slugToReadable(category)} kategorisindeki makaleler,
+                          analizler ve detaylı içerikleri görüntüleyin.
+                        </div>
                       </div>
-                      <p className="text-gray-600 mt-2 flex-grow">
-                        {slugToReadable(category)} kategorisindeki tüm
-                        makaleleri görüntüleyin.
-                      </p>
-                      <div className="mt-6 flex items-center text-primary">
-                        <span className="text-sm font-medium">
-                          Makaleleri Görüntüle
-                        </span>
-                        <Icon icon="mdi:arrow-right" className="ml-2 text-lg" />
+
+                      <div className="border-t border-gray-100 p-3 sm:p-4">
+                        <Link
+                          to={`/blog/category/${encodeURIComponent(category)}`}
+                          className="flex items-center text-primary text-sm font-medium"
+                          onClick={(e) => e.stopPropagation()}
+                        >
+                          <span>Makaleleri Görüntüle</span>
+                          <Icon icon="mdi:arrow-right" className="ml-2" />
+                        </Link>
                       </div>
-                    </div>
-                  </div>
-                </Link>
-              );
-            })}
+                    </article>
+                  );
+                })}
+              </div>
+            </div>
+
+            {/* Pagination */}
+            {totalPages > 1 && (
+              <div className="flex justify-center mt-8 mb-4">
+                <Pagination
+                  total={totalPages}
+                  page={page}
+                  onChange={handlePageChange}
+                  color="primary"
+                  showControls
+                />
+              </div>
+            )}
           </div>
         </div>
-      </div>
-    </>
+      </main>
+    </div>
   );
 };
 

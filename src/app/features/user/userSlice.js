@@ -52,6 +52,31 @@ const handleRegisterFulfilled = (state, action) => {
   state.isSuccess = true;
 };
 
+const handleForgotPasswordFulfilled = (state, action) => {
+  const message =
+    action.payload?.message || "Şifre sıfırlama e-postası gönderildi.";
+
+  // Şifre sıfırlama e-postasının başarıyla gönderildiğini bildir
+  logInfo("✉️ Şifre Sıfırlama", message);
+
+  // Kullanıcı giriş yapmadığı için sadece başarı durumunu güncelliyoruz
+  state.isLoading = false;
+  state.isSuccess = true;
+};
+
+const handleResetPasswordFulfilled = (state, action) => {
+  const message =
+    action.payload?.message || "Password has been successfully reset.";
+
+  // Notify that the password has been reset successfully
+  logInfo("🔒 Password Reset Successful", message);
+
+  // Reset password is usually followed by redirecting to login, so update state accordingly
+  state.isLoading = false;
+  state.isSuccess = true;
+  state.message = message;
+};
+
 // Logout fulfilled: Kullanıcı çıkışı sonrası state sıfırlanır.
 const handleLogoutFulfilled = (state) => {
   logInfo("✅ Çıkış", "Kullanıcı çıkış yaptı");
@@ -144,6 +169,46 @@ export const logoutUser = createAsyncThunk(
       return true;
     } catch (error) {
       const errMessage = error.message || "Çıkış yapılamadı.";
+      const errCode = error.code || "UNKNOWN_ERROR";
+      return thunkAPI.rejectWithValue({ message: errMessage, code: errCode });
+    }
+  }
+);
+
+// Forgot Password thunk – used when the user forgets their password
+export const forgotPasswordUser = createAsyncThunk(
+  "user/forgotPasswordUser",
+  async ({ email }, thunkAPI) => {
+    try {
+      const response = await axios.post(
+        "/auth/forgot-password",
+        { email },
+        { withCredentials: true }
+      );
+      return response.data;
+    } catch (error) {
+      const errMessage =
+        error.response?.data?.message || "Password reset failed.";
+      const errCode = error.code || "UNKNOWN_ERROR";
+      return thunkAPI.rejectWithValue({ message: errMessage, code: errCode });
+    }
+  }
+);
+
+// Reset Password thunk – used to set new password with token
+export const resetPasswordUser = createAsyncThunk(
+  "user/resetPasswordUser",
+  async ({ token, newPassword, email }, thunkAPI) => {
+    try {
+      const response = await axios.post(
+        "/auth/reset-password",
+        { token, newPassword, email },
+        { withCredentials: true }
+      );
+      return response.data;
+    } catch (error) {
+      const errMessage =
+        error.response?.data?.message || "Password reset failed.";
       const errCode = error.code || "UNKNOWN_ERROR";
       return thunkAPI.rejectWithValue({ message: errMessage, code: errCode });
     }
@@ -345,6 +410,18 @@ const userSlice = createSlice({
       .addCase(registerUser.fulfilled, handleRegisterFulfilled)
       .addCase(registerUser.rejected, (state, action) =>
         handleRejected(state, action, "Registration failed.")
+      )
+      // forgetpasswordUser
+      .addCase(forgotPasswordUser.pending, handlePending)
+      .addCase(forgotPasswordUser.fulfilled, handleForgotPasswordFulfilled)
+      .addCase(forgotPasswordUser.rejected, (state, action) =>
+        handleRejected(state, action, "Forget password failed.")
+      )
+      //resetPasswordUser
+      .addCase(resetPasswordUser.pending, handlePending)
+      .addCase(resetPasswordUser.fulfilled, handleResetPasswordFulfilled)
+      .addCase(resetPasswordUser.rejected, (state, action) =>
+        handleRejected(state, action, "Reset password failed.")
       )
       // logoutUser
       .addCase(logoutUser.pending, handlePending)

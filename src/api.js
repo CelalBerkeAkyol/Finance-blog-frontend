@@ -1,9 +1,13 @@
 // src/api.js
 import axios from "axios";
-import { logApiResponse } from "./utils/logger";
+import { logApiResponse, logApiRequest } from "./utils/logger";
 
-// Ortam değişkenlerinden API URL'sini al
-const API_URL = import.meta.env.VITE_API_URL;
+
+// Ortam değişkenlerinden API URL'sini al veya proxy kullan
+// Proxy kullanırken, doğrudan URL'e "/api" ekleyerek aynı origin'de kalıyoruz
+// Bu şekilde third-party cookie sorununu çözüyoruz
+const VITE_API_URL = import.meta.env.VITE_API_URL;
+
 
 // Hassas veri içeren alanların listesi (maskelenecek)
 const SENSITIVE_FIELDS = [
@@ -58,7 +62,7 @@ const maskSensitiveData = (data) => {
 
 // Axios instance oluştur
 const instance = axios.create({
-  baseURL: API_URL,
+  baseURL: VITE_API_URL,
   withCredentials: true,
   timeout: 30000,
   headers: {
@@ -67,6 +71,37 @@ const instance = axios.create({
   },
 });
 
+// Request interceptor ekliyoruz
+instance.interceptors.request.use(
+  (config) => {
+    // URL'den endpoint'i çıkar
+    const url = config.url;
+    const method = config.method?.toUpperCase() || "GET";
+    const endpoint = url.replace(VITE_API_URL, "");
+
+    // Request verilerini maskele (varsa)
+    let maskedData = null;
+    if (config.data) {
+      maskedData = maskSensitiveData(config.data);
+    }
+
+    // Tüm config içeriğini de maskele
+    const maskedConfig = { ...config };
+    if (maskedConfig.headers) {
+      maskedConfig.headers = { ...maskSensitiveData(maskedConfig.headers) };
+    }
+
+    // İstek formatlı log
+    logApiRequest(method, endpoint, maskedConfig, maskedData);
+
+    return config;
+  },
+  (error) => {
+    console.error("API Request Error:", error);
+    return Promise.reject(error);
+  }
+);
+
 // Response interceptor
 instance.interceptors.response.use(
   (response) => {
@@ -74,7 +109,7 @@ instance.interceptors.response.use(
     const url = response.config.url;
     const method = response.config.method.toUpperCase();
     const status = response.status;
-    const endpoint = url.replace(API_URL, "");
+    const endpoint = url.replace(VITE_API_URL, "");
 
     // Yanıt verilerinde hassas bilgileri maskele
     const maskedData = maskSensitiveData(response.data);
@@ -100,7 +135,7 @@ instance.interceptors.response.use(
       const method = error.config.method?.toUpperCase() || "REQUEST";
       const url = error.config.url || "UNKNOWN_URL";
       const status = error.response?.status || 0;
-      const endpoint = url.replace(API_URL, "") || "/unknown";
+      const endpoint = url.replace(VITE_API_URL, "") || "/unknown";
 
       // Hata verilerinde de hassas bilgileri maskele
       const errorData = {

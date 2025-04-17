@@ -13,10 +13,9 @@ import { FeedbackProvider } from "./context/FeedbackContext";
 import usePageNavigation from "./hooks/usePageNavigation";
 
 import HomePage from "./pages/HomePage";
-import PricePage from "./pages/other_pages/PricePage";
 import PageNotFound from "./pages/other_pages/PageNotFound";
-import ProfilePage from "./pages/other_pages/ProfilePage";
-import DeleteAccountPage from "./pages/other_pages/DeleteAccountPage";
+import ProfilePage from "./pages/dashboard_pages/ProfilePage";
+import DeleteAccountPage from "./pages/auth/DeleteAccountPage";
 import TeamPage from "./pages/other_pages/TeamPage";
 import AboutUsPage from "./pages/other_pages/AboutUsPage";
 import DisclaimerPage from "./pages/other_pages/DisclaimerPage";
@@ -36,6 +35,8 @@ import UsersPage from "./pages/dashboard_pages/UsersPage";
 
 import LoginPage from "./pages/auth/LoginPage";
 import RegisterPage from "./pages/auth/RegisterPage";
+import ForgetPassword from "./pages/auth/ForgetPassword";
+import ResetPassword from "./pages/auth/ResetPassword";
 
 import ProtectedRoute from "./components/auth/ProtectedRoute";
 import BlogPostPage from "./pages/blog_pages/BlogPostPage";
@@ -45,6 +46,7 @@ import CategoryBasePostsPage from "./pages/blog_pages/CategoryBasePostsPage";
 import CategoriesPage from "./pages/blog_pages/CategoriesPage";
 
 import CheatSheet from "./components/blog_components/blog_dashboard/helpers/CheatSheet";
+import VerifyEmailComponent from "./components/auth/VerifyEmailComponent";
 
 // Sayfa navigasyonu ve scroll yönetimini sağlayan bileşen
 function AppContent() {
@@ -67,12 +69,15 @@ function AppContent() {
 
           {/* Blog yazarları için */}
 
-          <Route path="/plans" element={<PricePage />} />
           <Route path="/about-us" element={<AboutUsPage />} />
           <Route path="/disclaimer" element={<DisclaimerPage />} />
           <Route path="/privacy-policy" element={<PrivacyPolicyPage />} />
           <Route path="/login" element={<LoginPage />} />
+          <Route path="/forget" element={<ForgetPassword />} />
+          <Route path="/reset" element={<ResetPassword />} />
           <Route path="/register" element={<RegisterPage />} />
+          <Route path="/verify-email" element={<VerifyEmailComponent />} />
+
           <Route path="/team" element={<TeamPage />} />
           <Route
             path="/delete-account"

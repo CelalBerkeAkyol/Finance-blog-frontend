@@ -72,13 +72,10 @@ const CheatSheet = () => {
   return (
     <div className="flex min-h-screen w-full">
       <BlogSidebarComponent />
-      <div className="flex-1 p-4 md:p-6 overflow-x-auto">
-        <h1 className="text-2xl font-bold mb-4">📖 Markdown Cheat Sheet</h1>
-        <div className="bg-white shadow-lg rounded-lg p-6">
-          <ReactMarkdown className="prose max-w-none">
-            {markdownContent}
-          </ReactMarkdown>
-        </div>
+      <div className="flex-1 p-4 md:p-6 overflow-x-auto bg-white shadow-lg rounded-lg">
+        <ReactMarkdown className="prose max-w-none">
+          {markdownContent}
+        </ReactMarkdown>
       </div>
     </div>
   );

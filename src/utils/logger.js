@@ -388,6 +388,107 @@ export function logApiResponse(method, endpoint, statusCode, data = null) {
 }
 
 /**
+ * API Request loglarını formatlı ve renkli gösterir
+ * @param {string} method - HTTP method (GET, POST, PUT, DELETE)
+ * @param {string} endpoint - API endpoint (/auth/login, /posts, etc.)
+ * @param {object} config - Request konfigürasyonu
+ * @param {object} data - Request gövdesi (hassas veriler maskelenmiş olmalı)
+ */
+export function logApiRequest(method, endpoint, config = {}, data = null) {
+  // Check if logging should be performed
+  if (!shouldLog("debug")) {
+    return; // Skip logging if not meeting log level requirements
+  }
+
+  // Request renkleri - response'dan farklı olması için mor tonları kullanıyoruz
+  const color = "#8B5CF6"; // mor
+  const bgColor = "rgba(139, 92, 246, 0.1)";
+  const status = "REQUEST";
+
+  // Log objesi oluştur
+  const logObject = createLogObject(
+    "debug",
+    `API Request [${method}] ${endpoint}`,
+    data
+  );
+
+  const baseStyle = `color: ${color}; font-weight: bold; background: ${bgColor}; padding: 2px 6px; border-radius: 3px; border-left: 3px solid ${color};`;
+
+  // Veri varsa, katlanabilir grup kullan
+  if ((data || config) && shouldLog("debug")) {
+    // Grup başlığını göster (tıklanabilir)
+    console.groupCollapsed(
+      `%c[${status}] API Request [${method}] ${endpoint}`,
+      baseStyle
+    );
+
+    // Grup içinde detay göster
+    console.log(
+      "%cEndpoint:",
+      "font-weight: bold; margin-right: 4px;",
+      `${method} ${endpoint}`
+    );
+
+    if (config.headers) {
+      console.log(
+        "%cHeaders:",
+        "font-weight: bold; margin-right: 4px;",
+        config.headers
+      );
+    }
+
+    if (data) {
+      console.log(
+        "%cRequest Data:",
+        `color: ${color}; font-weight: bold; margin-right: 4px;`,
+        data
+      );
+    }
+
+    // Config detaylarını göster
+    console.log("%cConfig:", "font-weight: bold; margin-right: 4px;", {
+      ...config,
+      headers: config.headers,
+    });
+
+    // Bitti
+    console.groupEnd();
+  } else {
+    // Veri yoksa sadece normal log göster
+    console.log(`%c[${status}] API Request [${method}] ${endpoint}`, baseStyle);
+  }
+
+  // Logları localStorage'a kaydet, konsola tekrar yazdırmadan
+  try {
+    let logs = [];
+    const storedLogs = localStorage.getItem("application_logs");
+
+    if (storedLogs) {
+      try {
+        logs = JSON.parse(storedLogs);
+        if (!Array.isArray(logs)) logs = [];
+      } catch (e) {
+        logs = [];
+      }
+    }
+
+    // Logları ekle
+    logs.push({
+      ...logObject,
+      // Özel formatlanmış log için stil bilgisini ekle
+      _styleInfo: { color, bgColor, status },
+    });
+
+    // Son 1000 logu tut
+    if (logs.length > 1000) logs.shift();
+
+    localStorage.setItem("application_logs", JSON.stringify(logs));
+  } catch (e) {
+    // Sessizce devam et
+  }
+}
+
+/**
  * Logları dışa aktarır
  */
 export function exportLogs() {
@@ -432,6 +533,7 @@ export default {
   logDebug,
   logSuccess,
   logApiResponse,
+  logApiRequest,
   exportLogs,
   clearLogs,
 };

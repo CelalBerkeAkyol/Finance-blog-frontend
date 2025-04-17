@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React from "react";
 import { useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import ProfileComponent from "../../components/blog_components/blog_dashboard/users/ProfileComponent";
@@ -6,7 +6,7 @@ import { Spinner } from "@nextui-org/react";
 import BlogSidebarComponent from "../../components/blog_components/blog_dashboard/BlogSidebarComponent";
 
 const ProfilePage = () => {
-  const { isLoading } = useSelector((state) => state.user);
+  const { isLoading, userInfo } = useSelector((state) => state.user);
 
   // Yükleme durumunda gösterilecek içerik
   if (isLoading) {

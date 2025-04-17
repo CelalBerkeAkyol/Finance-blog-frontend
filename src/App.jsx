@@ -14,8 +14,8 @@ import usePageNavigation from "./hooks/usePageNavigation";
 
 import HomePage from "./pages/HomePage";
 import PageNotFound from "./pages/other_pages/PageNotFound";
-import ProfilePage from "./pages/other_pages/ProfilePage";
-import DeleteAccountPage from "./pages/other_pages/DeleteAccountPage";
+import ProfilePage from "./pages/dashboard_pages/ProfilePage";
+import DeleteAccountPage from "./pages/auth/DeleteAccountPage";
 import TeamPage from "./pages/other_pages/TeamPage";
 import AboutUsPage from "./pages/other_pages/AboutUsPage";
 import DisclaimerPage from "./pages/other_pages/DisclaimerPage";

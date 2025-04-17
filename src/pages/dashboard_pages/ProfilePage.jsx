@@ -21,11 +21,6 @@ const ProfilePage = () => {
     <div className="flex min-h-screen w-full">
       <BlogSidebarComponent />
       <div className="flex-1 p-4 md:p-6 overflow-x-auto">
-        <h1 className="text-2xl font-bold">Profil Sayfası</h1>
-        <p className="text-sm text-gray-500 mb-4">
-          Bu sayfada profil bilgilerinizi görüntüleyebilir ve
-          düzenleyebilirsiniz.
-        </p>
         <ProfileComponent />
       </div>
     </div>

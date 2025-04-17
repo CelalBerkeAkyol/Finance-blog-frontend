@@ -43,7 +43,7 @@ export default function Component() {
             </Button>
             <Button
               as={Link}
-              to="/plans"
+              to="/"
               className="h-10 w-[163px] border-1 border-default-100 px-[16px] py-[10px] text-small font-medium leading-5"
               endContent={
                 <span className="pointer-events-none flex h-[22px] w-[22px] items-center justify-center rounded-full bg-default-100">

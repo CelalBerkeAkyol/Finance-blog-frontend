@@ -24,19 +24,14 @@ import LogoutComponent from "../auth/LogoutComponent";
 // Navbar bağlantıları ve kategorileri bileşen dışına taşıyarak her render'da yeniden oluşturulmasını önlüyoruz
 const navbarLinks = [
   { name: "Ana Sayfa", path: "/" },
-  { name: "Blog", path: "/blog/posts" },
+  { name: "Son Yazılar", path: "/blog/posts" },
   { name: "Kategoriler", path: "/blog/categories" },
-  { name: "Ekibimiz", path: "/team" },
-  { name: "Araştırma", path: "/blog/category/arastirma" },
-  { name: "Data Science", path: "/blog/category/data-science" },
-  { name: "Machine Learning", path: "/blog/category/machine-learning" },
 ];
 
 const categories = [
-  { name: "Makro Ekonomi", path: "/blog/category/makro-ekonomi" },
-  { name: "Mikro Ekonomi", path: "/blog/category/mikro-ekonomi" },
-  { name: "Finans", path: "/blog/category/finans" },
-  { name: "Kişisel Finans", path: "/blog/category/kişisel-finans" },
+  { name: "Araştırma", path: "/blog/category/arastirma" },
+  { name: "Data Science", path: "/blog/category/data-science" },
+  { name: "Machine Learning", path: "/blog/category/machine-learning" },
 ];
 
 // Seçici fonksiyonları bileşen dışına taşıyarak her render'da yeniden oluşturulmasını önlüyoruz
@@ -133,7 +128,7 @@ function CustomNavbar() {
 
         {/* Logo */}
         <NavbarBrand className="mr-0 sm:mr-4">
-          <p className="font-bold text-inherit text-lg">Fin AI</p>
+          <p className="font-bold text-inherit text-lg">Learn Deep Invest</p>
         </NavbarBrand>
 
         {/* Ana Navigasyon Bağlantıları - tablet ve desktop */}
@@ -160,7 +155,7 @@ function CustomNavbar() {
                 }
                 style={navTextStyle}
               >
-                Ekonomi & Finans
+                Popüler Kategoriler
               </Button>
             </DropdownTrigger>
             <DropdownMenu aria-label="Kategoriler" color="default">
@@ -173,15 +168,6 @@ function CustomNavbar() {
                   <span style={navTextStyle}>{item.name}</span>
                 </DropdownItem>
               ))}
-              <DropdownItem
-                key="all-categories"
-                onClick={() => handleNavigate("/blog/categories")}
-                textValue="Tüm Kategoriler"
-                startContent={<Icon icon="mdi:view-grid" width="18" />}
-                className="text-primary"
-              >
-                <span style={navTextStyle}>Tüm Kategoriler</span>
-              </DropdownItem>
             </DropdownMenu>
           </Dropdown>
         </NavbarContent>
@@ -235,7 +221,7 @@ function CustomNavbar() {
                   className="px-3 py-1 hover:text-primary"
                   style={navTextStyle}
                 >
-                  Login
+                  Giriş Yap
                 </button>
               </NavbarItem>
 
@@ -245,7 +231,7 @@ function CustomNavbar() {
                   className="px-3 py-1 hover:text-primary"
                   style={navTextStyle}
                 >
-                  Register
+                  Kayıt Ol
                 </button>
               </NavbarItem>
             </>
@@ -270,7 +256,7 @@ function CustomNavbar() {
             <NavbarMenuItem>
               <div className="py-4">
                 <p className="font-semibold mb-3" style={navTextStyle}>
-                  Ekonomi & Finans
+                  Popüler Kategoriler
                 </p>
                 <div className="flex flex-col gap-2 pl-2">
                   {categories.map((item, index) => (
@@ -283,14 +269,6 @@ function CustomNavbar() {
                       {item.name}
                     </button>
                   ))}
-                  <button
-                    onClick={() => handleNavigate("/blog/categories")}
-                    className="w-full text-left py-3 text-primary font-medium touch-manipulation flex items-center"
-                    style={navTextStyle}
-                  >
-                    <Icon icon="mdi:view-grid" className="mr-2" width="18" />
-                    Tüm Kategoriler
-                  </button>
                 </div>
               </div>
             </NavbarMenuItem>
@@ -304,7 +282,7 @@ function CustomNavbar() {
                       className="w-full text-left py-4 hover:text-primary"
                       style={navTextStyle}
                     >
-                      Profile ({userName})
+                      Profil ({userName})
                     </button>
                   </NavbarMenuItem>
                 )}
@@ -320,7 +298,7 @@ function CustomNavbar() {
                     className="w-full text-left py-4 hover:text-primary"
                     style={navTextStyle}
                   >
-                    Login
+                    Giriş Yap
                   </button>
                 </NavbarMenuItem>
                 <NavbarMenuItem>
@@ -329,7 +307,7 @@ function CustomNavbar() {
                     className="w-full text-left py-4 hover:text-primary"
                     style={navTextStyle}
                   >
-                    Register
+                    Kayıt Ol
                   </button>
                 </NavbarMenuItem>
               </>

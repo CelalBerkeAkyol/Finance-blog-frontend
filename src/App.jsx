@@ -13,16 +13,14 @@ import { FeedbackProvider } from "./context/FeedbackContext";
 import usePageNavigation from "./hooks/usePageNavigation";
 
 import HomePage from "./pages/HomePage";
-import PricePage from "./pages/other_pages/PricePage";
 import PageNotFound from "./pages/other_pages/PageNotFound";
-import ProfilePage from "./pages/other_pages/ProfilePage";
-import DeleteAccountPage from "./pages/other_pages/DeleteAccountPage";
+import ProfilePage from "./pages/dashboard_pages/ProfilePage";
+import DeleteAccountPage from "./pages/auth/DeleteAccountPage";
 import TeamPage from "./pages/other_pages/TeamPage";
 import AboutUsPage from "./pages/other_pages/AboutUsPage";
 import DisclaimerPage from "./pages/other_pages/DisclaimerPage";
 import PrivacyPolicyPage from "./pages/other_pages/PrivacyPolicyPage";
 import AdminLogsPage from "./pages/AdminLogsPage";
-
 
 {
   /* dashboard pages */
@@ -71,13 +69,12 @@ function AppContent() {
 
           {/* Blog yazarları için */}
 
-          <Route path="/plans" element={<PricePage />} />
           <Route path="/about-us" element={<AboutUsPage />} />
           <Route path="/disclaimer" element={<DisclaimerPage />} />
           <Route path="/privacy-policy" element={<PrivacyPolicyPage />} />
           <Route path="/login" element={<LoginPage />} />
-	  <Route path="/forget" element={<ForgetPassword />} />
-	  <Route path="/reset" element={<ResetPassword />} />
+          <Route path="/forget" element={<ForgetPassword />} />
+          <Route path="/reset" element={<ResetPassword />} />
           <Route path="/register" element={<RegisterPage />} />
           <Route path="/verify-email" element={<VerifyEmailComponent />} />
 

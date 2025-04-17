@@ -57,14 +57,19 @@ const ProfileComponent = () => {
 
   // Kullanıcı verilerini kontrol et
   useEffect(() => {
-    if (!isLoading && !userInfo) {
+    // Sadece userInfo eksikse veya userInfo içinde detay bilgiler yoksa fetch yap
+    const needsFetch =
+      !userInfo || !userInfo.bio || !userInfo.website || !userInfo.socialLinks;
+
+    if (needsFetch && !isLoading) {
       dispatch(fetchUser());
     }
+
     // userInfo geldiğinde, isUserDataReady'i true yap
     if (userInfo) {
       setIsUserDataReady(true);
     }
-  }, [isLoading, userInfo, dispatch]);
+  }, [userInfo, isLoading, dispatch]);
 
   // Form verilerini başlat
   useEffect(() => {
@@ -154,6 +159,7 @@ const ProfileComponent = () => {
       );
 
       if (updateUserProfile.fulfilled.match(resultAction)) {
+        // Profil güncellemesi başarılıysa tekrar kullanıcı bilgilerini getir
         await dispatch(fetchUser());
         logInfo("👤 Profil", "Düzenleme modu kapatıldı");
         setEditMode(false);

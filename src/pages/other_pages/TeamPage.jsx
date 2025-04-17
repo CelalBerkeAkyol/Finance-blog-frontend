@@ -34,39 +34,43 @@ const TeamPage = () => {
   }, [isTeamError, teamErrorMessage, showError]);
 
   return (
-    <>
+    <div className="flex flex-col min-h-screen">
       <CustomNavbar />
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 md:py-12">
-        <h1 className="text-3xl md:text-4xl font-bold mb-8 text-center">
-          Our Content Team
-        </h1>
-        <p className="text-lg text-center mb-8 max-w-3xl mx-auto">
-          Meet the talented people behind the content you enjoy. Our team brings
-          diverse expertise and perspectives to create valuable articles for our
-          readers.
-        </p>
+      <main className="flex-grow">
+        <div className="bg-white py-2 mb-12 min-h-full">
+          <div className="mx-auto max-w-7xl px-3 sm:px-6 lg:px-8">
+            <div className="mx-auto my-4 sm:my-6 text-start bg-gradient-to-r from-gray-800 to-gray-700 text-white py-4 px-4 rounded-lg shadow-lg">
+              <h1 className="text-2xl sm:text-3xl font-bold">Yazarlarımız</h1>
+              <p className="mt-2 text-sm sm:text-base text-gray-300">
+                Learn Deep Invest'in değerli içerik üreticileri ve uzmanları
+              </p>
+            </div>
 
-        {isTeamLoading ? (
-          <div className="flex justify-center items-center h-64">
-            <Spinner
-              size="lg"
-              color="primary"
-              label="Loading team members..."
-            />
+            <div className="border-t border-gray-200 pt-6">
+              {isTeamLoading ? (
+                <div className="flex justify-center items-center h-64">
+                  <Spinner
+                    size="lg"
+                    color="primary"
+                    label="Yazarlar yükleniyor..."
+                  />
+                </div>
+              ) : teamMembers.length === 0 ? (
+                <div className="text-center py-12 bg-gray-50 rounded-lg">
+                  <p className="text-gray-500">Henüz yazar bulunmamaktadır.</p>
+                </div>
+              ) : (
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4 md:gap-5">
+                  {teamMembers.map((member) => (
+                    <TeamMemberCard key={member._id} author={member} />
+                  ))}
+                </div>
+              )}
+            </div>
           </div>
-        ) : teamMembers.length === 0 ? (
-          <div className="text-center py-12">
-            <p className="text-gray-500">No team members found.</p>
-          </div>
-        ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8">
-            {teamMembers.map((member) => (
-              <TeamMemberCard key={member._id} author={member} />
-            ))}
-          </div>
-        )}
-      </div>
-    </>
+        </div>
+      </main>
+    </div>
   );
 };
 

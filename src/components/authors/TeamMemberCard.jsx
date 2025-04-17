@@ -56,8 +56,8 @@ const TeamMemberCard = ({ author }) => {
         </p>
       </CardHeader>
 
-      <CardBody className="py-4 text-center">
-        <p className="text-default-700">
+      <CardBody className="py-4 text-start">
+        <p className="text-default-700 text-sm">
           {author.bio || "This team member hasn't added a bio yet."}
         </p>
       </CardBody>

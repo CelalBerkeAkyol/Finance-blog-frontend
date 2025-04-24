@@ -113,7 +113,7 @@ function CustomNavbar() {
   return (
     <>
       <Navbar
-        className={`bg-gray-50 py-1 transition-transform duration-300 ${
+        className={` border-b-2 border-gray-100 py-1 transition-transform duration-300 ${
           !visible ? "-translate-y-full" : "translate-y-0"
         }`}
         maxWidth="xl"
@@ -128,7 +128,7 @@ function CustomNavbar() {
 
         {/* Logo */}
         <NavbarBrand className="mr-0 sm:mr-4">
-          <p className="font-bold text-inherit text-lg">Cassandra</p>
+          <p className="text-xl ">CASSANDRA</p>
         </NavbarBrand>
 
         {/* Ana Navigasyon Bağlantıları - tablet ve desktop */}

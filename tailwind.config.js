@@ -11,6 +11,13 @@ export default {
   ],
   theme: {
     extend: {
+      colors: {
+        primary: "#395480", // Indigo rengi - istediğiniz renk koduyla değiştirebilirsiniz
+        secondary: "#465F88",
+      },
+      fontFamily: {
+        cinzel: ["Cinzel", "serif"],
+      },
       screens: {
         xs: "360px", // Ekstra küçük (mini telefon)
         sm: "640px", // Küçük (telefon)

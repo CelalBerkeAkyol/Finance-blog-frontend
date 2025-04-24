@@ -209,7 +209,7 @@ export default function ForgetpasswordComponent() {
             </p>
 
             <Button
-              className="bg-primary-600 text-white hover:bg-primary-700 mt-2"
+              className="bg-primary text-white hover:bg-secondary mt-2"
               type="submit"
               isDisabled={isLoading}
             >
@@ -218,7 +218,7 @@ export default function ForgetpasswordComponent() {
 
             <div className="text-center mt-2">
               <Button
-                className="text-primary-600"
+                className="text-primary"
                 type="button"
                 variant="light"
                 onClick={() => navigate("/login")}
@@ -260,7 +260,7 @@ export default function ForgetpasswordComponent() {
             </p>
 
             <Button
-              className="bg-primary-600 text-white hover:bg-primary-700 mt-2"
+              className="bg-primary text-white hover:bg-secondary mt-2"
               type="submit"
               isDisabled={isLoading}
             >
@@ -269,7 +269,7 @@ export default function ForgetpasswordComponent() {
 
             <div className="flex justify-between mt-2">
               <Button
-                className="text-primary-600"
+                className="text-primary"
                 type="button"
                 variant="light"
                 onClick={() => {
@@ -282,7 +282,7 @@ export default function ForgetpasswordComponent() {
               </Button>
 
               <Button
-                className="text-primary-600"
+                className="text-primary"
                 type="button"
                 variant="light"
                 onClick={handleResendCode}

@@ -116,15 +116,12 @@ const CategoriesPage = () => {
     <div className="flex flex-col min-h-screen">
       <CustomNavbar />
       <main className="flex-grow">
-        <div
-          className="bg-white py-2 mb-12 min-h-full"
-          id="categories-list-top"
-        >
+        <div className="bg-white py-2 mb-12 min-h-full">
           <div className="mx-auto max-w-7xl px-3 sm:px-6 lg:px-8">
-            <div className="mx-auto my-4 sm:my-6 text-start bg-gradient-to-r from-gray-800 to-gray-700 text-white py-4 px-4 rounded-lg shadow-lg">
+            <div className="mx-auto my-4 sm:my-6 text-start bg-gradient-to-r from-sky-950 to-lime-900 text-white py-4 px-4 rounded-lg shadow-lg">
               <h1 className="text-2xl sm:text-3xl font-bold">Kategoriler</h1>
               <p className="mt-2 text-sm sm:text-base text-gray-300">
-                İlgi alanlarınıza göre içerikleri keşfedin.
+                Tüm blog kategorileri ve içerikleri
               </p>
             </div>
 

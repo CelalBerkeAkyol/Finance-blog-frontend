@@ -216,7 +216,7 @@ export default function ResetPasswordComponent() {
           />
 
           <Button
-            className="bg-primary-600 text-white hover:bg-primary-700 mt-2"
+            className="bg-primary text-white hover:bg-secondary mt-2"
             type="submit"
             isDisabled={isLoading || !formData.email || !formData.token}
           >

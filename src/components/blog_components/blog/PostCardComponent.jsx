@@ -74,7 +74,7 @@ const PostCardComponent = ({ post }) => {
             <Link
               to={`/blog/post/${post._id}`}
               onClick={(e) => e.stopPropagation()}
-              className="hover:text-gray-600"
+              className="hover:text-primary"
             >
               {post.title || "Başlık yok"}
             </Link>

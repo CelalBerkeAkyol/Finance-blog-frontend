@@ -33,31 +33,27 @@ const TableOfContents = ({ content }) => {
   }
 
   return (
-    <nav className="toc p-4 sticky text-sm">
-      <h2 className="text-xl text-center text-gray-800 font-bold mb-2">
-        Table Of Contents
+    <div className="w-full pl-5">
+      <h2 className="text-lg text-left text-gray-800 font-bold mb-2">
+        Hızlı Erişim
       </h2>
       <ul className="list-none">
         {headings.map((heading, index) => (
           <li
             key={index}
-            className="mb-2"
+            className="mb-1"
             style={{ marginLeft: (heading.level - 1) * 10 }}
           >
             <a
               href={`#${heading.slug}`}
-              className={
-                heading.level == 1
-                  ? "text-gray-700 hover:underline cursor-pointer font-bold"
-                  : "text-gray-700 hover:underline cursor-pointer"
-              }
+              className="text-gray-700 hover:underline cursor-pointer text-xs"
             >
               {heading.text}
             </a>
           </li>
         ))}
       </ul>
-    </nav>
+    </div>
   );
 };
 

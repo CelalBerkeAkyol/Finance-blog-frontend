@@ -46,7 +46,7 @@ const TeamPage = () => {
               </p>
             </div>
 
-            <div className="border-t border-gray-200 pt-6">
+            <div className="pt-6">
               {isTeamLoading ? (
                 <div className="flex justify-center items-center h-64">
                   <Spinner

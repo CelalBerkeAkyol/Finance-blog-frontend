@@ -125,7 +125,7 @@ const CategoriesPage = () => {
               </p>
             </div>
 
-            <div className="border-t border-gray-200 pt-4">
+            <div className="pt-3">
               <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-3 sm:gap-4 md:gap-5">
                 {paginatedCategories.map((category) => {
                   const { icon, color } = getCategoryIcon(category);
@@ -155,7 +155,7 @@ const CategoriesPage = () => {
                         </div>
                       </div>
 
-                      <div className="border-t border-gray-100 p-3 sm:p-4">
+                      <div className=" p-3">
                         <Link
                           to={`/blog/category/${encodeURIComponent(category)}`}
                           className="flex items-center text-primary text-sm font-medium"

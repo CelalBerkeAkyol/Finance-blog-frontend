@@ -16,7 +16,7 @@ const DisclaimerPage = () => {
               </p>
             </div>
 
-            <div className="border-t border-gray-200 pt-6">
+            <div className=" pt-3">
               <div className="prose prose-gray max-w-none prose-headings:font-bold prose-headings:text-gray-900 prose-p:text-gray-600">
                 <p className="mb-6">
                   Cassandra tarafından paylaşılan tüm finansal analizler,
@@ -89,7 +89,7 @@ const DisclaimerPage = () => {
                   adresi üzerinden bize ulaşınız.
                 </p>
 
-                <p className="text-sm text-gray-400 mt-8 pt-4 border-t border-gray-100">
+                <p className="text-sm text-gray-400 mt-8 pt-4 ">
                   Son güncelleme: 1 Haziran 2024
                 </p>
               </div>

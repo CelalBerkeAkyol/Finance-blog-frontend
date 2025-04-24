@@ -16,7 +16,7 @@ const PrivacyPolicyPage = () => {
               </p>
             </div>
 
-            <div className="border-t border-gray-200 pt-6">
+            <div className=" pt-3">
               <div className="prose prose-gray max-w-none prose-headings:font-bold prose-headings:text-gray-900 prose-p:text-gray-600">
                 <p className="mb-6">
                   Cassandra ("Biz", "Bize" veya "Bizim"), kullanıcılarımızın
@@ -125,7 +125,7 @@ const PrivacyPolicyPage = () => {
                   adresi üzerinden bizimle iletişime geçiniz.
                 </p>
 
-                <p className="text-sm text-gray-400 mt-8 pt-4 border-t border-gray-100">
+                <p className="text-sm text-gray-400 mt-8 pt-4  ">
                   Son güncelleme: 1 Haziran 2024
                 </p>
               </div>

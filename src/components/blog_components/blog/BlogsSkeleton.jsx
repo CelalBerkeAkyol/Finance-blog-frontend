@@ -12,7 +12,7 @@ export default function BlogsSkeleton() {
         </div>
 
         {/* Blog yazıları için iskelet kartlar */}
-        <div className="border-t border-gray-200 pt-4">
+        <div className=" pt-3">
           <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-3 sm:gap-4 md:gap-5">
             {[...Array(9)].map((_, index) => (
               <div className="flex" key={index}>

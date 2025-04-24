@@ -50,28 +50,12 @@ const RelatedPostsComponent = ({ currentPostId, category }) => {
   }
 
   return (
-    <div className="w-full text-left">
-      <h3 className="text-2xl font-bold mb-4 ml-2 text-gray-800 border-b pb-2 text-left">
-        Önerilen Yazılar
-      </h3>
+    <div className="w-full  ">
+      <h2 className="text-lg text-left text-gray-800 font-bold mb-2">
+        Benzer Yazılar
+      </h2>
       <div className="flex flex-col gap-4">
         {relatedPosts.map((post) => {
-          // Get author information with fallbacks
-          const authorName =
-            typeof post.author === "object" && post.author?.userName
-              ? post.author.userName
-              : "İsimsiz Yazar";
-
-          const authorOccupation =
-            typeof post.author === "object" && post.author?.occupation
-              ? post.author.occupation
-              : "Yazar";
-
-          const avatarUrl =
-            typeof post.author === "object" && post.author?.profileImage
-              ? post.author.profileImage
-              : null;
-
           // Create a short summary if it exists
           const summary = post.summary
             ? post.summary.substring(0, 100) +
@@ -101,23 +85,6 @@ const RelatedPostsComponent = ({ currentPostId, category }) => {
                 <p className="text-xs text-gray-600 mb-4 line-clamp-2 text-left w-full">
                   {summary}
                 </p>
-
-                <div className="flex items-center justify-start w-full mb-2 mt-1">
-                  <Avatar
-                    size="sm"
-                    src={avatarUrl}
-                    name={authorName.substring(0, 2).toUpperCase()}
-                    className="mr-2"
-                  />
-                  <div className="flex flex-col items-start">
-                    <span className="text-xs font-medium text-left">
-                      {authorName}
-                    </span>
-                    <span className="text-xs text-gray-500 text-left">
-                      {authorOccupation}
-                    </span>
-                  </div>
-                </div>
 
                 <div className="flex items-center justify-between w-full text-xs text-gray-500">
                   <div className="flex items-center gap-1 justify-start">

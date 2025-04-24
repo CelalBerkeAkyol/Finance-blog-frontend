@@ -23,7 +23,7 @@ const BlogSidebarComponent = () => {
       {/* Header & Toggle Button */}
       <div className="p-4 flex justify-between items-center">
         {isOpen ? (
-          <h1 className="text-xl font-bold">Learn Deep Invest</h1>
+          <h1 className="text-xl font-bold">Cassandra</h1>
         ) : (
           <h1 className="text-lg font-bold">F</h1>
         )}

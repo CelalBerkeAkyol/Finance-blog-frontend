@@ -128,7 +128,7 @@ function CustomNavbar() {
 
         {/* Logo */}
         <NavbarBrand className="mr-0 sm:mr-4">
-          <p className="font-bold text-inherit text-lg">Learn Deep Invest</p>
+          <p className="font-bold text-inherit text-lg">Cassandra</p>
         </NavbarBrand>
 
         {/* Ana Navigasyon Bağlantıları - tablet ve desktop */}

@@ -21,11 +21,11 @@ const PrivacyPolicyPage = () => {
             <div className="border-t border-gray-200 pt-6">
               <div className="prose prose-gray max-w-none prose-headings:font-bold prose-headings:text-gray-900 prose-p:text-gray-600">
                 <p className="mb-6">
-                  Learn Deep Invest ("Biz", "Bize" veya "Bizim"),
-                  kullanıcılarımızın gizliliğine büyük önem verir. Bu gizlilik
-                  politikası, web sitemizi ziyaret eden veya hizmetlerimizi
-                  kullanan kişilerin verilerinin nasıl toplandığını, işlendiğini
-                  ve korunduğunu açıklamaktadır.
+                  Cassandra ("Biz", "Bize" veya "Bizim"), kullanıcılarımızın
+                  gizliliğine büyük önem verir. Bu gizlilik politikası, web
+                  sitemizi ziyaret eden veya hizmetlerimizi kullanan kişilerin
+                  verilerinin nasıl toplandığını, işlendiğini ve korunduğunu
+                  açıklamaktadır.
                 </p>
 
                 <h2 className="text-xl font-bold mt-8 mb-3">

@@ -66,7 +66,7 @@ export default function Footer() {
 
       {/* Footer Bottom */}
       <div className="mt-8 border-t border-gray-600 text-center py-4 text-sm">
-        <p>© 2024 Learn Deep Invest. Tüm hakları saklıdır.</p>
+        <p>© 2024 Cassandra. Tüm hakları saklıdır.</p>
       </div>
     </footer>
   );

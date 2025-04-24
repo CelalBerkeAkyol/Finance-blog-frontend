@@ -19,11 +19,10 @@ const DisclaimerPage = () => {
             <div className="border-t border-gray-200 pt-6">
               <div className="prose prose-gray max-w-none prose-headings:font-bold prose-headings:text-gray-900 prose-p:text-gray-600">
                 <p className="mb-6">
-                  Learn Deep Invest tarafından paylaşılan tüm finansal
-                  analizler, istatistiksel veriler, yorumlar ve kod örnekleri
-                  yalnızca bilgilendirme amaçlıdır. Bu içerikler yatırım
-                  tavsiyesi, finansal danışmanlık veya profesyonel öneri yerine
-                  geçmez.
+                  Cassandra tarafından paylaşılan tüm finansal analizler,
+                  istatistiksel veriler, yorumlar ve kod örnekleri yalnızca
+                  bilgilendirme amaçlıdır. Bu içerikler yatırım tavsiyesi,
+                  finansal danışmanlık veya profesyonel öneri yerine geçmez.
                 </p>
 
                 <h2 className="text-xl font-bold mt-8 mb-3">
@@ -41,11 +40,11 @@ const DisclaimerPage = () => {
                   2. Sorumluluk Reddi
                 </h2>
                 <p className="mb-6">
-                  Learn Deep Invest, paylaşılan bilgilerin doğruluğu,
-                  eksiksizliği veya güncelliği konusunda hiçbir garanti vermez.
-                  Yayınlanan içerikler, kişisel deneyimlere ve araştırmalara
-                  dayanmaktadır; dolayısıyla oluşabilecek her türlü zarardan
-                  Learn Deep Invest sorumlu tutulamaz.
+                  Cassandra, paylaşılan bilgilerin doğruluğu, eksiksizliği veya
+                  güncelliği konusunda hiçbir garanti vermez. Yayınlanan
+                  içerikler, kişisel deneyimlere ve araştırmalara dayanmaktadır;
+                  dolayısıyla oluşabilecek her türlü zarardan Cassandra sorumlu
+                  tutulamaz.
                 </p>
 
                 <h2 className="text-xl font-bold mt-8 mb-3">
@@ -64,8 +63,8 @@ const DisclaimerPage = () => {
                 <p className="mb-6">
                   Blogda, üçüncü taraf sitelere veya kaynaklara verilen
                   bağlantılar yer alabilir. Bu bağlantıların içerikleri,
-                  doğruluğu ve güncelliği üzerinde Learn Deep Invest herhangi
-                  bir sorumluluk kabul etmez.
+                  doğruluğu ve güncelliği üzerinde Cassandra herhangi bir
+                  sorumluluk kabul etmez.
                 </p>
 
                 <h2 className="text-xl font-bold mt-8 mb-3">

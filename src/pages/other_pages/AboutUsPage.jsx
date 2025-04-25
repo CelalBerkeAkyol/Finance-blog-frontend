@@ -113,11 +113,38 @@ const AboutUsPage = () => {
           </CardBody>
         </Card>
         <Spacer y={12} />
-        {/* İletişim Bölümü */}
-        <h2 className="text-2xl font-semibold text-gray-800 mb-4">
-          📩 İletişim
-        </h2>
+        {/* Nasıl Destek Olabilirsiniz Bölümü */}
+
         <Card shadow="sm" className="p-6 bg-white">
+          <h2 className="text-2xl font-semibold text-gray-800 pl-2 ">
+            Nasıl Destek Olabilirsiniz?
+          </h2>
+          <CardBody>
+            <ul className="list-disc p-2 space-y-2">
+              <li> İçeriklerimizi paylaşabilirsiniz.</li>
+
+              <li>
+                Projeye bağış yaparak daha fazla içerik üretmemizi
+                destekleyebilirsiniz.
+              </li>
+
+              <li>
+                Blog yazıları için konular önererek içerik üretimimize katkı
+                sağlayabilirsiniz.
+              </li>
+              <li>
+                Yapıcı yorumlarınızı paylaşarak içeriklerimizi
+                geliştirebilirsiniz.
+              </li>
+            </ul>
+          </CardBody>
+        </Card>
+
+        <Spacer y={12} />
+        {/* İletişim Bölümü */}
+
+        <Card shadow="sm" className="p-6 bg-white">
+          <h2 className="text-2xl font-semibold text-gray-800 ">İletişim</h2>
           <CardBody>
             <p className="text-gray-700 text-lg">
               Geliştirici mail{" "}
@@ -154,34 +181,6 @@ const AboutUsPage = () => {
             </p>
           </CardBody>
         </Card>
-        <Spacer y={12} />
-
-        {/* Nasıl Destek Olabilirsiniz Bölümü */}
-        <h2 className="text-2xl font-semibold text-gray-800 mb-4">
-          💡 Nasıl Destek Olabilirsiniz?
-        </h2>
-        <Card shadow="sm" className="p-6 bg-white">
-          <CardBody>
-            <ul className="list-none p-4 space-y-4">
-              <li> İçeriklerimizi paylaşabilirsiniz.</li>
-
-              <li>
-                Projeye bağış yaparak daha fazla içerik üretmemizi
-                destekleyebilirsiniz.
-              </li>
-
-              <li>
-                Blog yazıları için konular önererek içerik üretimimize katkı
-                sağlayabilirsiniz.
-              </li>
-              <li>
-                Yapıcı yorumlarınızı paylaşarak içeriklerimizi
-                geliştirebilirsiniz.
-              </li>
-            </ul>
-          </CardBody>
-        </Card>
-
         <Spacer y={12} />
       </div>
     </>

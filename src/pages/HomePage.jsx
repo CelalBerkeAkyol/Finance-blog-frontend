@@ -14,9 +14,9 @@ function HomePage() {
 
       <main className="flex-grow">
         <HeroTail />
-        <SSFeatureComponent />
-        <FeatureComponent />
         <CTASection />
+        <SSFeatureComponent />
+
         <NewsletterComponent />
       </main>
     </div>

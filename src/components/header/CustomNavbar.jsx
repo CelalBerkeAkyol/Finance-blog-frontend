@@ -29,9 +29,9 @@ const navbarLinks = [
 ];
 
 const categories = [
-  { name: "Araştırma", path: "/blog/category/arastirma" },
-  { name: "Data Science", path: "/blog/category/data-science" },
-  { name: "Machine Learning", path: "/blog/category/machine-learning" },
+  { name: "Ekonomi", path: "/blog/category/ekonomi" },
+  { name: "Finans", path: "/blog/category/finans" },
+  { name: "Veri Bilimi", path: "/blog/category/veri-bilimi" },
 ];
 
 // Seçici fonksiyonları bileşen dışına taşıyarak her render'da yeniden oluşturulmasını önlüyoruz

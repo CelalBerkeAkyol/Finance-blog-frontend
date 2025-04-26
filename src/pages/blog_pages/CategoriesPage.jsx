@@ -22,17 +22,52 @@ function slugToReadable(slug) {
 // Kategorilere özel ikon ve renk belirlenmesi
 const getCategoryIcon = (category) => {
   const icons = {
-    "mikro-ekonomi": { icon: "mdi:chart-line", color: "bg-blue-500" },
-    "makro-ekonomi": { icon: "mdi:chart-areaspline", color: "bg-indigo-600" },
-    "kişisel-finans": { icon: "mdi:wallet", color: "bg-green-600" },
-    tasarruf: { icon: "mdi:piggy-bank", color: "bg-amber-500" },
-    "temel-analiz": { icon: "mdi:finance", color: "bg-purple-600" },
-    "teknik-analiz": { icon: "mdi:chart-bar", color: "bg-rose-600" },
-    "kategori-yok": { icon: "mdi:help-circle", color: "bg-gray-500" },
-    araştırma: { icon: "mdi:magnify", color: "bg-cyan-600" },
+    ekonomi: {
+      icon: "mdi:chart-line",
+      color: "bg-blue-500",
+      description:
+        "Ekonomik göstergeler, makroekonomik analizler, piyasa trendleri.",
+    },
+    finans: {
+      icon: "mdi:finance",
+      color: "bg-green-600",
+      description:
+        "Finansal analiz, yatırım stratejileri, şirket değerlemeleri.",
+    },
+    "veri-bilimi": {
+      icon: "mdi:database",
+      color: "bg-purple-600",
+      description: "Veri toplama, temizleme, analiz etme teknikleri.",
+    },
+    "makine-öğrenmesi": {
+      icon: "mdi:robot",
+      color: "bg-indigo-600",
+      description: "ML algoritmaları, tahmin modelleri, finansal veri tahmini.",
+    },
+    "derin-öğrenme": {
+      icon: "mdi:brain",
+      color: "bg-rose-600",
+      description: "Sinir ağları, derin öğrenme uygulamaları.",
+    },
+    projeler: {
+      icon: "mdi:application",
+      color: "bg-amber-500",
+      description: "Adım adım yapılan projeler, kodlu uygulamalar.",
+    },
+    "kategori-yok": {
+      icon: "mdi:help-circle",
+      color: "bg-gray-500",
+      description: "Henüz bir kategoriye atanmamış içerikler.",
+    },
   };
 
-  return icons[category] || { icon: "mdi:tag", color: "bg-slate-600" };
+  return (
+    icons[category] || {
+      icon: "mdi:tag",
+      color: "bg-slate-600",
+      description: "Kategori hakkında bilgi bulunmuyor.",
+    }
+  );
 };
 
 const CategoriesPage = () => {
@@ -150,8 +185,10 @@ const CategoriesPage = () => {
                           </h3>
                         </div>
                         <div className="text-gray-600 text-sm line-clamp-3">
-                          {slugToReadable(category)} kategorisindeki makaleler,
-                          analizler ve detaylı içerikleri görüntüleyin.
+                          {getCategoryIcon(category).description ||
+                            `${slugToReadable(
+                              category
+                            )} kategorisindeki makaleler, analizler ve detaylı içerikleri görüntüleyin.`}
                         </div>
                       </div>
 

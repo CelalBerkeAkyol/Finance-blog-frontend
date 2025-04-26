@@ -97,10 +97,10 @@ const PrivacyPolicyPage = () => {
                   düzeltme, silme veya işleme itiraz etme haklarına sahiptir. Bu
                   haklarınızı kullanmak için bize{" "}
                   <a
-                    href="mailto:info@learndeepinvest.com"
+                    href="mailto:support@cassandra.com.tr"
                     className="text-primary hover:underline"
                   >
-                    info@learndeepinvest.com
+                    support@cassandra.com.tr
                   </a>{" "}
                   adresinden ulaşabilirsiniz. Ayrıca, GDPR ve KVKK kapsamındaki
                   haklarınız çerçevesinde ek bilgilendirme talep edebilirsiniz.
@@ -121,10 +121,10 @@ const PrivacyPolicyPage = () => {
                   Gizlilik politikamızla ilgili sorularınız veya talepleriniz
                   için lütfen{" "}
                   <a
-                    href="mailto:info@learndeepinvest.com"
+                    href="mailto:support@cassandra.com.tr"
                     className="text-primary hover:underline"
                   >
-                    info@learndeepinvest.com
+                    support@cassandra.com.tr
                   </a>{" "}
                   adresi üzerinden bizimle iletişime geçiniz.
                 </p>

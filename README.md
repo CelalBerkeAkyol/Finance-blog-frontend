@@ -127,7 +127,7 @@ git push origin feature/new-feature
 
 ## **📩 Contact**
 
-**Email:** [buscberke@gmail.com](mailto:buscberke@gmail.com)  
+**Email:** [celalberke@cassandra.com.tr](mailto:celalberke@cassandra.com.tr)  
 **Github:** [Github](https://github.com/CelalBerkeAkyol)  
 **LinkedIn:** [LinkedIn](https://www.linkedin.com/in/celal-berke-akyol-389a3a216/)
 

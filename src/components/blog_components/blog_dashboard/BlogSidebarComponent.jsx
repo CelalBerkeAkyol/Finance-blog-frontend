@@ -103,6 +103,18 @@ const BlogSidebarComponent = () => {
             <>
               <li>
                 <Link
+                  to="/dashboard/categories"
+                  className="flex items-center p-2 rounded-lg hover:bg-content3"
+                >
+                  <Icon
+                    icon="mdi:tag-multiple-outline"
+                    className="h-5 w-5 min-w-5"
+                  />
+                  {isOpen && <span className="ml-2">Kategoriler</span>}
+                </Link>
+              </li>
+              <li>
+                <Link
                   to="/dashboard/users"
                   className="flex items-center p-2 rounded-lg hover:bg-content3"
                 >

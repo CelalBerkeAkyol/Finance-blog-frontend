@@ -32,6 +32,7 @@ import DashboardHomePage from "./pages/dashboard_pages/DashboardHomePage";
 import NewPostPage from "./pages/dashboard_pages/NewPostPage";
 import AllBlogPostsPage from "./pages/dashboard_pages/AllBlogPostsPage";
 import UsersPage from "./pages/dashboard_pages/UsersPage";
+import CategoriesManagementPage from "./pages/dashboard_pages/CategoriesManagementPage";
 
 import LoginPage from "./pages/auth/LoginPage";
 import RegisterPage from "./pages/auth/RegisterPage";
@@ -171,6 +172,14 @@ function AppContent() {
             element={
               <ProtectedRoute allowedRoles={["admin"]}>
                 <UsersPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/dashboard/categories"
+            element={
+              <ProtectedRoute allowedRoles={["admin"]}>
+                <CategoriesManagementPage />
               </ProtectedRoute>
             }
           />

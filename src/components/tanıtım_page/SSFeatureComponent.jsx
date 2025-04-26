@@ -18,7 +18,7 @@ const features = [
     icon: ChartBarIcon,
   },
   {
-    name: "Yapay Zeka (AI)",
+    name: "Yapay Zeka (Artificial Intelligence)",
     description:
       "Machine Learning ve Deep Learning ile ihtiyaçlarınıza göre yapay zeka modelleri oluşturmak.",
     icon: CpuChipIcon,

@@ -8,7 +8,7 @@ const DisclaimerPage = () => {
       <main className="flex-grow">
         <div className="bg-white py-2 mb-12 min-h-full">
           <div className="mx-auto max-w-7xl px-3 sm:px-6 lg:px-8">
-            <div className="mx-auto my-4 sm:my-6 text-start bg-gradient-to-r from-sky-950 to-lime-900 text-white py-4 px-4 rounded-lg shadow-lg">
+            <div className="mx-auto my-4 sm:my-6 text-start bg-gradient-to-r from-sky-950 to-lime-950 text-white py-4 px-4 rounded-lg shadow-lg">
               <h1 className="text-2xl sm:text-3xl font-bold">
                 Kullanım Politikası
               </h1>

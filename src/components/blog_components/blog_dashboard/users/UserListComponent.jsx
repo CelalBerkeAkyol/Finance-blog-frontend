@@ -354,7 +354,7 @@ const UserListComponent = () => {
 
   // UI Rendering helpers
   const renderRole = useCallback((role) => {
-    let bgColorClass = "bg-primary-500";
+    let bgColorClass = "bg-primary";
     let textColorClass = "text-white";
 
     if (role?.toLowerCase() === "admin") {
@@ -411,10 +411,10 @@ const UserListComponent = () => {
             isIconOnly
             size="sm"
             variant="light"
-            className="text-yellow-500 hover:bg-yellow-100"
+            className="text-primary hover:bg-primary-100"
             onPress={() => openRoleModal(user)}
           >
-            <Icon icon="mdi:account-convert" />
+            <Icon icon="mdi:account-convert" className="text-primary" />
           </Button>
         </Tooltip>
 
@@ -432,6 +432,7 @@ const UserListComponent = () => {
           >
             <Icon
               icon={user.isActive ? "mdi:user-remove" : "mdi:account-check"}
+              className="text-primary"
             />
           </Button>
         </Tooltip>
@@ -445,7 +446,7 @@ const UserListComponent = () => {
               className="text-red-600 hover:bg-red-100"
               onPress={() => openHardDeleteModal(user)}
             >
-              <Icon icon="mdi:delete-forever" />
+              <Icon icon="mdi:delete-forever" className="text-primary" />
             </Button>
           </Tooltip>
         )}
@@ -505,7 +506,7 @@ const UserListComponent = () => {
               onPress={handleRefreshUsers}
               aria-label="Yenile"
             >
-              <Icon icon="mdi:refresh" className="text-lg" />
+              <Icon icon="mdi:refresh" className="text-primary" />
             </Button>
           </Tooltip>
         </div>
@@ -524,7 +525,7 @@ const UserListComponent = () => {
                     isCompact
                     showControls
                     showShadow
-                    className="text-primary-500"
+                    className="text-primary"
                     page={page}
                     total={pages}
                     onChange={setPage}

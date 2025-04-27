@@ -129,7 +129,7 @@ export default function LoginComponent() {
           </div>
           {loginError === "ACCOUNT_NOT_VERIFIED" && (
             <Button
-              className="bg-primary-600 text-white hover:bg-primary-700"
+              className="bg-primary text-white hover:bg-secondary"
               onClick={resendVerificationEmail}
               type="button"
             >
@@ -139,7 +139,7 @@ export default function LoginComponent() {
             </Button>
           )}
           <Button
-            className="bg-primary-600 text-white hover:bg-primary-700"
+            className="bg-primary text-white hover:bg-secondary"
             type="submit"
             isDisabled={isLoading}
           >

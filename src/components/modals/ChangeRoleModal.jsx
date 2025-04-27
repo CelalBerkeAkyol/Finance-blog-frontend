@@ -68,7 +68,7 @@ const ChangeRoleModal = ({
                 İptal
               </Button>
               <Button
-                className="bg-primary-500 text-white hover:bg-primary-600"
+                className="bg-primary text-white hover:bg-secondary"
                 onPress={handleUpdateRole}
                 isLoading={roleUpdateLoading}
               >

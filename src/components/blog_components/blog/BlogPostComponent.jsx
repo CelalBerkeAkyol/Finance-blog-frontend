@@ -61,7 +61,7 @@ const BlogPostComponent = ({ post }) => {
       </h1>
 
       {/* Blog meta bilgileri - Mobil için daha düzenli */}
-      <div id="blog-meta" className="pb-4 border-b border-gray-100">
+      <div id="blog-meta" className="pb-4 border-b-4 border-gray-200">
         {/* Yazar bilgisi - Avatar içeren kart görünümü - Profil resmi büyütüldü */}
         <div className="flex items-center mb-3 sm:mb-4">
           <Avatar
@@ -116,7 +116,7 @@ const BlogPostComponent = ({ post }) => {
       </div>
 
       {/* Blog İçeriği */}
-      <div className="overflow-x-auto pt-3 md:pt-4 text-sm sm:text-base leading-relaxed">
+      <div className="overflow-x-auto pt-3 md:pt-3 text-sm sm:text-base leading-relaxed">
         <ReactMarkdown
           remarkPlugins={[remarkGfm]}
           rehypePlugins={[rehypeRaw, rehypeSlug]}

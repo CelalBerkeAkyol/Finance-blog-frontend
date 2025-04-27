@@ -8,36 +8,38 @@ const PrivacyPolicyPage = () => {
       <main className="flex-grow">
         <div className="bg-white py-2 mb-12 min-h-full">
           <div className="mx-auto max-w-7xl px-3 sm:px-6 lg:px-8">
-            <div className="mx-auto my-4 sm:my-6 text-start bg-gradient-to-r from-gray-800 to-gray-700 text-white py-4 px-4 rounded-lg shadow-lg">
-              <h1 className="text-2xl sm:text-3xl font-bold">
-                Gizlilik Politikası
-              </h1>
+            <div className="mx-auto my-4 sm:my-6 text-start bg-gradient-to-r from-sky-950 to-lime-950 text-white py-4 px-4 rounded-lg shadow-lg">
+              <h1 className="text-2xl font-bold">Gizlilik Politikası</h1>
               <p className="mt-2 text-sm sm:text-base text-gray-300">
                 Verilerinizin nasıl toplandığı, işlendiği ve korunduğu hakkında
                 bilgi
               </p>
             </div>
 
-            <div className="border-t border-gray-200 pt-6">
+            <div className=" pt-3">
               <div className="prose prose-gray max-w-none prose-headings:font-bold prose-headings:text-gray-900 prose-p:text-gray-600">
                 <p className="mb-6">
-                  Learn Deep Invest ("Biz", "Bize" veya "Bizim"),
-                  kullanıcılarımızın gizliliğine büyük önem verir. Bu gizlilik
-                  politikası, web sitemizi ziyaret eden veya hizmetlerimizi
-                  kullanan kişilerin verilerinin nasıl toplandığını, işlendiğini
-                  ve korunduğunu açıklamaktadır.
+                  Cassandra ("Biz", "Bize" veya "Bizim"), kullanıcılarımızın
+                  gizliliğine büyük önem verir. Bu gizlilik politikası, web
+                  sitemizi ziyaret eden veya hizmetlerimizi kullanan kişilerin
+                  verilerinin nasıl toplandığını, işlendiğini ve korunduğunu
+                  açıklamaktadır.
                 </p>
 
                 <h2 className="text-xl font-bold mt-8 mb-3">
                   1. Toplanan Veriler
                 </h2>
                 <p className="mb-6">
-                  Hizmetlerimizi kullanırken;
-                  <strong> kişisel bilgiler</strong> (ad, soyad, e-posta adresi,
-                  telefon numarası gibi) ve
-                  <strong> otomatik olarak toplanan veriler</strong> (IP adresi,
-                  tarayıcı bilgileri, çerezler, kullanım verileri)
-                  toplanmaktadır.
+                  Sitemizi kullandığınızda veya bizimle iletişime geçtiğinizde,
+                  belirli kişisel verilerinizi toplayabiliriz. Bu veriler,
+                  örneğin bir iletişim formu doldurduğunuzda sağladığınız ad,
+                  soyad, e-posta adresi gibi kimlik ve iletişim bilgilerini
+                  içerebilir. Ayrıca, sitemizi nasıl kullandığınıza dair bazı
+                  teknik veriler otomatik olarak toplanabilir. Bu veriler
+                  arasında IP adresiniz, tarayıcı türü, cihaz bilgileri, ziyaret
+                  tarihçesi ve benzeri gezinme bilgileriniz bulunabilir. Ek
+                  olarak, aşağıda açıklandığı üzere, çerezler (cookies)
+                  aracılığıyla da bazı veriler elde edilmektedir
                 </p>
 
                 <h2 className="text-xl font-bold mt-8 mb-3">
@@ -127,8 +129,8 @@ const PrivacyPolicyPage = () => {
                   adresi üzerinden bizimle iletişime geçiniz.
                 </p>
 
-                <p className="text-sm text-gray-400 mt-8 pt-4 border-t border-gray-100">
-                  Son güncelleme: 1 Haziran 2024
+                <p className="border-t-1 border-gray-200 text-sm text-gray-400 mt-8 pt-4  ">
+                  Son güncelleme: 26 Nisan 2025
                 </p>
               </div>
             </div>

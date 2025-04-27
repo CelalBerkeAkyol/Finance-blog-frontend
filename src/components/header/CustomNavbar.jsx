@@ -29,9 +29,9 @@ const navbarLinks = [
 ];
 
 const categories = [
-  { name: "Araştırma", path: "/blog/category/arastirma" },
-  { name: "Data Science", path: "/blog/category/data-science" },
-  { name: "Machine Learning", path: "/blog/category/machine-learning" },
+  { name: "Ekonomi", path: "/blog/category/ekonomi" },
+  { name: "Finans", path: "/blog/category/finans" },
+  { name: "Veri Bilimi", path: "/blog/category/veri-bilimi" },
 ];
 
 // Seçici fonksiyonları bileşen dışına taşıyarak her render'da yeniden oluşturulmasını önlüyoruz
@@ -113,7 +113,7 @@ function CustomNavbar() {
   return (
     <>
       <Navbar
-        className={`bg-gray-50 py-1 transition-transform duration-300 ${
+        className={` border-b-2 border-gray-100 py-1 transition-transform duration-300 ${
           !visible ? "-translate-y-full" : "translate-y-0"
         }`}
         maxWidth="xl"
@@ -128,7 +128,7 @@ function CustomNavbar() {
 
         {/* Logo */}
         <NavbarBrand className="mr-0 sm:mr-4">
-          <p className="font-bold text-inherit text-lg">Learn Deep Invest</p>
+          <p className="text-xl ">CASSANDRA</p>
         </NavbarBrand>
 
         {/* Ana Navigasyon Bağlantıları - tablet ve desktop */}

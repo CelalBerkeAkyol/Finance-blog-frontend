@@ -20,7 +20,7 @@ export default function Footer() {
   ];
 
   return (
-    <footer className="bg-neutral-900 text-gray-300 mt-auto">
+    <footer className=" text-gray-300 mt-auto bg-gradient-to-r from-gray-950 to-slate-800">
       <div className="container mx-auto px-4 sm:px-6 pt-8">
         <div className="flex flex-col items-center justify-center gap-8 md:flex-row md:justify-center">
           {/* Navigation Links */}
@@ -65,8 +65,8 @@ export default function Footer() {
       </div>
 
       {/* Footer Bottom */}
-      <div className="mt-8 border-t border-gray-600 text-center py-4 text-sm">
-        <p>© 2024 Learn Deep Invest. Tüm hakları saklıdır.</p>
+      <div className="mt-8 border-t border-slate-700  text-center py-4 text-sm">
+        <p>© 2025 Cassandra tüm hakları saklıdır.</p>
       </div>
     </footer>
   );

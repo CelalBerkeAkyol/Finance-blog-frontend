@@ -5,11 +5,10 @@ import CustomNavbar from "../../components/header/CustomNavbar";
 
 function BlogsPage() {
   return (
-    <div className="flex flex-col min-h-screen">
+    <div className="flex flex-col min-h-screen ">
+      <BannerComponent />
       <CustomNavbar />
-      <main className="flex-grow">
-        <BlogsComponent />
-      </main>
+      <BlogsComponent />
     </div>
   );
 }

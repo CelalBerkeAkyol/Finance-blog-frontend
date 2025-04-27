@@ -69,12 +69,12 @@ const PostCardComponent = ({ post }) => {
           </time>
         </div>
 
-        <div className="mb-3">
-          <h3 className="text-base sm:text-lg font-semibold text-gray-900 mb-1.5 line-clamp-2">
+        <div className="mb-2">
+          <h3 className="text-base sm:text-lg font-semibold text-gray-900 mt-4 mb-2 line-clamp-2">
             <Link
               to={`/blog/post/${post._id}`}
               onClick={(e) => e.stopPropagation()}
-              className="hover:text-gray-600"
+              className="hover:text-primary"
             >
               {post.title || "Başlık yok"}
             </Link>

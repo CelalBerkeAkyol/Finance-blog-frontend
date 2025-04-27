@@ -8,14 +8,13 @@ const CategorySelector = ({
   isInvalid,
 }) => {
   const categories = [
-    "mikro-ekonomi",
-    "makro-ekonomi",
-    "kişisel-finans",
-    "tasarruf",
-    "temel-analiz",
-    "teknik-analiz",
+    "ekonomi",
+    "finans",
+    "veri-bilimi",
+    "makine-öğrenmesi",
+    "derin-öğrenme",
+    "projeler",
     "kategori-yok",
-    "araştırma",
   ];
 
   const handleSelectionChange = (e) => {

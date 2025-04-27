@@ -1,39 +1,105 @@
 import { CalendarDaysIcon, HandRaisedIcon } from "@heroicons/react/24/outline";
 import { XMarkIcon } from "@heroicons/react/24/solid";
+import { useState } from "react";
+import axios from "../../api";
 
 export default function NewsletterComponent() {
+  const [email, setEmail] = useState("");
+  const [status, setStatus] = useState({ type: "", message: "" });
+  const [loading, setLoading] = useState(false);
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+
+    if (!email) {
+      setStatus({
+        type: "error",
+        message: "Lütfen e-posta adresinizi girin.",
+      });
+      return;
+    }
+
+    setLoading(true);
+    setStatus({ type: "", message: "" });
+
+    try {
+      const response = await axios.post("/newsletter/subscribe", { email });
+
+      if (response.data.success) {
+        setStatus({
+          type: "success",
+          message: "Abone olduğunuz için teşekkür ederiz!",
+        });
+        setEmail("");
+      } else {
+        setStatus({
+          type: "error",
+          message:
+            response.data.message || "Bir hata oluştu. Lütfen tekrar deneyin.",
+        });
+      }
+    } catch (error) {
+      console.error("Newsletter subscribe error:", error);
+      setStatus({
+        type: "error",
+        message:
+          error.response?.data?.message ||
+          "Bir hata oluştu. Lütfen tekrar deneyin.",
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
     <div className="relative isolate overflow-hidden bg-gray-900 py-16 sm:py-24 lg:py-32">
       <div className="mx-auto max-w-7xl px-6 lg:px-8">
         <div className="mx-auto grid max-w-2xl grid-cols-1 gap-x-8 gap-y-16 lg:max-w-none lg:grid-cols-2">
           <div className="max-w-xl lg:max-w-lg">
             <h2 className="text-4xl font-semibold tracking-tight text-white">
-              Subscribe to our newsletter
+              Bültenimize Abone Olun
             </h2>
             <p className="mt-4 text-lg text-gray-300">
-              Nostrud amet eu ullamco nisi aute in ad minim nostrud adipisicing
-              velit quis. Duis tempor incididunt dolore.
+              En son güncellemeler, makaleler ve içgörüler hakkında bilgi almak
+              için e-posta listemize kaydolun.
             </p>
-            <div className="mt-6 flex max-w-md gap-x-4">
+            <form
+              onSubmit={handleSubmit}
+              className="mt-6 flex max-w-md gap-x-4"
+            >
               <label htmlFor="email-address" className="sr-only">
-                Email address
+                E-posta adresi
               </label>
               <input
                 id="email-address"
                 name="email"
                 type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
                 required
-                placeholder="Enter your email"
+                placeholder="E-posta adresinizi girin"
                 autoComplete="email"
                 className="min-w-0 flex-auto rounded-md bg-white/5 px-3.5 py-2 text-base text-white outline outline-1 -outline-offset-1 outline-white/10 placeholder:text-gray-500 focus:outline focus:outline-2 focus:-outline-offset-2 focus:outline-primary sm:text-sm/6"
               />
               <button
                 type="submit"
-                className="flex-none rounded-md bg-primary px-3.5 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-secondary focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
+                disabled={loading}
+                className={`flex-none rounded-md ${
+                  loading ? "bg-gray-500" : "bg-primary hover:bg-secondary"
+                } px-3.5 py-2.5 text-sm font-semibold text-white shadow-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary`}
               >
-                Subscribe
+                {loading ? "Gönderiliyor..." : "Abone Ol"}
               </button>
-            </div>
+            </form>
+            {status.message && (
+              <div
+                className={`mt-3 text-sm ${
+                  status.type === "success" ? "text-green-400" : "text-red-400"
+                }`}
+              >
+                {status.message}
+              </div>
+            )}
           </div>
           <dl className="grid grid-cols-1 gap-x-8 gap-y-10 sm:grid-cols-2 lg:pt-2">
             <div className="flex flex-col items-start">
@@ -44,28 +110,30 @@ export default function NewsletterComponent() {
                 />
               </div>
               <dt className="mt-4 text-base font-semibold text-white">
-                No spam
+                Spam Yok
               </dt>
               <dd className="mt-2 text-base/7 text-gray-400">
-                Officia excepteur ullamco ut sint duis proident non adipisicing.
-                Voluptate incididunt anim.
+                Sadece önemli güncellemeler ve içerikler hakkında bilgi veririz.
+                E-postalarımızdan istediğiniz zaman çıkabilirsiniz.
               </dd>
             </div>
 
             <div className="flex flex-col items-start">
               <dt className="text-base font-semibold text-white mb-4">
-                Find us on
+                Bizi Bulun
               </dt>
               <div className="flex space-x-4">
                 <a
                   href="#"
                   className="rounded-md bg-white/5 p-2 ring-1 ring-white/10 hover:bg-white/10"
+                  aria-label="X Icon"
                 >
                   <XMarkIcon aria-hidden="true" className="size-6 text-white" />
                 </a>
                 <a
-                  href="#"
+                  href="https://www.linkedin.com/in/celal-berke-akyol-389a3a216/"
                   className="rounded-md bg-white/5 p-2 ring-1 ring-white/10 hover:bg-white/10"
+                  aria-label="Linkedin Icon"
                 >
                   <svg
                     xmlns="http://www.w3.org/2000/svg"
@@ -77,8 +145,9 @@ export default function NewsletterComponent() {
                   </svg>
                 </a>
                 <a
-                  href="#"
+                  href="https://github.com/CelalBerkeAkyol"
                   className="rounded-md bg-white/5 p-2 ring-1 ring-white/10 hover:bg-white/10"
+                  aria-label="Github "
                 >
                   <svg
                     xmlns="http://www.w3.org/2000/svg"
@@ -90,8 +159,9 @@ export default function NewsletterComponent() {
                   </svg>
                 </a>
                 <a
-                  href="#"
+                  href="mailto:contact@cassandra.com.tr"
                   className="rounded-md bg-white/5 p-2 ring-1 ring-white/10 hover:bg-white/10"
+                  aria-label="Email Icon"
                 >
                   <svg
                     xmlns="http://www.w3.org/2000/svg"

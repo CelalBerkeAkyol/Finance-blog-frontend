@@ -149,10 +149,10 @@ const AboutUsPage = () => {
             <p className="text-gray-700 text-lg">
               Geliştirici mail{" "}
               <a
-                href="mailto:buscberke@gmail.com"
+                href="mailto:celalberke@cassandra.com.tr"
                 className="text-blue-600 underline"
               >
-                buscberke@gmail.com
+                celalberke@cassandra.com.tr
               </a>
             </p>
 

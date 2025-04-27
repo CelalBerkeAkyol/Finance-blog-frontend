@@ -1,12 +1,6 @@
-import {
-  BrowserRouter as Router,
-  Routes,
-  Route,
-  useLocation,
-} from "react-router-dom";
-import React, { useEffect } from "react";
-import { useDispatch, useSelector } from "react-redux";
-import { fetchUser } from "./app/features/user/userSlice"; // Adjust the path as necessary
+import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import React from "react";
+
 import { logRender } from "./utils/logger";
 import ErrorBoundary from "./components/error/ErrorBoundary";
 import { FeedbackProvider } from "./context/FeedbackContext";
@@ -32,6 +26,7 @@ import DashboardHomePage from "./pages/dashboard_pages/DashboardHomePage";
 import NewPostPage from "./pages/dashboard_pages/NewPostPage";
 import AllBlogPostsPage from "./pages/dashboard_pages/AllBlogPostsPage";
 import UsersPage from "./pages/dashboard_pages/UsersPage";
+import CategoriesManagementPage from "./pages/dashboard_pages/CategoriesManagementPage";
 
 import LoginPage from "./pages/auth/LoginPage";
 import RegisterPage from "./pages/auth/RegisterPage";
@@ -50,14 +45,8 @@ import VerifyEmailComponent from "./components/auth/VerifyEmailComponent";
 
 // Sayfa navigasyonu ve scroll yönetimini sağlayan bileşen
 function AppContent() {
-  const dispatch = useDispatch();
-
   // Tüm sayfa değişikliklerinde sayfayı en üste kaydır
   usePageNavigation();
-
-  useEffect(() => {
-    dispatch(fetchUser());
-  }, [dispatch]);
 
   logRender("App", false);
 
@@ -171,6 +160,14 @@ function AppContent() {
             element={
               <ProtectedRoute allowedRoles={["admin"]}>
                 <UsersPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/dashboard/categories"
+            element={
+              <ProtectedRoute allowedRoles={["admin"]}>
+                <CategoriesManagementPage />
               </ProtectedRoute>
             }
           />

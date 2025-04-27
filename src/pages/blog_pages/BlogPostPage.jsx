@@ -70,7 +70,7 @@ function BlogPostPage() {
       <CustomNavbar />
       <div className="flex flex-col md:flex-row gap-4 md:gap-6 py-6 md:py-8 container mx-auto px-2 max-w-[1600px] w-full">
         {/* Masaüstü için Table of Contents */}
-        <div className="md:w-[18%] w-full md:border-r min-w-[200px] hidden md:block">
+        <div className="md:w-[18%] w-full min-w-[200px] hidden md:block">
           <div className="sticky top-20 max-h-[calc(100vh-8rem)] overflow-y-auto py-2">
             {isLoading ? (
               <TableSkeleton />
@@ -81,7 +81,7 @@ function BlogPostPage() {
         </div>
 
         {/* Blog İçeriği */}
-        <div className="w-full md:w-[57%] lg:w-[57%] mx-auto">
+        <div className="w-full md:w-[60%] lg:w-[60%] mx-auto">
           {isLoading ? (
             <BlogPostSkeleton />
           ) : post ? (
@@ -104,7 +104,7 @@ function BlogPostPage() {
 
         {/* Sağ Kenar Çubuğu - Önerilen Yazılar */}
         <div
-          className="md:w-[25%] lg:w-[23%] hidden md:block pl-2 md:pl-4 border-l pt-4"
+          className="md:w-[25%] lg:w-[23%] hidden md:block pt-2 pr-3"
           style={{
             position: "sticky",
             top: "5rem",

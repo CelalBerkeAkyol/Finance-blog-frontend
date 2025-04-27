@@ -23,7 +23,7 @@ const BlogSidebarComponent = () => {
       {/* Header & Toggle Button */}
       <div className="p-4 flex justify-between items-center">
         {isOpen ? (
-          <h1 className="text-xl font-bold">Learn Deep Invest</h1>
+          <h1 className="text-xl font-bold">Cassandra</h1>
         ) : (
           <h1 className="text-lg font-bold">F</h1>
         )}
@@ -101,6 +101,18 @@ const BlogSidebarComponent = () => {
           </li>
           {isAdmin && (
             <>
+              <li>
+                <Link
+                  to="/dashboard/categories"
+                  className="flex items-center p-2 rounded-lg hover:bg-content3"
+                >
+                  <Icon
+                    icon="mdi:tag-multiple-outline"
+                    className="h-5 w-5 min-w-5"
+                  />
+                  {isOpen && <span className="ml-2">Kategoriler</span>}
+                </Link>
+              </li>
               <li>
                 <Link
                   to="/dashboard/users"

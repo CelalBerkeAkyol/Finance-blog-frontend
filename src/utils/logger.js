@@ -6,7 +6,7 @@
 const isProduction = import.meta.env.PROD;
 const enableLoggingEnv = import.meta.env.VITE_ENABLE_LOGGING === "true";
 const logLevel = import.meta.env.VITE_LOG_LEVEL || "debug";
-const appName = import.meta.env.VITE_APP_NAME || "Fin AI Blog";
+const appName = import.meta.env.VITE_APP_NAME || "Cassandra";
 
 // Log seviyeleri
 const LOG_LEVELS = {

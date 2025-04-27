@@ -44,13 +44,13 @@ export default function BlogsComponent() {
   return (
     <div className="bg-white py-2 mb-12 min-h-full" id="blog-list-top">
       <div className="mx-auto max-w-7xl px-3 sm:px-6 lg:px-8">
-        <div className="mx-auto my-4 sm:my-6 text-start bg-gradient-to-r from-gray-800 to-gray-700 text-white py-4 px-4 rounded-lg shadow-lg">
+        <div className="mx-auto my-4 sm:my-6 text-start bg-gradient-to-r from-sky-950 to-lime-950 text-white py-4 px-4 rounded-lg shadow-lg">
           <h1 className="text-2xl sm:text-3xl font-bold">Blog</h1>
           <p className="mt-2 text-sm sm:text-base text-gray-300">
             Güncel içeriklerimizi keşfedin.
           </p>
         </div>
-        <div className="border-t border-gray-200 pt-4">
+        <div className=" border-gray-200 pt-4">
           <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-3 sm:gap-4 md:gap-5">
             {posts &&
               posts.map((post, index) => (

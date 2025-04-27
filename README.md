@@ -67,7 +67,7 @@ VITE_ENABLE_LOGGING=true
 VITE_LOG_LEVEL=debug
 
 # Uygulama ayarları
-VITE_APP_NAME=Fin AI Blog
+VITE_APP_NAME=Cassandra
 VITE_APP_VERSION=1.0.0
 ```
 
@@ -75,7 +75,7 @@ For production, create a `.env.production` file with appropriate values:
 
 ```
 # API URL'leri - Üretim ortamında gerçek API URL'nizi kullanın
-VITE_API_URL=https://api.finai.com/api
+VITE_API_URL=https://api.cassandra.com/api
 
 # Loglama ayarları - Üretim ortamında loglama kapalı
 VITE_ENABLE_LOGGING=false
@@ -127,7 +127,7 @@ git push origin feature/new-feature
 
 ## **📩 Contact**
 
-**Email:** [buscberke@gmail.com](mailto:buscberke@gmail.com)  
+**Email:** [celalberke@cassandra.com.tr](mailto:celalberke@cassandra.com.tr)  
 **Github:** [Github](https://github.com/CelalBerkeAkyol)  
 **LinkedIn:** [LinkedIn](https://www.linkedin.com/in/celal-berke-akyol-389a3a216/)
 

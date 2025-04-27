@@ -164,7 +164,7 @@ export default function RegisterComponent() {
           </Checkbox>
 
           <Button
-            className="bg-primary-600 text-white hover:bg-primary-700"
+            className="bg-primary text-white hover:bg-secondary"
             type="submit"
           >
             Kayıt Ol

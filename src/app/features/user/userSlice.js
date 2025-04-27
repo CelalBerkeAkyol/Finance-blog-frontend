@@ -86,6 +86,7 @@ const handleLogoutFulfilled = (state) => {
   state.isLoggedIn = false;
   state.isAdmin = false;
   state.isAuthor = false;
+  state.isProfileLoaded = false;
 };
 
 // FetchUser fulfilled: Kullanıcı bilgisi güncel bilgileri state'e aktarır.
@@ -97,6 +98,7 @@ const handleFetchUserFulfilled = (state, action) => {
     `Kullanıcı bilgisi alındı (rol: ${user.role || "user"})`
   );
   state.userInfo = user;
+  state.isProfileLoaded = true;
   state.isAdmin = user.role === "admin";
   state.isAuthor = user.role === "author";
   state.isLoggedIn = true;
@@ -111,6 +113,7 @@ const handleUpdateProfileFulfilled = (state, action) => {
     // Kullanıcı ID'si yerine sadece güncelleme bilgisini logla
     logInfo("✅ Profil", "Kullanıcı profili başarıyla güncellendi");
     state.userInfo = user;
+
     state.isAdmin = user.role === "admin";
     state.isAuthor = user.role === "author" || user.role === "admin";
   } else {
@@ -364,6 +367,7 @@ const userSlice = createSlice({
   initialState: {
     userInfo: null,
     isLoggedIn: false,
+    isProfileLoaded: false,
     isAdmin: false,
     isAuthor: false,
     isLoading: false,
@@ -388,6 +392,7 @@ const userSlice = createSlice({
       logInfo("🧹 State", "Kullanıcı state tamamen temizleniyor");
       state.userInfo = null;
       state.isLoggedIn = false;
+      isProfileLoaded = false;
       state.isAdmin = false;
       state.isAuthor = false;
       state.isLoading = false;

@@ -41,7 +41,6 @@ const ProfileComponent = () => {
   const [saveLoading, setSaveLoading] = useState(false);
   const [saveError, setSaveError] = useState(null);
   const { isOpen, onOpen, onClose } = useDisclosure();
-  const [isUserDataReady, setIsUserDataReady] = useState(false);
 
   // Profil resmi state'leri
   const [selectedImage, setSelectedImage] = useState(null);
@@ -54,22 +53,6 @@ const ProfileComponent = () => {
     if (isError && errorMessage) showError(errorMessage);
     if (saveError) showError(saveError);
   }, [isError, errorMessage, saveError, showError]);
-
-  // Kullanıcı verilerini kontrol et
-  useEffect(() => {
-    // Sadece userInfo eksikse veya userInfo içinde detay bilgiler yoksa fetch yap
-    const needsFetch =
-      !userInfo || !userInfo.bio || !userInfo.website || !userInfo.socialLinks;
-
-    if (needsFetch && !isLoading) {
-      dispatch(fetchUser());
-    }
-
-    // userInfo geldiğinde, isUserDataReady'i true yap
-    if (userInfo) {
-      setIsUserDataReady(true);
-    }
-  }, [userInfo, isLoading, dispatch]);
 
   // Form verilerini başlat
   useEffect(() => {

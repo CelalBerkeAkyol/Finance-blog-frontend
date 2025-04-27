@@ -42,11 +42,11 @@ const TeamPage = () => {
             <div className="mx-auto my-4 sm:my-6 text-start bg-gradient-to-r from-gray-800 to-gray-700 text-white py-4 px-4 rounded-lg shadow-lg">
               <h1 className="text-2xl sm:text-3xl font-bold">Yazarlarımız</h1>
               <p className="mt-2 text-sm sm:text-base text-gray-300">
-                Learn Deep Invest'in değerli içerik üreticileri ve uzmanları
+                Cassandra'nın değerli içerik üreticileri ve uzmanları
               </p>
             </div>
 
-            <div className="border-t border-gray-200 pt-6">
+            <div className="pt-6">
               {isTeamLoading ? (
                 <div className="flex justify-center items-center h-64">
                   <Spinner

@@ -10,31 +10,6 @@ import ErrorComponent from "../../components/error/ErrorComponent";
 import useScrollToTop from "../../hooks/useScrollToTop";
 import { scrollToTop } from "../../utils/scrollHelpers";
 
-// Kategori isimlerini okunabilir hale getiriyor
-function slugToReadable(slug) {
-  if (!slug) return "Kategori Yok";
-  return slug
-    .split("-")
-    .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
-    .join(" ");
-}
-
-// Kategorilere özel ikon ve renk belirlenmesi
-const getCategoryIcon = (category) => {
-  const icons = {
-    "mikro-ekonomi": { icon: "mdi:chart-line", color: "bg-blue-500" },
-    "makro-ekonomi": { icon: "mdi:chart-areaspline", color: "bg-indigo-600" },
-    "kişisel-finans": { icon: "mdi:wallet", color: "bg-green-600" },
-    tasarruf: { icon: "mdi:piggy-bank", color: "bg-amber-500" },
-    "temel-analiz": { icon: "mdi:finance", color: "bg-purple-600" },
-    "teknik-analiz": { icon: "mdi:chart-bar", color: "bg-rose-600" },
-    "kategori-yok": { icon: "mdi:help-circle", color: "bg-gray-500" },
-    araştırma: { icon: "mdi:magnify", color: "bg-cyan-600" },
-  };
-
-  return icons[category] || { icon: "mdi:tag", color: "bg-slate-600" };
-};
-
 const CategoriesPage = () => {
   const [categories, setCategories] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -52,9 +27,14 @@ const CategoriesPage = () => {
   useEffect(() => {
     const fetchCategories = async () => {
       try {
-        const response = await axios.get("/category/all-categories");
+        // Kategorileri detaylarıyla birlikte getir
+        const response = await axios.get("/category/categories-with-details");
         if (response.data.success) {
-          setCategories(response.data.data);
+          // Sadece aktif kategorileri göster
+          const activeCategories = response.data.data.filter(
+            (cat) => cat.active !== false
+          );
+          setCategories(activeCategories);
         } else {
           setError("Kategoriler yüklenirken bir hata oluştu.");
         }
@@ -116,51 +96,66 @@ const CategoriesPage = () => {
     <div className="flex flex-col min-h-screen">
       <CustomNavbar />
       <main className="flex-grow">
-        <div
-          className="bg-white py-2 mb-12 min-h-full"
-          id="categories-list-top"
-        >
+        <div className="bg-white py-2 mb-12 min-h-full">
           <div className="mx-auto max-w-7xl px-3 sm:px-6 lg:px-8">
-            <div className="mx-auto my-4 sm:my-6 text-start bg-gradient-to-r from-gray-800 to-gray-700 text-white py-4 px-4 rounded-lg shadow-lg">
+            <div className="mx-auto my-4 sm:my-6 text-start bg-gradient-to-r from-sky-950 to-lime-950 text-white py-4 px-4 rounded-lg shadow-lg">
               <h1 className="text-2xl sm:text-3xl font-bold">Kategoriler</h1>
               <p className="mt-2 text-sm sm:text-base text-gray-300">
-                İlgi alanlarınıza göre içerikleri keşfedin.
+                Tüm blog kategorileri ve içerikleri
               </p>
             </div>
 
-            <div className="border-t border-gray-200 pt-4">
-              <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-3 sm:gap-4 md:gap-5">
-                {paginatedCategories.map((category) => {
-                  const { icon, color } = getCategoryIcon(category);
-
-                  return (
+            <div className="pt-3">
+              {categories.length === 0 ? (
+                <div className="text-center p-8 bg-gray-50 rounded-lg">
+                  <Icon
+                    icon="mdi:folder-outline"
+                    className="text-6xl mx-auto text-gray-400"
+                  />
+                  <h3 className="mt-4 text-xl font-medium text-gray-900">
+                    Henüz Hiç Kategori Bulunmuyor
+                  </h3>
+                  <p className="mt-2 text-gray-600">
+                    Şu anda blogda herhangi bir kategori bulunmamaktadır.
+                  </p>
+                </div>
+              ) : (
+                <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-3 sm:gap-4 md:gap-5">
+                  {paginatedCategories.map((category) => (
                     <article
-                      key={category}
+                      key={category.slug}
                       className="flex flex-col w-full h-full bg-white shadow-sm hover:shadow-md rounded-md overflow-hidden transition-all border border-gray-100 cursor-pointer"
                       onClick={() =>
                         navigate(
-                          `/blog/category/${encodeURIComponent(category)}`
+                          `/blog/category/${encodeURIComponent(category.slug)}`
                         )
                       }
                     >
                       <div className="p-3 sm:p-4 flex-grow">
                         <div className="flex items-center mb-3">
-                          <div className={`p-2 rounded-lg ${color} mr-3`}>
-                            <Icon icon={icon} className="text-white text-xl" />
+                          <div
+                            className={`p-2 rounded-lg ${category.color} mr-3`}
+                          >
+                            <Icon
+                              icon={category.icon}
+                              className="text-white text-xl"
+                            />
                           </div>
                           <h3 className="text-lg font-semibold text-gray-900">
-                            {slugToReadable(category)}
+                            {category.name}
                           </h3>
                         </div>
                         <div className="text-gray-600 text-sm line-clamp-3">
-                          {slugToReadable(category)} kategorisindeki makaleler,
-                          analizler ve detaylı içerikleri görüntüleyin.
+                          {category.description ||
+                            `${category.name} kategorisindeki makaleler, analizler ve detaylı içerikleri görüntüleyin.`}
                         </div>
                       </div>
 
-                      <div className="border-t border-gray-100 p-3 sm:p-4">
+                      <div className="p-3">
                         <Link
-                          to={`/blog/category/${encodeURIComponent(category)}`}
+                          to={`/blog/category/${encodeURIComponent(
+                            category.slug
+                          )}`}
                           className="flex items-center text-primary text-sm font-medium"
                           onClick={(e) => e.stopPropagation()}
                         >
@@ -169,13 +164,13 @@ const CategoriesPage = () => {
                         </Link>
                       </div>
                     </article>
-                  );
-                })}
-              </div>
+                  ))}
+                </div>
+              )}
             </div>
 
             {/* Pagination */}
-            {totalPages > 1 && (
+            {categories.length > 0 && totalPages > 1 && (
               <div className="flex justify-center mt-8 mb-4">
                 <Pagination
                   total={totalPages}

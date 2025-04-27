@@ -1,12 +1,6 @@
-import {
-  BrowserRouter as Router,
-  Routes,
-  Route,
-  useLocation,
-} from "react-router-dom";
-import React, { useEffect } from "react";
-import { useDispatch, useSelector } from "react-redux";
-import { fetchUser } from "./app/features/user/userSlice"; // Adjust the path as necessary
+import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import React from "react";
+
 import { logRender } from "./utils/logger";
 import ErrorBoundary from "./components/error/ErrorBoundary";
 import { FeedbackProvider } from "./context/FeedbackContext";
@@ -51,14 +45,8 @@ import VerifyEmailComponent from "./components/auth/VerifyEmailComponent";
 
 // Sayfa navigasyonu ve scroll yönetimini sağlayan bileşen
 function AppContent() {
-  const dispatch = useDispatch();
-
   // Tüm sayfa değişikliklerinde sayfayı en üste kaydır
   usePageNavigation();
-
-  useEffect(() => {
-    dispatch(fetchUser());
-  }, [dispatch]);
 
   logRender("App", false);
 

@@ -1,5 +1,7 @@
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
-import React from "react";
+import React, { useEffect } from "react";
+import { useDispatch } from "react-redux";
+import { fetchUser } from "./app/features/user/userSlice"; // Adjust the path as necessary
 
 import { logRender } from "./utils/logger";
 import ErrorBoundary from "./components/error/ErrorBoundary";
@@ -47,6 +49,10 @@ import VerifyEmailComponent from "./components/auth/VerifyEmailComponent";
 function AppContent() {
   // Tüm sayfa değişikliklerinde sayfayı en üste kaydır
   usePageNavigation();
+  const dispatch = useDispatch();
+  useEffect(() => {
+    dispatch(fetchUser());
+  }, [dispatch]);
 
   logRender("App", false);
 
